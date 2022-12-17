@@ -1,0 +1,242 @@
+package org.testcases.ifs;
+
+// отрабатывает вполне естественным образом. Просто для сравнения с FermatsLastTheorem
+
+public class Pythagoras {
+    public boolean fun(int x, int y, int z) {
+        if (x > 0 && y > 0 && z > 0
+            && x < 46341 && y < 46341 && z < 46341     // Math.pow(Integer.MAX_VALUE, 0.5)
+            && x * x + y * y == z * z) {
+            return true;
+        }
+        x++;
+        return false;
+    }
+}
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.Pythagoras,
+	i6 := @parameter0: int,
+	i0 := @parameter1: int,
+	i1 := @parameter2: int,
+	if i6 <= 0 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.Pythagoras), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4461)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Le (int (BVInt32 p0)) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.Pythagoras,
+	i6 := @parameter0: int,
+	i0 := @parameter1: int,
+	i1 := @parameter2: int,
+	if i6 <= 0 goto return 0,
+	if i0 <= 0 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.Pythagoras), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4461)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p0)) (int Int32 0)),
+	(Le (int (BVInt32 p1)) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.Pythagoras,
+	i6 := @parameter0: int,
+	i0 := @parameter1: int,
+	i1 := @parameter2: int,
+	if i6 <= 0 goto return 0,
+	if i0 <= 0 goto return 0,
+	if i1 <= 0 goto return 0,
+	if i6 >= 46341 goto return 0,
+	if i0 >= 46341 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.Pythagoras), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4461)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p0)) (int Int32 0)),
+	(Gt (int (BVInt32 p2)) (int Int32 0)),
+	(Lt (int (BVInt32 p0)) (int Int32 46341)),
+	(Ge (int (BVInt32 p1)) (int Int32 46341)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.Pythagoras,
+	i6 := @parameter0: int,
+	i0 := @parameter1: int,
+	i1 := @parameter2: int,
+	if i6 <= 0 goto return 0,
+	if i0 <= 0 goto return 0,
+	if i1 <= 0 goto return 0,
+	if i6 >= 46341 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.Pythagoras), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4461)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Gt (int (BVInt32 p2)) (int Int32 0)),
+	(Ge (int (BVInt32 p0)) (int Int32 46341)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.Pythagoras,
+	i6 := @parameter0: int,
+	i0 := @parameter1: int,
+	i1 := @parameter2: int,
+	if i6 <= 0 goto return 0,
+	if i0 <= 0 goto return 0,
+	if i1 <= 0 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.Pythagoras), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4461)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p0)) (int Int32 0)),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Le (int (BVInt32 p2)) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.Pythagoras,
+	i6 := @parameter0: int,
+	i0 := @parameter1: int,
+	i1 := @parameter2: int,
+	if i6 <= 0 goto return 0,
+	if i0 <= 0 goto return 0,
+	if i1 <= 0 goto return 0,
+	if i6 >= 46341 goto return 0,
+	if i0 >= 46341 goto return 0,
+	if i1 >= 46341 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.Pythagoras), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4461)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p0)) (int Int32 0)),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Lt (int (BVInt32 p0)) (int Int32 46341)),
+	(Lt (int (BVInt32 p1)) (int Int32 46341)),
+	(Ge (int (BVInt32 p2)) (int Int32 46341)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.Pythagoras,
+	i6 := @parameter0: int,
+	i0 := @parameter1: int,
+	i1 := @parameter2: int,
+	if i6 <= 0 goto return 0,
+	if i0 <= 0 goto return 0,
+	if i1 <= 0 goto return 0,
+	if i6 >= 46341 goto return 0,
+	if i0 >= 46341 goto return 0,
+	if i1 >= 46341 goto return 0,
+	$i3 = i6 * i6,
+	$i2 = i0 * i0,
+	$i5 = $i3 + $i2,
+	$i4 = i1 * i1,
+	if $i5 != $i4 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.Pythagoras), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4461)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p0)) (int Int32 0)),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Gt (int (BVInt32 p2)) (int Int32 0)),
+	(Lt (int (BVInt32 p0)) (int Int32 46341)),
+	(Lt (int (BVInt32 p1)) (int Int32 46341)),
+	(Lt (int (BVInt32 p2)) (int Int32 46341)),
+	(not (Eq (int (Add (int (Mul (int (BVInt32 p0)) (int (BVInt32 p0)))) (int (Mul (int (BVInt32 p1)) (int (BVInt32 p1)))))) (int (Mul (int (BVInt32 p2)) (int (BVInt32 p2)))))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.Pythagoras,
+	i6 := @parameter0: int,
+	i0 := @parameter1: int,
+	i1 := @parameter2: int,
+	if i6 <= 0 goto return 0,
+	if i0 <= 0 goto return 0,
+	if i1 <= 0 goto return 0,
+	if i6 >= 46341 goto return 0,
+	if i0 >= 46341 goto return 0,
+	if i1 >= 46341 goto return 0,
+	$i3 = i6 * i6,
+	$i2 = i0 * i0,
+	$i5 = $i3 + $i2,
+	$i4 = i1 * i1,
+	if $i5 != $i4 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.Pythagoras), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4461)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p0)) (int Int32 0)),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Gt (int (BVInt32 p2)) (int Int32 0)),
+	(Lt (int (BVInt32 p0)) (int Int32 46341)),
+	(Lt (int (BVInt32 p1)) (int Int32 46341)),
+	(Lt (int (BVInt32 p2)) (int Int32 46341)),
+	(Eq (int (Add (int (Mul (int (BVInt32 p0)) (int (BVInt32 p0)))) (int (Mul (int (BVInt32 p1)) (int (BVInt32 p1)))))) (int (Mul (int (BVInt32 p2)) (int (BVInt32 p2))))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT

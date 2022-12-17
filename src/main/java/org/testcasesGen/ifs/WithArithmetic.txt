@@ -1,0 +1,115 @@
+package org.testcases.ifs;
+
+// ((x * y + 1) / 2 == 32) - одно условие
+// отдельно смотрится случай y == 0 (без других условий из-за x % y) - он падает
+
+public class WithArithmetic {
+    public boolean fun(int x, int y) {
+        if ((x * y + 1) / 2 == 32) {
+            return true;
+        }
+        if (x % y == 1_000_000 - 1) {
+            return true;
+        }
+        return false;
+    }
+}
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.WithArithmetic,
+	i0 := @parameter0: int,
+	i1 := @parameter1: int,
+	$i2 = i0 * i1,
+	$i3 = $i2 + 1,
+	$i4 = $i3 / 2,
+	if $i4 != 32 goto $i5 = i0 % i1
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.WithArithmetic), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4456)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Eq (int (Div (int (Add (int (Mul (int (BVInt32 p0)) (int (BVInt32 p1)))) (int Int32 1))) (int Int32 2))) (int Int32 32)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+path: r0 := @this: org.testcases.ifs.WithArithmetic,
+	i0 := @parameter0: int,
+	i1 := @parameter1: int,
+	$i2 = i0 * i1,
+	$i3 = $i2 + 1,
+	$i4 = $i3 / 2,
+	if $i4 != 32 goto $i5 = i0 % i1,
+	$i5 = i0 % i1,
+	if $i5 != 999999 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.WithArithmetic), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4456)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(not (Eq (int (Div (int (Add (int (Mul (int (BVInt32 p0)) (int (BVInt32 p1)))) (int Int32 1))) (int Int32 2))) (int Int32 32))),
+	(not (Eq (int (BVInt32 p1)) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int (BVInt32 p1)))) (int Int32 999999)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.WithArithmetic,
+	i0 := @parameter0: int,
+	i1 := @parameter1: int,
+	$i2 = i0 * i1,
+	$i3 = $i2 + 1,
+	$i4 = $i3 / 2,
+	if $i4 != 32 goto $i5 = i0 % i1,
+	$i5 = i0 % i1,
+	if $i5 != 999999 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.WithArithmetic), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4456)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(not (Eq (int (Div (int (Add (int (Mul (int (BVInt32 p0)) (int (BVInt32 p1)))) (int Int32 1))) (int Int32 2))) (int Int32 32))),
+	(not (Eq (int (BVInt32 p1)) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int (BVInt32 p1)))) (int Int32 999999))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.ifs.WithArithmetic,
+	i0 := @parameter0: int,
+	i1 := @parameter1: int,
+	$i2 = i0 * i1,
+	$i3 = $i2 + 1,
+	$i4 = $i3 / 2,
+	if $i4 != 32 goto $i5 = i0 % i1
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.ifs.WithArithmetic), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4456)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Eq (int (BVInt32 p1)) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT

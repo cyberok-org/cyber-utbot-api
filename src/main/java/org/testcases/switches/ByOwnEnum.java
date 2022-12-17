@@ -1,0 +1,30 @@
+package org.testcases.switches;
+
+enum Language {
+    JAVA,
+    KOTLIN,
+    C_PLUS_PLUS,
+    HASKELL,
+    PYTHON
+}
+
+public class ByOwnEnum {
+    public int fun(Language language) {
+        int value = 0;
+        switch (language) {
+            case PYTHON:
+                value -= 2;
+                break;
+            case HASKELL:
+                value *= 2;
+                break;
+            case C_PLUS_PLUS:
+                value /= 2;
+                break;
+            default:
+                value += 2;
+                break;
+        }
+        return value;
+    }
+}

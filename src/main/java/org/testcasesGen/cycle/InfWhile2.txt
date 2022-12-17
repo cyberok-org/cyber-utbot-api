@@ -1,0 +1,71 @@
+package org.testcases.cycle;
+
+// Результат, два теста, один заходит в while, другой нет. Всё падает по таймауту
+
+public class InfWhile2 {
+    public boolean fun(int x, int y, int z) {
+        boolean changeX = true;
+        while (x == y) {
+            if (changeX) {
+                x += z;
+            } else {
+                y += z;
+            }
+            changeX = !changeX;
+        }
+        return false;
+    }
+}
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.cycle.InfWhile2,
+	i1 := @parameter0: int,
+	i2 := @parameter1: int,
+	i0 := @parameter2: int,
+	z0 = 1,
+	if i1 != i2 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.cycle.InfWhile2), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4479)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(not (Eq (int (BVInt32 p0)) (int (BVInt32 p1)))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.cycle.InfWhile2,
+	i1 := @parameter0: int,
+	i2 := @parameter1: int,
+	i0 := @parameter2: int,
+	z0 = 1,
+	if i1 != i2 goto return 0,
+	if z0 == 0 goto i2 = i2 + i0,
+	i1 = i1 + i0,
+	goto [?= (branch)],
+	if z0 != 0 goto $z1 = 0,
+	$z1 = 0,
+	z0 = $z1,
+	goto [?= (branch)],
+	if i1 != i2 goto return 0
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.cycle.InfWhile2), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4479)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Eq (int (BVInt32 p0)) (int (BVInt32 p1))),
+	(not (Eq (int (Add (int (BVInt32 p0)) (int (BVInt32 p2)))) (int (BVInt32 p1)))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
