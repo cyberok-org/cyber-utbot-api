@@ -4,7 +4,7 @@
 
 Этапы создания:
 - берёт [soot](../abstract/Soot.md) представление метода, переводит его в [Jimple](../abstract/Jimple.md) вид и строит по нему граф (_ExceptionalUnitGraph_).
-- строит надстройку над эти графом - _globalGraph_: [InterProceduralUnitGraph](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/InterProceduralUnitGraph.kt).
+- строит надстройку над эти графом - _globalGraph_: [InterProceduralUnitGraph](InterProceduralUnitGraph.md).
 - создаёт нужные сущности для типизации, описаны в [Types](Types.md).
 - создаёт [PathSelector](PathSelector.md)
 - создаёт [Mocker](Mocker.md)

@@ -16,8 +16,8 @@
 
 Существенная часть из **utbot-framework** (в частности вызываемая из **cyber-utbot-api**) - [TestCaseGenerator](utbot/TestCaseGenerator.md). Стоит начать с неё.
 
-О том где лежат какие-то основополагающие части - [where](where.md)
+О том где лежат какие-то основополагающие части - [where](utbot/where.md)
 
-Какие-то заметки - [notes](notes.md)
+Какие-то заметки - [notes](utbot/notes.md)
 
 В целом все доки по **utbot** в этом репозитории - [тут](utbot). Какие-то доки от самого **utbot** - [тут](../../../docs).

@@ -21,6 +21,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.temporal.ChronoUnit
+import kotlin.system.measureTimeMillis
 
 
 open class TestGenerator(private val settings: GenerateTestsSettings) : AbstractTestGenerator() {
@@ -105,16 +106,19 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
 
                 val testClassName = output?.toPath()?.toFile()?.nameWithoutExtension
                     ?: "${classIdUnderTest.simpleName}Test"
-                val testSets = generateTestSets(
-                    testCaseGenerator,
-                    targetMethods,
-                    sourceCodeFile?.let { Paths.get(it) },
-                    searchDirectory = workingDirectory,
-                    chosenClassesToMockAlways = (Mocker.defaultSuperClassesToMockAlwaysNames + settings.mockAlways)
-                        .mapTo(mutableSetOf()) { ClassId(it) }
-                )
+                var testSets: List<UtMethodTestSet>
+                val time = measureTimeMillis {
+                    testSets = generateTestSets(
+                        testCaseGenerator,
+                        targetMethods,
+                        sourceCodeFile?.let { Paths.get(it) },
+                        searchDirectory = workingDirectory,
+                        chosenClassesToMockAlways = (Mocker.defaultSuperClassesToMockAlwaysNames + settings.mockAlways)
+                            .mapTo(mutableSetOf()) { ClassId(it) }
+                    )
+                }
+                logger.info("generateTestSets time: ${time}ms")
                 testClassBody = generateTest(classIdUnderTest, testClassName, testSets)
-                testSets
                 if (settings.sarifReport != null && sourceCodeFile != null) {
                     generateReport(targetClassFqn, testSets, testClassBody, sourceCodeFile, output)
                 }

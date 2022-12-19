@@ -22,10 +22,13 @@ _traverseException_ - берёт _Stmt_ и [SymbolicFailure](../../../../utbot-f
 - возвращает следующие состояние, полученные из [TraversalContext](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/TraversalContext.kt).
 
 Этапы _traverseIfStmt_ (много подобных, взят для примера):
-- получает оба ребра из этого _Stmt_ (используя _globalGraph_: [InterProceduralUnitGraph](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/InterProceduralUnitGraph.kt)).
+- получает оба ребра из этого _Stmt_ (используя _globalGraph_: [InterProceduralUnitGraph](InterProceduralUnitGraph.md)).
 - получает [ResolvedCondition](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/DataClasses.kt) - содержит само условие, ограничения, что мы хотим добавить и [SymbolicStateUpdateForResolvedCondition](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/DataClasses.kt) обновление состояния в положительном и отрицательном случаях.
 - получает из этого [ResolvedCondition](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/DataClasses.kt) ограничения пути (_path constraint_) в положительном и отрицательном случаях и аналогично мягкие ограничения (_soft constraint_).
 - проверяется _isAssumeExpr_ (лучше почитать что это в комментарии к коду).
 - получает _positiveCaseState_: [ExecutionState](ExecutionState.md), копируя текущее состояние и вызывая обновление [update](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/state/ExecutionStateUpdates.kt) по ребру и [SymbolicStateUpdate](SymbolicStateUpdate.md).
 - и добавляет полученный _positiveCaseState_ в [TraversalContext](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/TraversalContext.kt), от которого и запускалась сама функция (_traverseIfStmt_).
 - далее делает почти аналогичное для отрицательного случая и _negativeCaseState_.
+
+Заметки:
+- добавление состояний, достижимых из данного происходит так: берётся ребро из графа, из него создаётся обновлённый [ExecutionState](ExecutionState.md) с учётом перехода (_updateQueued_). Полученное состояние добавляется в [TraversalContext](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/TraversalContext.kt).

@@ -8,7 +8,7 @@
 - _executionStack_: _PersistentList< [ExecutionStackElement](../../../../utbot-framework/src/main/kotlin/org/utbot/engine/state/ExecutionStackElement.kt) >_.
 - _path_: _PersistentList< Stmt >_ - путь из _Stmt_ до текущего состояния.
 - _visitedStatementsHashesToCountInPath_: _PersistentMap<Int, Int>_ - хранит сколько раз каждая инструкция есть в _path_.
-- _decisionPath_: _PersistentList < Int >_ - хранит _decisionNum_ рёбер на пути (условно номер пропорциональный времени создания ребра, id). 
+- _decisionPath_: _PersistentList < Int >_ - хранит _decisionNum_ рёбер на пути (условно номер позволяющий идентифицировать конкретное ребро среди всех с теми же _Stmt_). 
 - _edges_: _PersistentSet< Edge >_ - все разобранные рёбра в состоянии.
 - _stmts_: _PersistentMap<Stmt, Int>_ - по _Stmt_ выдаёт длину пути с ним (для упорядоченности).
 - _pathLength_ - текущая длина пути.

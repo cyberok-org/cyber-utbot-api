@@ -1,0 +1,535 @@
+package org.testcases.execPaths;
+
+// в целом очень странно отрабатывает, не покрывает всего (если без условия про y - всё логично).
+// изначальная цель примера вообще в другом: в зависимости от положения if с условием (y > 0) работает разное время: если до switch - 68-71 секунд, если после - 39-40. Такое происходит из-за сложности switch тут и независимости путей исполнения.
+
+public class ManyPathsProblem {
+    public int fun(int x, int y) throws InterruptedException {
+        int sum = 0;
+        int res;
+        int pr = 1;
+
+        if (y > 0) {
+            pr = -pr;
+        }
+
+        if (x % 2 == 0) {
+            sum++;
+        }
+        if (x % 3 == 0) {
+            sum++;
+        }
+        if (x % 5 == 0) {
+            sum++;
+        }
+        if (x % 7 == 0) {
+            sum++;
+        }
+        if (x % 11 == 0) {
+            sum++;
+        }
+        if (x % 13 == 0) {
+            sum++;
+        }
+        if (x % 17 == 0) {
+            sum++;
+        }
+        switch (sum) {
+            case 0:
+                res = 1;
+                break;
+            case 1:
+                res = 2;
+                break;
+            case 2:
+                res = 3;
+                break;
+            case 3:
+                res = 4;
+                break;
+            case 4:
+                res = 5;
+                break;
+            case 5:
+                res = 6;
+                break;
+            case 6:
+                res = 7;
+                break;
+            case 7:
+                res = 8;
+                break;
+            default:
+                res = 9;
+                break;
+        }
+
+//        if (y > 0) {
+//            pr = -pr;
+//        }
+
+        return res * pr;
+    }
+}
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.execPaths.ManyPathsProblem,
+	i1 := @parameter0: int,
+	i0 := @parameter1: int,
+	i9 = 0,
+	b10 = 1,
+	if i0 <= 0 goto $i2 = i1 % 2,
+	$i2 = i1 % 2,
+	if $i2 != 0 goto $i3 = i1 % 3,
+	$i3 = i1 % 3,
+	if $i3 != 0 goto $i4 = i1 % 5,
+	$i4 = i1 % 5,
+	if $i4 != 0 goto $i5 = i1 % 7,
+	$i5 = i1 % 7,
+	if $i5 != 0 goto $i6 = i1 % 11,
+	i9 = i9 + 1,
+	$i6 = i1 % 11,
+	if $i6 != 0 goto $i7 = i1 % 13,
+	i9 = i9 + 1,
+	$i7 = i1 % 13,
+	if $i7 != 0 goto $i8 = i1 % 17,
+	$i8 = i1 % 17,
+	if $i8 != 0 goto (branch),
+	tableswitch(i9) {     case 0: goto b11 = 1;     case 1: goto b11 = 2;     case 2: goto b11 = 3;     case 3: goto b11 = 4;     case 4: goto b11 = 5;     case 5: goto b11 = 6;     case 6: goto b11 = 7;     case 7: goto b11 = 8;     default: goto b11 = 9; },
+	b11 = 3,
+	goto [?= $i12 = b11 * b10],
+	$i12 = b11 * b10
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.execPaths.ManyPathsProblem), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4489)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Le (int (BVInt32 p1)) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 2))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 3))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 5))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 7))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 11))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 13))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 17))) (int Int32 0))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.execPaths.ManyPathsProblem,
+	i1 := @parameter0: int,
+	i0 := @parameter1: int,
+	i9 = 0,
+	b10 = 1,
+	if i0 <= 0 goto $i2 = i1 % 2,
+	b10 = -1,
+	$i2 = i1 % 2,
+	if $i2 != 0 goto $i3 = i1 % 3,
+	$i3 = i1 % 3,
+	if $i3 != 0 goto $i4 = i1 % 5,
+	$i4 = i1 % 5,
+	if $i4 != 0 goto $i5 = i1 % 7,
+	$i5 = i1 % 7,
+	if $i5 != 0 goto $i6 = i1 % 11,
+	$i6 = i1 % 11,
+	if $i6 != 0 goto $i7 = i1 % 13,
+	$i7 = i1 % 13,
+	if $i7 != 0 goto $i8 = i1 % 17,
+	i9 = i9 + 1,
+	$i8 = i1 % 17,
+	if $i8 != 0 goto (branch),
+	tableswitch(i9) {     case 0: goto b11 = 1;     case 1: goto b11 = 2;     case 2: goto b11 = 3;     case 3: goto b11 = 4;     case 4: goto b11 = 5;     case 5: goto b11 = 6;     case 6: goto b11 = 7;     case 7: goto b11 = 8;     default: goto b11 = 9; },
+	b11 = 2,
+	goto [?= $i12 = b11 * b10],
+	$i12 = b11 * b10
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.execPaths.ManyPathsProblem), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4489)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 2))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 3))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 5))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 7))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 11))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 13))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 17))) (int Int32 0))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.execPaths.ManyPathsProblem,
+	i1 := @parameter0: int,
+	i0 := @parameter1: int,
+	i9 = 0,
+	b10 = 1,
+	if i0 <= 0 goto $i2 = i1 % 2,
+	$i2 = i1 % 2,
+	if $i2 != 0 goto $i3 = i1 % 3,
+	$i3 = i1 % 3,
+	if $i3 != 0 goto $i4 = i1 % 5,
+	$i4 = i1 % 5,
+	if $i4 != 0 goto $i5 = i1 % 7,
+	$i5 = i1 % 7,
+	if $i5 != 0 goto $i6 = i1 % 11,
+	i9 = i9 + 1,
+	$i6 = i1 % 11,
+	if $i6 != 0 goto $i7 = i1 % 13,
+	i9 = i9 + 1,
+	$i7 = i1 % 13,
+	if $i7 != 0 goto $i8 = i1 % 17,
+	$i8 = i1 % 17,
+	if $i8 != 0 goto (branch),
+	i9 = i9 + 1,
+	tableswitch(i9) {     case 0: goto b11 = 1;     case 1: goto b11 = 2;     case 2: goto b11 = 3;     case 3: goto b11 = 4;     case 4: goto b11 = 5;     case 5: goto b11 = 6;     case 6: goto b11 = 7;     case 7: goto b11 = 8;     default: goto b11 = 9; },
+	b11 = 4,
+	goto [?= $i12 = b11 * b10],
+	$i12 = b11 * b10
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.execPaths.ManyPathsProblem), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4489)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Le (int (BVInt32 p1)) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 2))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 3))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 5))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 7))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 11))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 13))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 17))) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.execPaths.ManyPathsProblem,
+	i1 := @parameter0: int,
+	i0 := @parameter1: int,
+	i9 = 0,
+	b10 = 1,
+	if i0 <= 0 goto $i2 = i1 % 2,
+	b10 = -1,
+	$i2 = i1 % 2,
+	if $i2 != 0 goto $i3 = i1 % 3,
+	i9 = 1,
+	$i3 = i1 % 3,
+	if $i3 != 0 goto $i4 = i1 % 5,
+	i9 = i9 + 1,
+	$i4 = i1 % 5,
+	if $i4 != 0 goto $i5 = i1 % 7,
+	$i5 = i1 % 7,
+	if $i5 != 0 goto $i6 = i1 % 11,
+	i9 = i9 + 1,
+	$i6 = i1 % 11,
+	if $i6 != 0 goto $i7 = i1 % 13,
+	$i7 = i1 % 13,
+	if $i7 != 0 goto $i8 = i1 % 17,
+	i9 = i9 + 1,
+	$i8 = i1 % 17,
+	if $i8 != 0 goto (branch),
+	tableswitch(i9) {     case 0: goto b11 = 1;     case 1: goto b11 = 2;     case 2: goto b11 = 3;     case 3: goto b11 = 4;     case 4: goto b11 = 5;     case 5: goto b11 = 6;     case 6: goto b11 = 7;     case 7: goto b11 = 8;     default: goto b11 = 9; },
+	b11 = 5,
+	goto [?= $i12 = b11 * b10],
+	$i12 = b11 * b10
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.execPaths.ManyPathsProblem), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4489)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 2))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 3))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 5))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 7))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 11))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 13))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 17))) (int Int32 0))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.execPaths.ManyPathsProblem,
+	i1 := @parameter0: int,
+	i0 := @parameter1: int,
+	i9 = 0,
+	b10 = 1,
+	if i0 <= 0 goto $i2 = i1 % 2,
+	b10 = -1,
+	$i2 = i1 % 2,
+	if $i2 != 0 goto $i3 = i1 % 3,
+	i9 = 1,
+	$i3 = i1 % 3,
+	if $i3 != 0 goto $i4 = i1 % 5,
+	i9 = i9 + 1,
+	$i4 = i1 % 5,
+	if $i4 != 0 goto $i5 = i1 % 7,
+	i9 = i9 + 1,
+	$i5 = i1 % 7,
+	if $i5 != 0 goto $i6 = i1 % 11,
+	$i6 = i1 % 11,
+	if $i6 != 0 goto $i7 = i1 % 13,
+	$i7 = i1 % 13,
+	if $i7 != 0 goto $i8 = i1 % 17,
+	i9 = i9 + 1,
+	$i8 = i1 % 17,
+	if $i8 != 0 goto (branch),
+	tableswitch(i9) {     case 0: goto b11 = 1;     case 1: goto b11 = 2;     case 2: goto b11 = 3;     case 3: goto b11 = 4;     case 4: goto b11 = 5;     case 5: goto b11 = 6;     case 6: goto b11 = 7;     case 7: goto b11 = 8;     default: goto b11 = 9; },
+	b11 = 5,
+	goto [?= $i12 = b11 * b10],
+	$i12 = b11 * b10
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.execPaths.ManyPathsProblem), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4489)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 2))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 3))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 5))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 7))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 11))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 13))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 17))) (int Int32 0))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.execPaths.ManyPathsProblem,
+	i1 := @parameter0: int,
+	i0 := @parameter1: int,
+	i9 = 0,
+	b10 = 1,
+	if i0 <= 0 goto $i2 = i1 % 2,
+	b10 = -1,
+	$i2 = i1 % 2,
+	if $i2 != 0 goto $i3 = i1 % 3,
+	i9 = 1,
+	$i3 = i1 % 3,
+	if $i3 != 0 goto $i4 = i1 % 5,
+	i9 = i9 + 1,
+	$i4 = i1 % 5,
+	if $i4 != 0 goto $i5 = i1 % 7,
+	$i5 = i1 % 7,
+	if $i5 != 0 goto $i6 = i1 % 11,
+	i9 = i9 + 1,
+	$i6 = i1 % 11,
+	if $i6 != 0 goto $i7 = i1 % 13,
+	$i7 = i1 % 13,
+	if $i7 != 0 goto $i8 = i1 % 17,
+	i9 = i9 + 1,
+	$i8 = i1 % 17,
+	if $i8 != 0 goto (branch),
+	i9 = i9 + 1,
+	tableswitch(i9) {     case 0: goto b11 = 1;     case 1: goto b11 = 2;     case 2: goto b11 = 3;     case 3: goto b11 = 4;     case 4: goto b11 = 5;     case 5: goto b11 = 6;     case 6: goto b11 = 7;     case 7: goto b11 = 8;     default: goto b11 = 9; },
+	b11 = 6,
+	goto [?= $i12 = b11 * b10],
+	$i12 = b11 * b10
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.execPaths.ManyPathsProblem), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4489)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 2))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 3))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 5))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 7))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 11))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 13))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 17))) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.execPaths.ManyPathsProblem,
+	i1 := @parameter0: int,
+	i0 := @parameter1: int,
+	i9 = 0,
+	b10 = 1,
+	if i0 <= 0 goto $i2 = i1 % 2,
+	b10 = -1,
+	$i2 = i1 % 2,
+	if $i2 != 0 goto $i3 = i1 % 3,
+	$i3 = i1 % 3,
+	if $i3 != 0 goto $i4 = i1 % 5,
+	$i4 = i1 % 5,
+	if $i4 != 0 goto $i5 = i1 % 7,
+	$i5 = i1 % 7,
+	if $i5 != 0 goto $i6 = i1 % 11,
+	$i6 = i1 % 11,
+	if $i6 != 0 goto $i7 = i1 % 13,
+	$i7 = i1 % 13,
+	if $i7 != 0 goto $i8 = i1 % 17,
+	$i8 = i1 % 17,
+	if $i8 != 0 goto (branch),
+	tableswitch(i9) {     case 0: goto b11 = 1;     case 1: goto b11 = 2;     case 2: goto b11 = 3;     case 3: goto b11 = 4;     case 4: goto b11 = 5;     case 5: goto b11 = 6;     case 6: goto b11 = 7;     case 7: goto b11 = 8;     default: goto b11 = 9; },
+	b11 = 1,
+	goto [?= $i12 = b11 * b10],
+	$i12 = b11 * b10
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.execPaths.ManyPathsProblem), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4489)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 2))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 3))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 5))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 7))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 11))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 13))) (int Int32 0))),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 17))) (int Int32 0))),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.execPaths.ManyPathsProblem,
+	i1 := @parameter0: int,
+	i0 := @parameter1: int,
+	i9 = 0,
+	b10 = 1,
+	if i0 <= 0 goto $i2 = i1 % 2,
+	b10 = -1,
+	$i2 = i1 % 2,
+	if $i2 != 0 goto $i3 = i1 % 3,
+	i9 = 1,
+	$i3 = i1 % 3,
+	if $i3 != 0 goto $i4 = i1 % 5,
+	i9 = i9 + 1,
+	$i4 = i1 % 5,
+	if $i4 != 0 goto $i5 = i1 % 7,
+	i9 = i9 + 1,
+	$i5 = i1 % 7,
+	if $i5 != 0 goto $i6 = i1 % 11,
+	i9 = i9 + 1,
+	$i6 = i1 % 11,
+	if $i6 != 0 goto $i7 = i1 % 13,
+	$i7 = i1 % 13,
+	if $i7 != 0 goto $i8 = i1 % 17,
+	i9 = i9 + 1,
+	$i8 = i1 % 17,
+	if $i8 != 0 goto (branch),
+	i9 = i9 + 1,
+	tableswitch(i9) {     case 0: goto b11 = 1;     case 1: goto b11 = 2;     case 2: goto b11 = 3;     case 3: goto b11 = 4;     case 4: goto b11 = 5;     case 5: goto b11 = 6;     case 6: goto b11 = 7;     case 7: goto b11 = 8;     default: goto b11 = 9; },
+	b11 = 7,
+	goto [?= $i12 = b11 * b10],
+	$i12 = b11 * b10
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.execPaths.ManyPathsProblem), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4489)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 2))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 3))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 5))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 7))) (int Int32 0)),
+	(not (Eq (int (Rem (int (BVInt32 p0)) (int Int32 11))) (int Int32 0))),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 13))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 17))) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.testcases.execPaths.ManyPathsProblem,
+	i1 := @parameter0: int,
+	i0 := @parameter1: int,
+	i9 = 0,
+	b10 = 1,
+	if i0 <= 0 goto $i2 = i1 % 2,
+	b10 = -1,
+	$i2 = i1 % 2,
+	if $i2 != 0 goto $i3 = i1 % 3,
+	i9 = 1,
+	$i3 = i1 % 3,
+	if $i3 != 0 goto $i4 = i1 % 5,
+	i9 = i9 + 1,
+	$i4 = i1 % 5,
+	if $i4 != 0 goto $i5 = i1 % 7,
+	i9 = i9 + 1,
+	$i5 = i1 % 7,
+	if $i5 != 0 goto $i6 = i1 % 11,
+	i9 = i9 + 1,
+	$i6 = i1 % 11,
+	if $i6 != 0 goto $i7 = i1 % 13,
+	i9 = i9 + 1,
+	$i7 = i1 % 13,
+	if $i7 != 0 goto $i8 = i1 % 17,
+	i9 = i9 + 1,
+	$i8 = i1 % 17,
+	if $i8 != 0 goto (branch),
+	i9 = i9 + 1,
+	tableswitch(i9) {     case 0: goto b11 = 1;     case 1: goto b11 = 2;     case 2: goto b11 = 3;     case 3: goto b11 = 4;     case 4: goto b11 = 5;     case 5: goto b11 = 6;     case 6: goto b11 = 7;     case 7: goto b11 = 8;     default: goto b11 = 9; },
+	b11 = 8,
+	goto [?= $i12 = b11 * b10],
+	$i12 = b11 * b10
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.testcases.execPaths.ManyPathsProblem), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4489)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Gt (int (BVInt32 p1)) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 2))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 3))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 5))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 7))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 11))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 13))) (int Int32 0)),
+	(Eq (int (Rem (int (BVInt32 p0)) (int Int32 17))) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT

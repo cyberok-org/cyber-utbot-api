@@ -1,3 +1,0 @@
-# Notes
-
-- В какой момент всё добавляется/отправляется на Z3? - [UtSolver](utbot/UtSolver.md) есть в [SymbolicState](utbot/SymbolicState.md), ограничения добавляются (_add_ в [UtSolver](utbot/UtSolver.md)) после каждой инструкции (итерации [Traverser](utbot/Traverser.md)), проверяются (_check_ в [UtSolver](utbot/UtSolver.md))  в _poll_ [PathSelector](utbot/PathSelector.md), если надо делать форк в графе (см. _checkUnsatIfFork_ [BasePathSelector](../../../utbot-framework/src/main/kotlin/org/utbot/engine/selectors/BasePathSelector.kt)), если дошли до инструкции _return_ (см. _JReturnStmt_ в _traverseStmt_ [Traverser](utbot/Traverser.md)) и в некоторых других специфичных случаях.
