@@ -36,4 +36,4 @@
 
 [test](src/test/java/org/testcases) - папка с результатами запуска тестов.
 
-[testcasesGen](src/main/java/org/testcasesGen) - папка c примерами в предполагаемом формате хранения. Спецификация формата хранения - [test format](src/docs/cyberok/TestFormatSpecification.md) (текущие примеры пока не удовлетворяют требованием спецификации).
+[testcasesGen](src/main/java/org/testcasesGen) - папка c примерами в предполагаемом формате хранения. Спецификация формата хранения - [test format](src/docs/cyberok/test/TestFormatSpecification.md) (текущие примеры пока не удовлетворяют требованием спецификации).

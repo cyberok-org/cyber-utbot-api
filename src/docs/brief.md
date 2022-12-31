@@ -6,7 +6,7 @@
 
 ## cyber-utbot-api parameters
 
-[GenerateTestsSettings](cyberok/GenerateTestsSettings.md).
+[GenerateTestsSettings](cyberok/api/GenerateTestsSettings.md).
 
 ## Examples
 

@@ -1,0 +1,16 @@
+---
+author: pogrebnoijak
+date: 19/12/2022
+description: This is an design example, it does not show anything worthwhile
+tag:
+  if:
+    significance: important
+    condition: difficult
+  overflow:
+  arithmetic:
+    operators:
+      - "+"
+      - "*"
+    significance: insignificant
+  simple:
+generate: false
