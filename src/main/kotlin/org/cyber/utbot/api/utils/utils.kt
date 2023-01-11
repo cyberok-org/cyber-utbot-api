@@ -1,9 +1,13 @@
 package org.cyber.utbot.api.utils
 
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+
 typealias TargetQualifiedName = String
 typealias SourceCodeFileName = String
 typealias OutputFileName = String
 typealias GeneratedTests = String
+typealias JSON = String
 
 
 class TestUnit(
@@ -24,3 +28,10 @@ class TestUnit(
 )
 
 fun Map<String, String>.toTestUnits(): List<TestUnit> = this.map { TestUnit(target=it.key, source=it.value) }
+
+fun printJson(json: JSON) {
+    val type = object : TypeToken<Map<String, Any?>?>() {}.type
+    val gson = GsonBuilder().setPrettyPrinting().create()
+    val res: Map<String, Any> = gson.fromJson(json, type)
+    println(gson.toJson(res))
+}

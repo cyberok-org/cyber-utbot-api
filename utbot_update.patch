@@ -1,0 +1,209 @@
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+index 4e30ca7d..f7bed480 100644
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -41,6 +41,8 @@ include("utbot-android-studio")
+ 
+ include("utbot-ui-commons")
+ 
++include("cyber-utbot-api")	// cyber
++
+ if (pythonIde.split(",").contains(ideType)) {
+     include("utbot-python")
+     include("utbot-cli-python")
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
+index d06c9c78..e8a0690f 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
+@@ -207,7 +207,7 @@ class Resolver(
+         state: MemoryState,
+     ): UtArrayExpressionBase = memory.findArray(chunkDescriptor, state, staticFieldUnderResolving)
+ 
+-    internal fun resolveModels(parameters: List<SymbolicValue>): ResolvedExecution {
++    fun resolveModels(parameters: List<SymbolicValue>): ResolvedExecution {
+         var instrumentation: List<UtInstrumentation> = emptyList()
+ 
+         val staticsBefore = memory.staticFields().map { (fieldId, states) -> fieldId to states.stateBefore }
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
+index b4ea2a84..2565b951 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
+@@ -125,7 +125,7 @@ class EngineController {
+ }
+ 
+ //for debugging purpose only
+-private var stateSelectedCount = 0
++var stateSelectedCount = 0
+ 
+ private val defaultIdGenerator = ReferencePreservingIntIdGenerator()
+ 
+@@ -160,28 +160,28 @@ private fun pathSelector(graph: InterProceduralUnitGraph, typeRegistry: TypeRegi
+         }
+     }
+ 
+-class UtBotSymbolicEngine(
+-    private val controller: EngineController,
+-    private val methodUnderTest: ExecutableId,
++open class UtBotSymbolicEngine(
++    protected val controller: EngineController,
++    protected val methodUnderTest: ExecutableId,
+     classpath: String,
+     dependencyPaths: String,
+     val mockStrategy: MockStrategy = NO_MOCKS,
+     chosenClassesToMockAlways: Set<ClassId>,
+-    private val solverTimeoutInMillis: Int = checkSolverTimeoutMillis
++    protected val solverTimeoutInMillis: Int = checkSolverTimeoutMillis
+ ) : UtContextInitializer() {
+-    private val graph = methodUnderTest.sootMethod.jimpleBody().apply {
++    protected val graph = methodUnderTest.sootMethod.jimpleBody().apply {
+         logger.trace { "JIMPLE for $methodUnderTest:\n$this" }
+     }.graph()
+ 
+     private val methodUnderAnalysisStmts: Set<Stmt> = graph.stmts.toSet()
+-    private val globalGraph = InterProceduralUnitGraph(graph)
+-    private val typeRegistry: TypeRegistry = TypeRegistry()
+-    private val pathSelector: PathSelector = pathSelector(globalGraph, typeRegistry)
++    protected val globalGraph = InterProceduralUnitGraph(graph)
++    protected val typeRegistry: TypeRegistry = TypeRegistry()
++    protected var pathSelector: PathSelector = pathSelector(globalGraph, typeRegistry)
+ 
+-    internal val hierarchy: Hierarchy = Hierarchy(typeRegistry)
++    protected val hierarchy: Hierarchy = Hierarchy(typeRegistry)
+ 
+     // TODO HACK violation of encapsulation
+-    internal val typeResolver: TypeResolver = TypeResolver(typeRegistry, hierarchy)
++    protected val typeResolver: TypeResolver = TypeResolver(typeRegistry, hierarchy)
+ 
+     private val classUnderTest: ClassId = methodUnderTest.classId
+ 
+@@ -197,9 +197,9 @@ class UtBotSymbolicEngine(
+ 
+     fun detachMockListener(mockListener: MockListener) = mocker.mockListenerController?.detach(mockListener)
+ 
+-    private val statesForConcreteExecution: MutableList<ExecutionState> = mutableListOf()
++    protected val statesForConcreteExecution: MutableList<ExecutionState> = mutableListOf()
+ 
+-    private val traverser = Traverser(
++    protected val traverser = Traverser(
+         methodUnderTest,
+         typeRegistry,
+         hierarchy,
+@@ -209,9 +209,9 @@ class UtBotSymbolicEngine(
+     )
+ 
+     //HACK (long strings)
+-    internal var softMaxArraySize = 40
++    protected var softMaxArraySize = 40
+ 
+-    private val concreteExecutor =
++    protected val concreteExecutor =
+         ConcreteExecutor(
+             UtExecutionInstrumentation,
+             classpath,
+@@ -222,7 +222,7 @@ class UtBotSymbolicEngine(
+         if (enableFeatureProcess) EngineAnalyticsContext.featureProcessorFactory(globalGraph) else null
+ 
+ 
+-    private val trackableResources: MutableSet<AutoCloseable> = mutableSetOf()
++    protected val trackableResources: MutableSet<AutoCloseable> = mutableSetOf()
+ 
+     private fun postTraverse() {
+         for (r in trackableResources)
+@@ -246,7 +246,7 @@ class UtBotSymbolicEngine(
+         .onStart { preTraverse() }
+         .onCompletion { postTraverse() }
+ 
+-    private fun traverseImpl(): Flow<UtResult> = flow {
++    protected open fun traverseImpl(): Flow<UtResult> = flow {
+ 
+         require(trackableResources.isEmpty())
+ 
+@@ -523,7 +523,7 @@ class UtBotSymbolicEngine(
+         }
+     }
+ 
+-    private suspend fun FlowCollector<UtResult>.emitFailedConcreteExecutionResult(
++    protected suspend fun FlowCollector<UtResult>.emitFailedConcreteExecutionResult(
+         stateBefore: EnvironmentModels,
+         e: ConcreteExecutionFailureException
+     ) {
+@@ -535,7 +535,7 @@ class UtBotSymbolicEngine(
+         emit(failedConcreteExecution)
+     }
+ 
+-    private suspend fun FlowCollector<UtResult>.consumeTerminalState(
++    protected suspend fun FlowCollector<UtResult>.consumeTerminalState(
+         state: ExecutionState,
+     ) {
+         // some checks to be sure the state is correct
+@@ -641,7 +641,7 @@ class UtBotSymbolicEngine(
+     }
+ }
+ 
+-private fun ResolvedModels.constructStateForMethod(methodUnderTest: ExecutableId): EnvironmentModels {
++fun ResolvedModels.constructStateForMethod(methodUnderTest: ExecutableId): EnvironmentModels {
+     val (thisInstanceBefore, paramsBefore) = when {
+         methodUnderTest.isStatic -> null to parameters
+         methodUnderTest.isConstructor -> null to parameters.drop(1)
+@@ -650,7 +650,7 @@ private fun ResolvedModels.constructStateForMethod(methodUnderTest: ExecutableId
+     return EnvironmentModels(thisInstanceBefore, paramsBefore, statics)
+ }
+ 
+-private suspend fun ConcreteExecutor<UtConcreteExecutionResult, UtExecutionInstrumentation>.executeConcretely(
++suspend fun ConcreteExecutor<UtConcreteExecutionResult, UtExecutionInstrumentation>.executeConcretely(
+     methodUnderTest: ExecutableId,
+     stateBefore: EnvironmentModels,
+     instrumentation: List<UtInstrumentation>
+@@ -667,7 +667,7 @@ private suspend fun ConcreteExecutor<UtConcreteExecutionResult, UtExecutionInstr
+  * For example, not fully visited map can contain duplicate keys that leads to incorrect behaviour.
+  * To prevent it, we need to add visited constraint for each MUT parameter-wrapper in state.
+  */
+-private fun ExecutionState.withWrapperConsistencyChecks(): ExecutionState {
++fun ExecutionState.withWrapperConsistencyChecks(): ExecutionState {
+     val visitedConstraints = mutableSetOf<UtBoolExpression>()
+     val methodUnderTestWrapperParameters = methodUnderTestParameters.filterNot { it.asWrapperOrNull == null }
+     val methodUnderTestWrapperParametersAddresses = methodUnderTestWrapperParameters.map { it.addr }.toSet()
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt
+index 5516d548..4a67f166 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt
+@@ -545,7 +545,7 @@ class MLSelectorBuilder internal constructor(
+ /**
+  * Base pathSelectorBuilder that maintains context to attach necessary statistics to graph
+  */
+-sealed class PathSelectorBuilder<out T : PathSelector>(
++abstract class PathSelectorBuilder<out T : PathSelector>(
+     protected val graph: InterProceduralUnitGraph,
+     protected var context: PathSelectorContext
+ ) {
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
+index cc61b809..73d55a7a 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
+@@ -61,7 +61,7 @@ import kotlin.reflect.KCallable
+ open class TestCaseGenerator(
+     private val buildDirs: List<Path>,
+     private val classpath: String?,
+-    private val dependencyPaths: String,
++    protected val dependencyPaths: String,
+     private val jdkInfo: JdkInfo,
+     val engineActions: MutableList<(UtBotSymbolicEngine) -> Unit> = mutableListOf(),
+     val isCanceled: () -> Boolean = { false },
+@@ -70,7 +70,7 @@ open class TestCaseGenerator(
+     private val logger: KLogger = KotlinLogging.logger {}
+     private val timeoutLogger: KLogger = KotlinLogging.logger(logger.name + ".timeout")
+ 
+-    private val classpathForEngine: String
++    protected val classpathForEngine: String
+         get() = (buildDirs + listOfNotNull(classpath)).joinToString(File.pathSeparator)
+ 
+     init {
+@@ -264,7 +264,7 @@ open class TestCaseGenerator(
+             )
+         }
+ 
+-    private fun createSymbolicEngine(
++    protected open fun createSymbolicEngine(
+         controller: EngineController,
+         method: ExecutableId,
+         mockStrategyApi: MockStrategyApi,

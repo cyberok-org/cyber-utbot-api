@@ -1,7 +1,12 @@
 package org.cyber.utbot.api
 
 import mu.KotlinLogging
+import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.*
+import org.cyber.utbot.api.utils.viewers.stateViewers.TerminalStatisticViewer
+import org.cyber.utbot.api.utils.viewers.UTBotViewers
+import org.cyber.utbot.api.utils.viewers.stateViewers.EndNotTerminalStatisticViewer
+import org.cyber.utbot.api.utils.viewers.utbotViewer
 import org.utbot.common.PathUtil.toPath
 import org.utbot.common.filterWhen
 import org.utbot.engine.Mocker
@@ -17,7 +22,6 @@ import org.utbot.framework.plugin.api.util.withUtContext
 import org.utbot.framework.util.isKnownImplicitlyDeclaredMethod
 import org.utbot.sarif.SarifReport
 import org.utbot.sarif.SourceFindingStrategyDefault
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.temporal.ChronoUnit
@@ -32,6 +36,9 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val staticsMocking: StaticsMocking = settings.mockStatics
     override val codegenLanguage: CodegenLanguage = settings.codegenLanguage
     override val testFramework: TestFramework = settings.testFrameworkGen.toTestFramework()
+    //
+    override val utbotViewers: Set<UTBotViewers> = settings.utbotViewers
+    override val cyberPathSelector: Boolean = settings.cyberPathSelector
 
     private val logger = KotlinLogging.logger {}
 
@@ -40,7 +47,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
      * @param classpath: the same parameter as in the [GenerateTestsSettings], if specified overrides the current launch
      * @return mapping from [TargetQualifiedName] to [GeneratedTests]
      */
-    fun run(testUnits: Iterable<TestUnit>, classpath: String? = null): Map<TargetQualifiedName, GeneratedTests> {
+    fun run(testUnits: Iterable<TestUnit>, classpath: String? = null): Pair<MutableMap<TargetQualifiedName, GeneratedTests>, MutableMap<UTBotViewers, Any>> {
         assert(testUnits.all {
             (it.source.endsWith(".java") || it.source.endsWith(".kt")) && Files.exists(Paths.get(it.source))
         }) { "source should have suffix \".java\" or  \".kt\"" }
@@ -50,7 +57,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
         testUnits.forEach { testUnit ->
             targetToTests[testUnit.target] = runInside(testUnit.target, testUnit.source, testUnit.output)
         }
-        return targetToTests
+        return targetToTests to getViewersResult()
     }
 
     /**
@@ -59,7 +66,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
      * @param classpath: the same parameter as in the [GenerateTestsSettings], if specified overrides the current launch
      * @return mapping from [TargetQualifiedName] to [GeneratedTests]
      */
-    fun runBunch(source: SourceCodeFileName, packageFilter: String? = null, classpath: String? = null): Map<TargetQualifiedName, GeneratedTests> {
+    fun runBunch(source: SourceCodeFileName, packageFilter: String? = null, classpath: String? = null): Pair<MutableMap<TargetQualifiedName, GeneratedTests>, MutableMap<UTBotViewers, Any>> {
         (classpath ?: settings.classpath)?.let{ updateClassLoader(it) } ?: throw Exception("classpath should be set")
         val targetToTests = mutableMapOf<TargetQualifiedName, GeneratedTests>()
         val classesFromPath = loadClassesFromPath(classLoader, source)
@@ -77,7 +84,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
                 logger.info("No qualified name for $it")
             }
         }
-        return targetToTests
+        return targetToTests to getViewersResult()
     }
 
     private fun runInside(targetClassFqn: TargetQualifiedName, sourceCodeFile: SourceCodeFileName? = null, output: OutputFileName? = null): GeneratedTests {
@@ -153,5 +160,21 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     } catch (t: Throwable) {
         logger.error { "An error has occurred while generating sarif report for snippet $classFqn : $t" }
         throw t
+    }
+
+    private fun getViewersResult(): MutableMap<UTBotViewers, Any> {
+        val result = mutableMapOf<UTBotViewers, Any>()
+        statePublisher.viewers.map { viewer ->
+            when(viewer) {
+                is TerminalStatisticViewer -> {
+                    result[viewer.utbotViewer()] = viewer.result()
+                }
+                is EndNotTerminalStatisticViewer -> {
+                    result[viewer.utbotViewer()] = viewer.result()
+                }
+                else -> throw CyberException("wrong viewer")
+            }
+        }
+        return result
     }
 }

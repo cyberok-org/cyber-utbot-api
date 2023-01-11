@@ -1,5 +1,8 @@
 package org.cyber.utbot.api
 
+import org.cyber.utbot.api.utils.overrides.CyberTestCaseGenerator
+import org.cyber.utbot.api.utils.viewers.StatePublisher
+import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.utbot.common.PathUtil
 import org.utbot.common.PathUtil.toPath
 import org.utbot.common.PathUtil.toURL
@@ -26,10 +29,15 @@ abstract class AbstractTestGenerator {
     protected abstract val staticsMocking: StaticsMocking
     protected abstract val codegenLanguage: CodegenLanguage
     protected abstract val testFramework: TestFramework
+    //
+    protected abstract val utbotViewers: Set<UTBotViewers>
+    protected abstract val cyberPathSelector: Boolean
 
     private var classpath: String? = null
     protected lateinit var classLoader: URLClassLoader
     protected val newlineSeparator: String by lazy { System.lineSeparator() }
+
+    protected val statePublisher: StatePublisher by lazy { StatePublisher(utbotViewers.mapNotNull { it.stateViewer() }.toMutableList()) }
 
     protected fun updateClassLoader(classpath: String) {
         if (this.classpath != classpath) {
@@ -58,11 +66,13 @@ abstract class AbstractTestGenerator {
         // TODO: SAT-1566 Set UtSettings parameters.
         UtSettings.treatOverflowAsError = treatOverflowAsError == TreatOverflowAsError.AS_ERROR
 
-        return TestCaseGenerator(
+        return CyberTestCaseGenerator(
             listOf(workingDirectory),
             classPathNormalized,
             System.getProperty("java.class.path"),
-            JdkInfoDefaultProvider().info
+            JdkInfoDefaultProvider().info,
+            cyberPathSelector,
+            statePublisher
         )
     }
 

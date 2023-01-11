@@ -1,12 +1,12 @@
 package org.cyber.utbot.api
 
+import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.utbot.engine.Mocker
 import org.utbot.framework.UtSettings
 import org.utbot.framework.codegen.*
 import org.utbot.framework.plugin.api.CodegenLanguage
 import org.utbot.framework.plugin.api.MockStrategyApi
 import org.utbot.framework.plugin.api.TreatOverflowAsError
-import org.utbot.common.AbstractSettings
 
 
 private const val LONG_GENERATION_TIMEOUT = 1_200_000L
@@ -86,7 +86,20 @@ class GenerateTestsSettings(
     /**
      * withUtSettings
      */
-    withUtSettings: (settings: UtSettings) -> Unit = {}
+    withUtSettings: (settings: UtSettings) -> Unit = {},
+
+
+    // cyber settings //
+
+    /**
+     * state and other viewers for utbot
+     */
+    val utbotViewers: Set<UTBotViewers> = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER),
+
+    /**
+     * ignore utbot pathSelectors parameters, use our
+     */
+    val cyberPathSelector: Boolean = true
 ) {
     init {  // check is settings correct
         mockAlways.forEach { fullyQualifiedName ->

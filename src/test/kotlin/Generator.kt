@@ -2,7 +2,9 @@ import org.cyber.utbot.api.GenerateTestsSettings
 import org.cyber.utbot.api.TestGenerator
 import org.cyber.utbot.api.utils.GeneratedTests
 import org.cyber.utbot.api.utils.TargetQualifiedName
+import org.cyber.utbot.api.utils.printJson
 import org.cyber.utbot.api.utils.toTestUnits
+import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.utbot.common.PathUtil.toPath
@@ -37,8 +39,9 @@ class Generator {
 
         val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA)
         val generator = TestGenerator(settings)
-        val tests = generator.runBunch(classpath, dir)
+        val (tests, info) = generator.runBunch(classpath, dir)
         saveTests(tests)
+        printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
     }
 
     @Test
@@ -48,8 +51,9 @@ class Generator {
 
         val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA)
         val generator = TestGenerator(settings)
-        val tests = generator.run(mapOf(classname to "$sourceDir/${classname.replace('.', '/')}.java").toTestUnits())
+        val (tests, info) = generator.run(mapOf(classname to "$sourceDir/${classname.replace('.', '/')}.java").toTestUnits())
         saveTests(tests)
+        printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
     }
 
     @Test
@@ -58,7 +62,8 @@ class Generator {
 
         val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA)
         val generator = TestGenerator(settings)
-        val tests = generator.run(mapOf(classname to "$sourceDir/${classname.replace('.', '/')}.java").toTestUnits())
-        saveTests(tests)
+        val (tests, info) = generator.run(mapOf(classname to "$sourceDir/${classname.replace('.', '/')}.java").toTestUnits())
+//        saveTests(tests)
+        printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
     }
 }
