@@ -32,6 +32,7 @@ abstract class AbstractTestGenerator {
     //
     protected abstract val utbotViewers: Set<UTBotViewers>
     protected abstract val cyberPathSelector: Boolean
+    protected abstract val findVulnerabilities: Boolean
 
     private var classpath: String? = null
     protected lateinit var classLoader: URLClassLoader
@@ -72,6 +73,7 @@ abstract class AbstractTestGenerator {
             System.getProperty("java.class.path"),
             JdkInfoDefaultProvider().info,
             cyberPathSelector,
+            findVulnerabilities,
             statePublisher
         )
     }

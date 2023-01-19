@@ -11,8 +11,21 @@ index 4e30ca7d..f7bed480 100644
  if (pythonIde.split(",").contains(ideType)) {
      include("utbot-python")
      include("utbot-cli-python")
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/ConstructedSootMethods.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/ConstructedSootMethods.kt
+index 67a5e89e..53116595 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/engine/ConstructedSootMethods.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/engine/ConstructedSootMethods.kt
+@@ -20,7 +20,7 @@ import soot.jimple.internal.JimpleLocal
+ import soot.toolkits.graph.ExceptionalUnitGraph
+ 
+ 
+-internal const val STATIC_INITIALIZER = "utbot\$staticInitializer"
++const val STATIC_INITIALIZER = "utbot\$staticInitializer"
+ 
+ /**
+  * Creates synthetic method with static initializer invocation and returns its graph.
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
-index d06c9c78..e8a0690f 100644
+index d06c9c78..834ec4b0 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
 @@ -207,7 +207,7 @@ class Resolver(
@@ -24,8 +37,211 @@ index d06c9c78..e8a0690f 100644
          var instrumentation: List<UtInstrumentation> = emptyList()
  
          val staticsBefore = memory.staticFields().map { (fieldId, states) -> fieldId to states.stateBefore }
+@@ -1116,7 +1116,7 @@ private data class ArrayExtractionDetails(
+     val oneDimensionalArray: UtArrayExpressionBase
+ )
+ 
+-internal val nullObjectAddr = UtAddrExpression(mkInt(SYMBOLIC_NULL_ADDR))
++val nullObjectAddr = UtAddrExpression(mkInt(SYMBOLIC_NULL_ADDR))
+ 
+ 
+ fun SymbolicValue.isNullObject() =
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
+index d51af92a..febaeb98 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
+@@ -220,7 +220,7 @@ import java.util.concurrent.atomic.AtomicInteger
+ 
+ private val CAUGHT_EXCEPTION = LocalVariable("@caughtexception")
+ 
+-class Traverser(
++open class Traverser(
+     private val methodUnderTest: ExecutableId,
+     internal val typeRegistry: TypeRegistry,
+     internal val hierarchy: Hierarchy,
+@@ -257,7 +257,7 @@ class Traverser(
+ 
+     private val preferredCexInstanceCache = mutableMapOf<ObjectValue, MutableSet<SootField>>()
+ 
+-    private var queuedSymbolicStateUpdates = SymbolicStateUpdate()
++    protected var queuedSymbolicStateUpdates = SymbolicStateUpdate()
+ 
+     private val objectCounter = AtomicInteger(TypeRegistry.objectCounterInitialValue)
+     private fun findNewAddr(insideStaticInitializer: Boolean): UtAddrExpression {
+@@ -271,7 +271,7 @@ class Traverser(
+     }
+     internal fun findNewAddr() = findNewAddr(environment.state.isInsideStaticInitializer).also { touchAddress(it) }
+ 
+-    private val dynamicInvokeResolver: DynamicInvokeResolver = DelegatingDynamicInvokeResolver()
++    protected val dynamicInvokeResolver: DynamicInvokeResolver = DelegatingDynamicInvokeResolver()
+ 
+     // Counter used for a creation symbolic results of "hashcode" and "equals" methods.
+     private var equalsCounter = 0
+@@ -1764,7 +1764,7 @@ class Traverser(
+     // Type is needed for null values: we should know, which null do we require.
+     // If valueType is NullType, return typelessNullObject. It can happen in a situation,
+     // where we cannot find the type, for example in condition (null == null)
+-    private fun TraversalContext.resolve(
++    protected fun TraversalContext.resolve(
+         value: Value,
+         valueType: Type = value.type
+     ): SymbolicValue = when (value) {
+@@ -2276,7 +2276,7 @@ class Traverser(
+      * @see Mocker.shouldMock
+      * @see UtStaticMethodMockInfo
+      */
+-    private fun mockStaticMethod(method: SootMethod, args: List<SymbolicValue>): List<MethodResult>? {
++    protected fun mockStaticMethod(method: SootMethod, args: List<SymbolicValue>): List<MethodResult>? {
+         val methodId = method.executableId as MethodId
+         val declaringClassType = method.declaringClass.type
+ 
+@@ -2325,7 +2325,7 @@ class Traverser(
+      *
+      * @see mockStaticMethod
+      */
+-    private fun TraversalContext.mockMakeSymbolic(invokeExpr: JStaticInvokeExpr): List<MethodResult>? {
++    protected fun TraversalContext.mockMakeSymbolic(invokeExpr: JStaticInvokeExpr): List<MethodResult>? {
+         val methodSignature = invokeExpr.method.signature
+         if (methodSignature != makeSymbolicMethod.signature && methodSignature != nonNullableMakeSymbolic.signature) return null
+ 
+@@ -2363,7 +2363,7 @@ class Traverser(
+         )
+     }
+ 
+-    private fun TraversalContext.staticInvoke(invokeExpr: JStaticInvokeExpr): List<MethodResult> {
++    protected open fun TraversalContext.staticInvoke(invokeExpr: JStaticInvokeExpr): List<MethodResult> {
+         val parameters = resolveParameters(invokeExpr.args, invokeExpr.method.parameterTypes)
+         val result = mockMakeSymbolic(invokeExpr) ?: mockStaticMethod(invokeExpr.method, parameters)
+ 
+@@ -2379,7 +2379,7 @@ class Traverser(
+      * Each target defines/reduces object type to set of concrete (not abstract, not interface)
+      * classes with particular method implementation.
+      */
+-    private fun TraversalContext.virtualAndInterfaceInvoke(
++    protected open fun TraversalContext.virtualAndInterfaceInvoke(
+         base: Value,
+         methodRef: SootMethodRef,
+         parameters: List<Value>
+@@ -2408,7 +2408,7 @@ class Traverser(
+      *
+      * Note: for some well known classes returns hardcoded choices.
+      */
+-    private fun findInvocationTargets(
++    protected fun findInvocationTargets(
+         instance: ObjectValue,
+         methodSubSignature: String
+     ): List<InvocationTarget> {
+@@ -2516,7 +2516,7 @@ class Traverser(
+             .toList()
+     }
+ 
+-    private fun TraversalContext.specialInvoke(invokeExpr: JSpecialInvokeExpr): List<MethodResult> {
++    protected open fun TraversalContext.specialInvoke(invokeExpr: JSpecialInvokeExpr): List<MethodResult> {
+         val instance = resolve(invokeExpr.base)
+         if (instance !is ReferenceValue) error("We cannot run ${invokeExpr.methodRef} on $instance")
+ 
+@@ -2533,7 +2533,7 @@ class Traverser(
+         return commonInvokePart(invocation)
+     }
+ 
+-    private fun TraversalContext.dynamicInvoke(invokeExpr: JDynamicInvokeExpr): List<MethodResult> {
++    protected open fun TraversalContext.dynamicInvoke(invokeExpr: JDynamicInvokeExpr): List<MethodResult> {
+         val invocation = with(dynamicInvokeResolver) { resolveDynamicInvoke(invokeExpr) }
+ 
+         if (invocation == null) {
+@@ -2554,7 +2554,7 @@ class Traverser(
+      *
+      * Returns results of native calls cause other calls push changes directly to path selector.
+      */
+-    private fun TraversalContext.commonInvokePart(invocation: Invocation): List<MethodResult> {
++    protected open fun TraversalContext.commonInvokePart(invocation: Invocation): List<MethodResult> {
+         /**
+          * First, check if there is override for the invocation itself, not for the targets.
+          *
+@@ -2656,7 +2656,7 @@ class Traverser(
+         return overriddenResults + originResults
+     }
+ 
+-    private fun TraversalContext.invoke(
++    protected fun TraversalContext.invoke(
+         target: InvocationTarget,
+         parameters: List<SymbolicValue>
+     ): List<MethodResult> = with(target.method) {
+@@ -2880,7 +2880,7 @@ class Traverser(
+      *
+      * Proceeds overridden method as non-library.
+      */
+-    private fun TraversalContext.overrideInvocation(invocation: Invocation, target: InvocationTarget?): OverrideResult {
++    protected fun TraversalContext.overrideInvocation(invocation: Invocation, target: InvocationTarget?): OverrideResult {
+         // If we try to override invocation itself, the target is null, and we have to process
+         // the instance from the invocation, otherwise take the one from the target
+         val instance = if (target == null) invocation.instance else target.instance
+@@ -3015,7 +3015,7 @@ class Traverser(
+             .firstOrNull { it.canRetrieveBody() || it.isNative }
+     }
+ 
+-    private fun TraversalContext.pushToPathSelector(
++    protected fun TraversalContext.pushToPathSelector(
+         graph: ExceptionalUnitGraph,
+         caller: ReferenceValue?,
+         callParameters: List<SymbolicValue>,
+@@ -3180,7 +3180,7 @@ class Traverser(
+         return if (negate) mkNot(eq) else eq
+     }
+ 
+-    private fun TraversalContext.nullPointerExceptionCheck(addr: UtAddrExpression) {
++    protected fun TraversalContext.nullPointerExceptionCheck(addr: UtAddrExpression) {
+         val canBeNull = addrEq(addr, nullObjectAddr)
+         val canNotBeNull = mkNot(canBeNull)
+         val notMarked = mkEq(memory.isSpeculativelyNotNull(addr), mkFalse())
+@@ -3426,7 +3426,7 @@ class Traverser(
+             }
+         }
+ 
+-    private fun constructConstraintForType(value: ReferenceValue, possibleTypes: Collection<Type>): UtBoolExpression {
++    protected fun constructConstraintForType(value: ReferenceValue, possibleTypes: Collection<Type>): UtBoolExpression {
+         val preferredTypes = typeResolver.findTopRatedTypes(possibleTypes, take = NUMBER_OF_PREFERRED_TYPES)
+         val mostCommonType = preferredTypes.singleOrNull() ?: OBJECT_TYPE
+         val typeStorage = typeResolver.constructTypeStorage(mostCommonType, preferredTypes)
+@@ -3446,7 +3446,7 @@ class Traverser(
+      * @see TypeRegistry.softEmptyTypes
+      * @see TypeRegistry.softZeroNumDimensions
+      */
+-    private fun addSoftDefaults() {
++    protected fun addSoftDefaults() {
+         memory.initialArrays.forEach { queuedSymbolicStateUpdates += UtMkTermArrayExpression(it).asHardConstraint() }
+         queuedSymbolicStateUpdates += memory.softZeroArraysLengths().asHardConstraint()
+         queuedSymbolicStateUpdates += typeRegistry.softZeroNumDimensions().asHardConstraint()
+@@ -3459,7 +3459,7 @@ class Traverser(
+      *
+      * @return updated memory updates.
+      */
+-    private fun substituteStaticFieldsWithSymbolicVariables(
++    protected fun substituteStaticFieldsWithSymbolicVariables(
+         declaringClass: SootClass,
+         updates: MemoryUpdate
+     ): MemoryUpdate {
+@@ -3501,7 +3501,7 @@ class Traverser(
+         )
+     }
+ 
+-    private fun TraversalContext.processResult(symbolicResult: SymbolicResult) {
++    protected open fun TraversalContext.processResult(symbolicResult: SymbolicResult) {
+         val resolvedParameters = environment.state.parameters.map { it.value }
+ 
+         //choose types that have biggest priority
+@@ -3646,7 +3646,7 @@ class Traverser(
+         )
+     }
+ 
+-    private fun pop(methodResultWithUpdates: MethodResult): ExecutionState {
++    protected fun pop(methodResultWithUpdates: MethodResult): ExecutionState {
+         return environment.state.pop(methodResultWithUpdates)
+     }
+ }
+\ No newline at end of file
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
-index b4ea2a84..2565b951 100644
+index b4ea2a84..b49d64fd 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
 @@ -125,7 +125,7 @@ class EngineController {
@@ -37,7 +253,7 @@ index b4ea2a84..2565b951 100644
  
  private val defaultIdGenerator = ReferencePreservingIntIdGenerator()
  
-@@ -160,28 +160,28 @@ private fun pathSelector(graph: InterProceduralUnitGraph, typeRegistry: TypeRegi
+@@ -160,32 +160,32 @@ private fun pathSelector(graph: InterProceduralUnitGraph, typeRegistry: TypeRegi
          }
      }
  
@@ -76,6 +292,11 @@ index b4ea2a84..2565b951 100644
  
      private val classUnderTest: ClassId = methodUnderTest.classId
  
+-    private val mocker: Mocker = Mocker(
++    protected val mocker: Mocker = Mocker(
+         mockStrategy,
+         classUnderTest,
+         hierarchy,
 @@ -197,9 +197,9 @@ class UtBotSymbolicEngine(
  
      fun detachMockListener(mockListener: MockListener) = mocker.mockListenerController?.detach(mockListener)
@@ -84,7 +305,7 @@ index b4ea2a84..2565b951 100644
 +    protected val statesForConcreteExecution: MutableList<ExecutionState> = mutableListOf()
  
 -    private val traverser = Traverser(
-+    protected val traverser = Traverser(
++    protected var traverser = Traverser(
          methodUnderTest,
          typeRegistry,
          hierarchy,
@@ -176,6 +397,18 @@ index 5516d548..4a67f166 100644
      protected val graph: InterProceduralUnitGraph,
      protected var context: PathSelectorContext
  ) {
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/strategies/GraphViz.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/strategies/GraphViz.kt
+index 1cf9c38e..41289f09 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/strategies/GraphViz.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/strategies/GraphViz.kt
+@@ -74,6 +74,7 @@ class GraphViz(
+         update()
+ 
+         val path = Paths.get(graphVisPathString, "UseVisJs.html")
++        println("Debug visualization: $path")
+ 
+         logger.debug { "Debug visualization: $path" }
+ 
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
 index cc61b809..73d55a7a 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt

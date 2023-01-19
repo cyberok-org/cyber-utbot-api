@@ -96,17 +96,4 @@
 
 [//]: #TODO (Tests generation realization)
 
-Пока `tool` не реализован. [ResultFormat](ResultFormat.md) можно получить только в более простом виде и неудобно - берётся копированием из консоли результата запуска `cyber-utbot-api` (с предварительными изменениями, описанными ниже)
-
-Изменение для вывода - стоит добавить в начало [UtBotSymbolicEngine](../../../../../utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt) `consumeTerminalState`:
-
-```kotlin
-println("----------------------------------------------------------------------------------------------------")
-println("path: ${state.path.joinToString(separator=",\n\t")}")
-state.symbolicState.solver.apply {
-    println("assertions: ${assertions.joinToString(separator=",\n\t")}")
-    println("assumption: $assumption")
-    println("lastStatus: $lastStatus")
-}
-println()
-```
+Пока `tool` не реализован. [ResultFormat](ResultFormat.md) можно получить только в более простом виде и неудобно - берётся копированием из консоли результата запуска `cyber-utbot-api`

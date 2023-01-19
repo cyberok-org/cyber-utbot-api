@@ -14,7 +14,6 @@ import org.utbot.engine.*
 import org.utbot.engine.pc.UtSolver
 import org.utbot.engine.pc.UtSolverStatusSAT
 import org.utbot.engine.selectors.StrategyOption
-import org.utbot.engine.selectors.inheritorsSelector
 import org.utbot.engine.selectors.nurs.NonUniformRandomSearch
 import org.utbot.engine.selectors.pollUntilFastSAT
 import org.utbot.engine.selectors.strategies.GraphViz
@@ -37,6 +36,7 @@ class CyberUtBotSymbolicEngine(
     chosenClassesToMockAlways: Set<ClassId>,
     solverTimeoutInMillis: Int = UtSettings.checkSolverTimeoutMillis,
     cyberPathSelector: Boolean = false,
+    findVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
     init {  // set our selector
@@ -44,6 +44,16 @@ class CyberUtBotSymbolicEngine(
             pathSelector = cyberPathSelector(globalGraph, StrategyOption.DISTANCE) {
                 withStepsLimit(UtSettings.pathSelectorStepsLimit)
             }
+        }
+        if (findVulnerabilities) {
+            traverser = CyberTraverser(
+                methodUnderTest,
+                typeRegistry,
+                hierarchy,
+                typeResolver,
+                globalGraph,
+                mocker,
+            )
         }
     }
 
@@ -165,7 +175,7 @@ class CyberUtBotSymbolicEngine(
                             return@measureTimeMillis
                         }
                         for (newState in newStates) {
-                            @CyberNew("view new states") statePublisher?.viewUpdate(newState)
+                            @CyberNew("view new states") statePublisher.viewUpdate(newState)
                             when (newState.label) {
                                 StateLabel.INTERMEDIATE -> pathSelector.offer(newState)
                                 StateLabel.CONCRETE -> statesForConcreteExecution.add(newState)

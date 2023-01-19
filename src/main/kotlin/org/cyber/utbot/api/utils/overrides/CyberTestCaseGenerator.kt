@@ -17,6 +17,7 @@ open class CyberTestCaseGenerator(
     dependencyPaths: String,
     jdkInfo: JdkInfo,
     private val cyberPathSelector: Boolean,
+    private val findVulnerabilities: Boolean,
     private val statePublisher: StatePublisher
 ) : TestCaseGenerator(buildDirs, classpath, dependencyPaths, jdkInfo) {
     private val logger: KLogger = KotlinLogging.logger {}
@@ -39,7 +40,8 @@ open class CyberTestCaseGenerator(
             chosenClassesToMockAlways = chosenClassesToMockAlways,
             solverTimeoutInMillis = executionTimeEstimator.updatedSolverCheckTimeoutMillis,
             cyberPathSelector,
-            statePublisher
+            findVulnerabilities,
+            statePublisher = statePublisher
         )
     }
 }
