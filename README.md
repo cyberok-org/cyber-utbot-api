@@ -20,17 +20,7 @@ bash patch_apply.sh
 build jar
 ```
 
-- Альтернативный способ (пока временный и не удобный, если очень не повезёт - придётся руками немного подправить)
-
-```bash
-git clone https://github.com/UnitTestBot/UTBotJava
-cd UTBotJava/
-git clone https://github.com/cyberok-org/cyber-utbot-api
-```
-
-В [patch](patch) есть все изменённые файлы `utbot` (где они лежат в действительности написано в [mapping](patch/patch.json))
-
-Их стоит перезаписать руками (позже будет скрипт для этого)
+После `bash patch_apply.sh` возможно стоит руками немного пофиксить то, что ему не удалось (возникающие `.rej` файлы).
 
 ## Run
 
