@@ -9,7 +9,28 @@
 
 ## Build
 
-Стоит склонировать и открыть этот проект, добавить `include("cyber-utbot-api")` рядом с другими `include` в `settings.gradle.kts`. После этого всё должно собраться и работать.
+- В идеале так должно быть, но `patch` работает недостаточно хорошо и даже при несущественных изменениях (обновлениях `utbot`) не резолвит. Тут стоит зафиксировать версию `utbot` или поумнее сделать `patch`
+
+```bash
+git clone https://github.com/UnitTestBot/UTBotJava
+cd UTBotJava/
+git clone https://github.com/cyberok-org/cyber-utbot-api
+cd cyber-utbot-api/scripts/
+bash patch_apply.sh
+build jar
+```
+
+- Альтернативный способ (пока временный и не удобный, если очень не повезёт - придётся руками немного подправить)
+
+```bash
+git clone https://github.com/UnitTestBot/UTBotJava
+cd UTBotJava/
+git clone https://github.com/cyberok-org/cyber-utbot-api
+```
+
+В [patch](patch) есть все изменённые файлы `utbot` (где они лежат в действительности написано в [mapping](patch/patch.json))
+
+Их стоит перезаписать руками (позже будет скрипт для этого)
 
 ## Run
 

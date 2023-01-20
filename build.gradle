@@ -63,10 +63,10 @@ classes {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'org.cyber-utbot.ApplicationKt'
-        attributes 'Bundle-SymbolicName': 'org.utbot.cli'
+        attributes 'Main-Class': 'org.cyber.utbot.ApplicationKt'
+        attributes 'Bundle-SymbolicName': 'org.cyber.utbot'
         attributes 'Bundle-Version': "${project.version}"
-        attributes 'Implementation-Title': 'UtBot Java CLI'
+        attributes 'Implementation-Title': 'Cyber UtBot Java API'
         attributes 'JAR-Type': 'Fat JAR'
     }
 

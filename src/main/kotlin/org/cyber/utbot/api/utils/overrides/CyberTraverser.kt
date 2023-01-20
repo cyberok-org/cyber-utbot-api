@@ -23,7 +23,7 @@ import soot.jimple.internal.JDynamicInvokeExpr
 import soot.jimple.internal.JSpecialInvokeExpr
 import soot.jimple.internal.JStaticInvokeExpr
 
-class CyberTraverser(           // FIXME (add annotations)
+class CyberTraverser(
     methodUnderTest: ExecutableId,
     typeRegistry: TypeRegistry,
     hierarchy: Hierarchy,
