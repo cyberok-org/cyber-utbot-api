@@ -14,11 +14,20 @@ git clone https://github.com/UnitTestBot/UTBotJava
 cd UTBotJava/
 git checkout aac63de
 git clone https://github.com/cyberok-org/cyber-utbot-api
+```
+
+После стоит открыть `ide` и попытаться собрать. Потом приминить `patch` командной ниже и ещё раз собрать.
+
+```bash
 cd cyber-utbot-api/scripts/
 bash patch_apply.sh
 ```
 
-После `bash patch_apply.sh` возможно стоит руками немного пофиксить то, что ему не удалось (возникающие `.rej` файлы).
+Дальше всё собирается командой (есть внутренние тесты для примеров которые и должны падать)
+
+```gradle
+gradle build -x test
+```
 
 ## Run
 
