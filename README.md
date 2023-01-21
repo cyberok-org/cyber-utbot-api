@@ -9,15 +9,13 @@
 
 ## Build
 
-- В идеале так должно быть, но `patch` работает недостаточно хорошо и даже при несущественных изменениях (обновлениях `utbot`) не резолвит. Тут стоит зафиксировать версию `utbot` или поумнее сделать `patch`
-
 ```bash
 git clone https://github.com/UnitTestBot/UTBotJava
 cd UTBotJava/
+git checkout aac63de
 git clone https://github.com/cyberok-org/cyber-utbot-api
 cd cyber-utbot-api/scripts/
 bash patch_apply.sh
-build jar
 ```
 
 После `bash patch_apply.sh` возможно стоит руками немного пофиксить то, что ему не удалось (возникающие `.rej` файлы).

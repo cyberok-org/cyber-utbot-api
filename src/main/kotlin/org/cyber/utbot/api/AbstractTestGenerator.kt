@@ -9,7 +9,10 @@ import org.utbot.common.PathUtil.toURL
 import org.utbot.common.toPath
 import org.utbot.framework.UtSettings
 import org.utbot.framework.codegen.*
-import org.utbot.framework.codegen.model.CodeGenerator
+import org.utbot.framework.codegen.domain.ForceStaticMocking
+import org.utbot.framework.codegen.domain.NoStaticMocking
+import org.utbot.framework.codegen.domain.StaticsMocking
+import org.utbot.framework.codegen.domain.TestFramework
 import org.utbot.framework.plugin.api.*
 import org.utbot.framework.plugin.services.JdkInfoDefaultProvider
 import org.utbot.summary.summarize

@@ -4,6 +4,7 @@ import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.utbot.engine.Mocker
 import org.utbot.framework.UtSettings
 import org.utbot.framework.codegen.*
+import org.utbot.framework.codegen.domain.*
 import org.utbot.framework.plugin.api.CodegenLanguage
 import org.utbot.framework.plugin.api.MockStrategyApi
 import org.utbot.framework.plugin.api.TreatOverflowAsError
@@ -17,10 +18,12 @@ enum class TestFrameworkGen {
     JUNIT5,
     TESTING;
 
-    fun toTestFramework(): TestFramework = when(this) {
-        JUNIT4 -> Junit4
-        JUNIT5 -> Junit5
-        TESTING -> TestNg
+    fun toTestFramework(): TestFramework {
+        return when(this) {
+            JUNIT4 -> Junit4
+            JUNIT5 -> Junit5
+            TESTING -> TestNg
+        }
     }
 }
 

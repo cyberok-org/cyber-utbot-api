@@ -1,3 +1,3 @@
 #!/bin/sh
 cd ../..
-git diff utbot-framework settings.gradle.kts > cyber-utbot-api/utbot_update.patch
+git diff utbot-framework settings.gradle.kts > cyber-utbot-api/utbot_update_aac63de.patch

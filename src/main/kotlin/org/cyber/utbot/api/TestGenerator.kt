@@ -11,9 +11,9 @@ import org.utbot.common.PathUtil.toPath
 import org.utbot.common.filterWhen
 import org.utbot.engine.Mocker
 import org.utbot.framework.UtSettings
-import org.utbot.framework.codegen.ForceStaticMocking
-import org.utbot.framework.codegen.StaticsMocking
-import org.utbot.framework.codegen.TestFramework
+import org.utbot.framework.codegen.domain.ForceStaticMocking
+import org.utbot.framework.codegen.domain.StaticsMocking
+import org.utbot.framework.codegen.domain.TestFramework
 import org.utbot.framework.plugin.api.*
 import org.utbot.framework.plugin.api.util.UtContext
 import org.utbot.framework.plugin.api.util.isAbstract
