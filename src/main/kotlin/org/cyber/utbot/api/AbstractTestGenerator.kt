@@ -107,7 +107,7 @@ abstract class AbstractTestGenerator {
             chosenClassesToMockAlways,
             generationTimeout
         ).map {
-            if (sourceCodeFile != null) it.summarize(sourceCodeFile.toFile(), searchDirectory) else it
+            if (sourceCodeFile != null) it.summarize(searchDirectory, sourceCodeFile.toFile()) else it
         }
 
     protected open fun generateTest(

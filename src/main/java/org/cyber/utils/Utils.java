@@ -8,4 +8,12 @@ public class Utils {
             throw new VulnerabilityException(message, new InvalidParameterException("these parameters lead to vulnerability"));
         }
     }
+
+//    public static void vulnerabilityAssertByMsg(String message) throws VulnerabilityException {
+//        throw new VulnerabilityException(message, new InvalidParameterException("these parameters lead to vulnerability"));
+//    }
+
+    public static void vulnerabilityAssertByMsg() throws VulnerabilityException {
+        throw new VulnerabilityException("message", new InvalidParameterException("these parameters lead to vulnerability"));
+    }
 }

@@ -2,27 +2,33 @@ package org.cyber.utbot.api.utils.overrides
 
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
+import org.cyber.utbot.api.utils.annotations.CyberNote
 import org.cyber.utbot.api.utils.vulnerability.stateUpdates
 import org.utbot.common.WorkaroundReason
 import org.utbot.common.workaround
 import org.utbot.engine.*
+import org.utbot.engine.Hierarchy
 import org.utbot.engine.pc.*
 import org.utbot.engine.state.StateLabel
 import org.utbot.engine.state.withLabel
 import org.utbot.engine.symbolic.SymbolicStateUpdate
+import org.utbot.engine.symbolic.asAssumption
 import org.utbot.engine.symbolic.asHardConstraint
 import org.utbot.engine.symbolic.asSoftConstraint
 import org.utbot.engine.types.TypeRegistry
 import org.utbot.engine.types.TypeResolver
 import org.utbot.framework.UtSettings
 import org.utbot.framework.plugin.api.ExecutableId
-import soot.SootMethod
-import soot.SootMethodRef
-import soot.Value
+import org.utbot.framework.util.executableId
+import org.utbot.framework.util.graph
+import soot.*
 import soot.jimple.internal.JDynamicInvokeExpr
 import soot.jimple.internal.JSpecialInvokeExpr
 import soot.jimple.internal.JStaticInvokeExpr
+import soot.toolkits.graph.ExceptionalUnitGraph
 
+
+@CyberNote("perhaps in some places adding constraints is unnecessary, this will be gradually corrected")
 class CyberTraverser(
     methodUnderTest: ExecutableId,
     typeRegistry: TypeRegistry,
@@ -31,15 +37,16 @@ class CyberTraverser(
     globalGraph: InterProceduralUnitGraph,
     mocker: Mocker
 ) : Traverser(methodUnderTest, typeRegistry, hierarchy, typeResolver, globalGraph, mocker) {
-    private var invokeStateUpdate = SymbolicStateUpdate()
+    @CyberNote("should be null before each operation \"traverse\"")
+    private var invokeStateUpdate: SymbolicStateUpdate? = null
 
     @CyberNew("add vulnerability constraints")
     private fun updateVulnerabilityStates(instance: SymbolicValue?, method: SootMethod, resolvedParameters: List<SymbolicValue>) {
 //        logger.info { "updateVulnerabilityStates ${instance?.type?.toString()} to ${method.name}" }
         stateUpdates[instance?.type?.toString() to method.name]?.let { func ->
-            val symbolicStateUpdates = func(resolvedParameters)
-            logger.info { "updateVulnerabilityStates $symbolicStateUpdates" }
-            invokeStateUpdate += symbolicStateUpdates
+            val symbolicStateUpdate = func(resolvedParameters)
+            logger.info { "updateVulnerabilityState $symbolicStateUpdate" }
+            invokeStateUpdate = symbolicStateUpdate
         }
     }
 
@@ -124,6 +131,22 @@ class CyberTraverser(
 
     @CyberModify("org/utbot/engine/Traverser.kt", "add invokeStateUpdate to MethodResult")
     override fun TraversalContext.commonInvokePart(invocation: Invocation): List<MethodResult> {
+        val method = invocation.method.executableId
+
+        // This code is supposed to support generic information from signatures for nested methods.
+        // If we have some method 'foo` and a method `bar(List<Integer>), and inside `foo`
+        // there is an invocation `bar(object)`, this object must have information about
+        // its `Integer` generic type.
+        invocation.parameters.forEachIndexed { index, param ->
+            if (param !is ReferenceValue) return@forEachIndexed
+
+            updateGenericTypeInfoFromMethod(method, param, parameterIndex = index + 1)
+        }
+
+        if (invocation.instance != null) {
+            updateGenericTypeInfoFromMethod(method, invocation.instance!!, parameterIndex = 0)
+        }
+
         /**
          * First, check if there is override for the invocation itself, not for the targets.
          *
@@ -149,7 +172,24 @@ class CyberTraverser(
         // It happens inside the `org.utbot.engine.Traverser.initStringLiteral` function.
         // So, if it happens, we should just drop the state we processing now.
         if (environment.state.solver.lastStatus is UtSolverStatusUNSAT) {
+            @CyberNew("clear constraints") run { invokeStateUpdate = null }
             return emptyList()
+        }
+
+        @CyberNew("check invoke conditions") run {
+            val sootClass = Scene.v().getSootClass("org.cyber.utils.Utils")
+            val vulnerabilityAssert = sootClass.getMethod("vulnerabilityAssertByMsg", listOf()) //STRING_TYPE
+            // TODO(add assert with msg later)
+//            val argList = ArrayList<Value>()
+//            val vulnerabilityAssertExpr = Jimple.v().newStaticInvokeExpr(vulnerabilityAssert.makeRef(), argList)
+//            val state = updateQueued(
+//                Edge(environment.state.stmt, JInvokeStmt(vulnerabilityAssertExpr), 0),
+//                invokeStateUpdate
+//            )
+
+            val graph = ExceptionalUnitGraph(vulnerabilityAssert.activeBody)
+            val constraints = invokeStateUpdate?.let { setOf(mkNot(mkAnd(it.hardConstraints.constraints.toList()))) } ?: emptySet()
+            pushToPathSelector(graph, null, listOf(), constraints=constraints)
         }
 
         // If so, return the result of the override
@@ -157,7 +197,8 @@ class CyberTraverser(
             if (artificialMethodOverride.results.size > 1) {
                 environment.state.definitelyFork()
             }
-
+            @CyberNew("constraints after clear") val constraints = invokeStateUpdate?.hardConstraints?.constraints ?: emptySet()
+            @CyberNew("clear constraints") run { invokeStateUpdate = null }
             return mutableListOf<MethodResult>().apply {
                 for (result in artificialMethodOverride.results) {
                     when (result) {
@@ -166,7 +207,7 @@ class CyberTraverser(
                             result.graph,
                             invocation.instance,
                             invocation.parameters,
-                            result.constraints,
+                            result.constraints + @CyberNew("add vulnerability constraints") constraints,
                             isLibraryMethod = true
                         )
                     }
@@ -207,7 +248,7 @@ class CyberTraverser(
                                 // It is important to add constraints for the target as well, because
                                 // those constraints contain information about the type of the
                                 // instance from the target
-                                target.constraints + result.constraints,
+                                target.constraints + result.constraints + @CyberNew("add vulnerability constraints") (invokeStateUpdate?.hardConstraints?.constraints ?: emptySet()),
                                 // Since we override methods of the classes from the standard library
                                 isLibraryMethod = true
                             )
@@ -222,12 +263,14 @@ class CyberTraverser(
         }
 
         // Return their concatenation
-        @CyberModify("org/utbot/engine/Traverser.kt", "was: return overriddenResults + originResults") return (overriddenResults + originResults).map {
-                result -> MethodResult(result.symbolicResult, result.symbolicStateUpdate.plus(invokeStateUpdate))
+        @CyberModify("org/utbot/engine/Traverser.kt", "was: return overriddenResults + originResults") return (overriddenResults + originResults).map { result ->
+            val symbolicUpdateResult = result.symbolicStateUpdate + invokeStateUpdate
+            @CyberNew("clear constraints") run { invokeStateUpdate = null }
+            MethodResult(result.symbolicResult, symbolicUpdateResult)
         }
     }
 
-    @CyberModify("org/utbot/engine/Traverser.kt", "add invokeStateUpdate to MethodResult")
+    @CyberModify("org/utbot/engine/Traverser.kt", "no change now. Will be updated later")
      override fun TraversalContext.processResult(symbolicResult: SymbolicResult) {
         val resolvedParameters = environment.state.parameters.map { it.value }
 
@@ -261,7 +304,7 @@ class CyberTraverser(
             logger.trace { "processResult<${environment.method.signature}> UNSAT" }
             return
         }
-        val methodResult = MethodResult(symbolicResult, @CyberNew("add vulnerability constraints") invokeStateUpdate)
+        val methodResult = MethodResult(symbolicResult)
 
         //execution frame from level 2 or above
         if (environment.state.isInNestedMethod()) {
@@ -275,7 +318,7 @@ class CyberTraverser(
             } else {
                 MemoryUpdate() // all memory updates are already added in [environment.state]
             }
-            val methodResultWithUpdates = methodResult.copy(symbolicStateUpdate = queuedSymbolicStateUpdates + updates + @CyberNew("add vulnerability constraints") methodResult.symbolicStateUpdate)
+            val methodResultWithUpdates = methodResult.copy(symbolicStateUpdate = queuedSymbolicStateUpdates + updates)
             val stateToOffer = pop(methodResultWithUpdates)
             offerState(stateToOffer)
 
@@ -291,5 +334,59 @@ class CyberTraverser(
             label = StateLabel.TERMINAL
         )
         offerState(terminalExecutionState)
+    }
+
+    @CyberModify("org/utbot/engine/Traverser.kt", "added vulnerability constraints where needed")
+    override fun TraversalContext.invoke(
+        target: InvocationTarget,
+        parameters: List<SymbolicValue>
+    ): List<MethodResult> = with(target.method) {
+        val substitutedMethod = typeRegistry.findSubstitutionOrNull(this)
+
+        if (isNative && substitutedMethod == null) return processNativeMethod(target).also { @CyberNew("add vulnerability constraints") it.map { result -> result.update(invokeStateUpdate) } }
+
+        // If we face UtMock.assume call, we should continue only with the branch
+        // where the predicate from the parameters is equal true
+        when {
+            isUtMockAssume || isUtMockAssumeOrExecuteConcretely -> {
+                val param = UtCastExpression(parameters.single() as PrimitiveValue, BooleanType.v())
+
+                val assumptionStmt = mkEq(param, UtTrue)
+                val (hardConstraints, assumptions) = if (isUtMockAssume) {
+                    // For UtMock.assume we must add the assumeStmt to the hard constraints
+                    setOf(assumptionStmt) to emptySet()
+                } else {
+                    // For assumeOrExecuteConcretely we must add the statement to the assumptions.
+                    // It is required to have opportunity to remove it later in case of unsat state
+                    // because of it and execute the state concretely.
+                    emptySet<UtBoolExpression>() to setOf(assumptionStmt)
+                }
+
+                val symbolicStateUpdate = SymbolicStateUpdate(
+                    hardConstraints = hardConstraints.asHardConstraint(),
+                    assumptions = assumptions.asAssumption()
+                ) + @CyberNew("add vulnerability constraints") invokeStateUpdate
+
+                val stateToContinue = updateQueued(
+                    globalGraph.succ(environment.state.stmt),
+                    symbolicStateUpdate
+                )
+                offerState(stateToContinue)
+
+                // we already pushed state with the fulfilled predicate, so we can just drop our branch here by
+                // adding UtFalse to the constraints.
+                queuedSymbolicStateUpdates += UtFalse.asHardConstraint()
+                emptyList()
+            }
+            declaringClass == utOverrideMockClass -> utOverrideMockInvoke(target, parameters)
+            declaringClass == utLogicMockClass -> utLogicMockInvoke(target, parameters)
+            declaringClass == utArrayMockClass -> utArrayMockInvoke(target, parameters)
+            isUtMockForbidClassCastException -> isUtMockDisableClassCastExceptionCheckInvoke(parameters)
+            else -> {
+                val graph = substitutedMethod?.jimpleBody()?.graph() ?: jimpleBody().graph()
+                pushToPathSelector(graph, target.instance, parameters, target.constraints + @CyberNew("add vulnerability constraints") (invokeStateUpdate?.hardConstraints?.constraints ?: emptySet()), isLibraryMethod)
+                emptyList()
+            }
+        }.also { @CyberNew("add vulnerability constraints") it.map { result -> result.update(invokeStateUpdate) } }
     }
 }

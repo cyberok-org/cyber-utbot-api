@@ -12,7 +12,7 @@
 ```bash
 git clone https://github.com/UnitTestBot/UTBotJava
 cd UTBotJava/
-git checkout aac63de
+git checkout 22badb4
 git clone https://github.com/cyberok-org/cyber-utbot-api
 ```
 

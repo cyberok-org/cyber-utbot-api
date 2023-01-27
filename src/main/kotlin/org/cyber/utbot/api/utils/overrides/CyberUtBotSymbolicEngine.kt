@@ -22,6 +22,8 @@ import org.utbot.engine.state.ExecutionState
 import org.utbot.engine.state.StateLabel
 import org.utbot.engine.symbolic.SymbolicState
 import org.utbot.framework.UtSettings
+import org.utbot.framework.UtSettings.processUnknownStatesDuringConcreteExecution
+import org.utbot.framework.UtSettings.useDebugVisualization
 import org.utbot.framework.plugin.api.*
 import org.utbot.framework.plugin.api.util.description
 import kotlin.system.measureTimeMillis
@@ -62,7 +64,7 @@ class CyberUtBotSymbolicEngine(
 
         require(trackableResources.isEmpty())
 
-        if (UtSettings.useDebugVisualization) GraphViz(globalGraph, pathSelector)
+        if (useDebugVisualization) GraphViz(globalGraph, pathSelector)
 
         val initStmt = graph.head
         val initState = ExecutionState(
@@ -96,7 +98,7 @@ class CyberUtBotSymbolicEngine(
 
                 if (controller.executeConcretely || statesForConcreteExecution.isNotEmpty()) {
                     val state = pathSelector.pollUntilFastSAT()
-                        ?: statesForConcreteExecution.pollUntilSat(UtSettings.processUnknownStatesDuringConcreteExecution)
+                        ?: statesForConcreteExecution.pollUntilSat(processUnknownStatesDuringConcreteExecution)
                         ?: break
                     // This state can contain inconsistent wrappers - for example, Map with keys but missing values.
                     // We cannot use withWrapperConsistencyChecks here because it needs solver to work.
@@ -113,7 +115,8 @@ class CyberUtBotSymbolicEngine(
                             typeResolver,
                             state.solver.lastStatus as UtSolverStatusSAT,
                             methodUnderTest,
-                            softMaxArraySize
+                            softMaxArraySize,
+                            traverser.objectCounter
                         )
 
                         val resolvedParameters = state.methodUnderTestParameters
@@ -123,6 +126,11 @@ class CyberUtBotSymbolicEngine(
                         try {
                             val concreteExecutionResult =
                                 concreteExecutor.executeConcretely(methodUnderTest, stateBefore, instrumentation)
+
+                            if (concreteExecutionResult.violatesUtMockAssumption()) {
+                                logger.debug { "Generated test case violates the UtMock assumption: $concreteExecutionResult" }
+                                return@bracket
+                            }
 
                             val concreteUtExecution = UtSymbolicExecution(
                                 stateBefore,

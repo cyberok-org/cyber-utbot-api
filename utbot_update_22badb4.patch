@@ -24,11 +24,32 @@ index 67a5e89e..53116595 100644
  
  /**
   * Creates synthetic method with static initializer invocation and returns its graph.
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt
+index 231d31c1..5f0d68b2 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt
+@@ -347,13 +347,13 @@ class UtMockWrapper(
+ internal val utMockClass: SootClass
+     get() = Scene.v().getSootClass(UtMock::class.qualifiedName)
+ 
+-internal val utOverrideMockClass: SootClass
++val utOverrideMockClass: SootClass
+     get() = Scene.v().getSootClass(UtOverrideMock::class.qualifiedName)
+ 
+-internal val utLogicMockClass: SootClass
++val utLogicMockClass: SootClass
+     get() = Scene.v().getSootClass(UtLogicMock::class.qualifiedName)
+ 
+-internal val utArrayMockClass: SootClass
++val utArrayMockClass: SootClass
+     get() = Scene.v().getSootClass(UtArrayMock::class.qualifiedName)
+ 
+ internal val makeSymbolicMethod: SootMethod
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
-index d06c9c78..834ec4b0 100644
+index 280006fd..25a42c15 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
-@@ -207,7 +207,7 @@ class Resolver(
+@@ -210,7 +210,7 @@ class Resolver(
          state: MemoryState,
      ): UtArrayExpressionBase = memory.findArray(chunkDescriptor, state, staticFieldUnderResolving)
  
@@ -37,7 +58,7 @@ index d06c9c78..834ec4b0 100644
          var instrumentation: List<UtInstrumentation> = emptyList()
  
          val staticsBefore = memory.staticFields().map { (fieldId, states) -> fieldId to states.stateBefore }
-@@ -1116,7 +1116,7 @@ private data class ArrayExtractionDetails(
+@@ -1153,7 +1153,7 @@ private data class ArrayExtractionDetails(
      val oneDimensionalArray: UtArrayExpressionBase
  )
  
@@ -47,28 +68,39 @@ index d06c9c78..834ec4b0 100644
  
  fun SymbolicValue.isNullObject() =
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
-index 179230cc..8a34f907 100644
+index 3ae7ca31..dff5ad5d 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
-@@ -223,7 +223,7 @@ import java.util.concurrent.atomic.AtomicInteger
+@@ -225,13 +225,13 @@ import java.lang.reflect.WildcardType
  
  private val CAUGHT_EXCEPTION = LocalVariable("@caughtexception")
  
 -class Traverser(
 +open class Traverser(
      private val methodUnderTest: ExecutableId,
-     internal val typeRegistry: TypeRegistry,
+-    internal val typeRegistry: TypeRegistry,
++    val typeRegistry: TypeRegistry,
      internal val hierarchy: Hierarchy,
-@@ -260,7 +260,7 @@ class Traverser(
+     // TODO HACK violation of encapsulation
+     internal val typeResolver: TypeResolver,
+-    private val globalGraph: InterProceduralUnitGraph,
++    protected val globalGraph: InterProceduralUnitGraph,
+     private val mocker: Mocker,
+ ) : UtContextInitializer() {
+ 
+@@ -265,9 +265,9 @@ class Traverser(
  
      private val preferredCexInstanceCache = mutableMapOf<ObjectValue, MutableSet<SootField>>()
  
 -    private var queuedSymbolicStateUpdates = SymbolicStateUpdate()
 +    protected var queuedSymbolicStateUpdates = SymbolicStateUpdate()
  
-     private val objectCounter = AtomicInteger(TypeRegistry.objectCounterInitialValue)
+-    internal val objectCounter = ObjectCounter(TypeRegistry.objectCounterInitialValue)
++    val objectCounter = ObjectCounter(TypeRegistry.objectCounterInitialValue)
+ 
      private fun findNewAddr(insideStaticInitializer: Boolean): UtAddrExpression {
-@@ -274,7 +274,7 @@ class Traverser(
+         val newAddr = objectCounter.createNewAddr()
+@@ -280,7 +280,7 @@ class Traverser(
      }
      internal fun findNewAddr() = findNewAddr(environment.state.isInsideStaticInitializer).also { touchAddress(it) }
  
@@ -77,7 +109,16 @@ index 179230cc..8a34f907 100644
  
      // Counter used for a creation symbolic results of "hashcode" and "equals" methods.
      private var equalsCounter = 0
-@@ -1830,7 +1830,7 @@ class Traverser(
+@@ -1106,7 +1106,7 @@ class Traverser(
+         return UtMockInfoGenerator { mockAddr -> UtObjectMockInfo(type.id, mockAddr) }
+     }
+ 
+-    private fun updateGenericTypeInfoFromMethod(method: ExecutableId, value: ReferenceValue, parameterIndex: Int) {
++    protected fun updateGenericTypeInfoFromMethod(method: ExecutableId, value: ReferenceValue, parameterIndex: Int) {
+         val type = extractParameterizedType(method, parameterIndex) as? ParameterizedType ?: return
+ 
+         updateGenericTypeInfo(type, value)
+@@ -1930,7 +1930,7 @@ class Traverser(
      // Type is needed for null values: we should know, which null do we require.
      // If valueType is NullType, return typelessNullObject. It can happen in a situation,
      // where we cannot find the type, for example in condition (null == null)
@@ -86,7 +127,7 @@ index 179230cc..8a34f907 100644
          value: Value,
          valueType: Type = value.type
      ): SymbolicValue = when (value) {
-@@ -2344,7 +2344,7 @@ class Traverser(
+@@ -2491,7 +2491,7 @@ class Traverser(
       * @see Mocker.shouldMock
       * @see UtStaticMethodMockInfo
       */
@@ -95,7 +136,7 @@ index 179230cc..8a34f907 100644
          val methodId = method.executableId as MethodId
          val declaringClassType = method.declaringClass.type
  
-@@ -2393,7 +2393,7 @@ class Traverser(
+@@ -2540,7 +2540,7 @@ class Traverser(
       *
       * @see mockStaticMethod
       */
@@ -104,7 +145,7 @@ index 179230cc..8a34f907 100644
          val methodSignature = invokeExpr.method.signature
          if (methodSignature != makeSymbolicMethod.signature && methodSignature != nonNullableMakeSymbolic.signature) return null
  
-@@ -2431,7 +2431,7 @@ class Traverser(
+@@ -2578,7 +2578,7 @@ class Traverser(
          )
      }
  
@@ -113,7 +154,7 @@ index 179230cc..8a34f907 100644
          val parameters = resolveParameters(invokeExpr.args, invokeExpr.method.parameterTypes)
          val result = mockMakeSymbolic(invokeExpr) ?: mockStaticMethod(invokeExpr.method, parameters)
  
-@@ -2447,7 +2447,7 @@ class Traverser(
+@@ -2594,7 +2594,7 @@ class Traverser(
       * Each target defines/reduces object type to set of concrete (not abstract, not interface)
       * classes with particular method implementation.
       */
@@ -122,7 +163,7 @@ index 179230cc..8a34f907 100644
          base: Value,
          methodRef: SootMethodRef,
          parameters: List<Value>
-@@ -2476,7 +2476,7 @@ class Traverser(
+@@ -2623,7 +2623,7 @@ class Traverser(
       *
       * Note: for some well known classes returns hardcoded choices.
       */
@@ -131,7 +172,7 @@ index 179230cc..8a34f907 100644
          instance: ObjectValue,
          methodSubSignature: String
      ): List<InvocationTarget> {
-@@ -2584,7 +2584,7 @@ class Traverser(
+@@ -2742,7 +2742,7 @@ class Traverser(
              .toList()
      }
  
@@ -140,7 +181,7 @@ index 179230cc..8a34f907 100644
          val instance = resolve(invokeExpr.base)
          if (instance !is ReferenceValue) error("We cannot run ${invokeExpr.methodRef} on $instance")
  
-@@ -2601,7 +2601,7 @@ class Traverser(
+@@ -2759,7 +2759,7 @@ class Traverser(
          return commonInvokePart(invocation)
      }
  
@@ -149,25 +190,61 @@ index 179230cc..8a34f907 100644
          val invocation = with(dynamicInvokeResolver) { resolveDynamicInvoke(invokeExpr) }
  
          if (invocation == null) {
-@@ -2622,7 +2622,7 @@ class Traverser(
+@@ -2780,7 +2780,7 @@ class Traverser(
       *
       * Returns results of native calls cause other calls push changes directly to path selector.
       */
 -    private fun TraversalContext.commonInvokePart(invocation: Invocation): List<MethodResult> {
 +    protected open fun TraversalContext.commonInvokePart(invocation: Invocation): List<MethodResult> {
-         /**
-          * First, check if there is override for the invocation itself, not for the targets.
-          *
-@@ -2724,7 +2724,7 @@ class Traverser(
+         val method = invocation.method.executableId
+ 
+         // This code is supposed to support generic information from signatures for nested methods.
+@@ -2898,7 +2898,7 @@ class Traverser(
          return overriddenResults + originResults
      }
  
 -    private fun TraversalContext.invoke(
-+    protected fun TraversalContext.invoke(
++    protected open fun TraversalContext.invoke(
          target: InvocationTarget,
          parameters: List<SymbolicValue>
      ): List<MethodResult> = with(target.method) {
-@@ -2948,7 +2948,7 @@ class Traverser(
+@@ -2951,7 +2951,7 @@ class Traverser(
+         }
+     }
+ 
+-    private fun isUtMockDisableClassCastExceptionCheckInvoke(
++    protected fun isUtMockDisableClassCastExceptionCheckInvoke(
+         parameters: List<SymbolicValue>
+     ): List<MethodResult> {
+         val param = parameters.single() as ReferenceValue
+@@ -2961,7 +2961,7 @@ class Traverser(
+         return listOf(MethodResult(voidValue))
+     }
+ 
+-    private fun TraversalContext.utOverrideMockInvoke(target: InvocationTarget, parameters: List<SymbolicValue>): List<MethodResult> {
++    protected fun TraversalContext.utOverrideMockInvoke(target: InvocationTarget, parameters: List<SymbolicValue>): List<MethodResult> {
+         when (target.method.name) {
+             utOverrideMockAlreadyVisitedMethodName -> {
+                 return listOf(MethodResult(memory.isVisited(parameters[0].addr).toBoolValue()))
+@@ -3041,7 +3041,7 @@ class Traverser(
+         }
+     }
+ 
+-    private fun utArrayMockInvoke(target: InvocationTarget, parameters: List<SymbolicValue>): List<MethodResult> {
++    protected fun utArrayMockInvoke(target: InvocationTarget, parameters: List<SymbolicValue>): List<MethodResult> {
+         when (target.method.name) {
+             utArrayMockArraycopyMethodName -> {
+                 val src = parameters[0] as ArrayValue
+@@ -3082,7 +3082,7 @@ class Traverser(
+         )
+     }
+ 
+-    private fun utLogicMockInvoke(target: InvocationTarget, parameters: List<SymbolicValue>): List<MethodResult> {
++    protected fun utLogicMockInvoke(target: InvocationTarget, parameters: List<SymbolicValue>): List<MethodResult> {
+         when (target.method.name) {
+             utLogicMockLessMethodName -> {
+                 val a = parameters[0] as PrimitiveValue
+@@ -3128,7 +3128,7 @@ class Traverser(
       *
       * Proceeds overridden method as non-library.
       */
@@ -176,7 +253,16 @@ index 179230cc..8a34f907 100644
          // If we try to override invocation itself, the target is null, and we have to process
          // the instance from the invocation, otherwise take the one from the target
          val instance = if (target == null) invocation.instance else target.instance
-@@ -3099,7 +3099,7 @@ class Traverser(
+@@ -3318,7 +3318,7 @@ class Traverser(
+     }
+ 
+     // For now, we just create unbounded symbolic variable as a result.
+-    private fun processNativeMethod(target: InvocationTarget): List<MethodResult> =
++    protected fun processNativeMethod(target: InvocationTarget): List<MethodResult> =
+         listOf(unboundedVariable(name = "nativeConst", target.method))
+ 
+     private fun unboundedVariable(name: String, method: SootMethod): MethodResult {
+@@ -3347,7 +3347,7 @@ class Traverser(
              .firstOrNull { it.canRetrieveBody() || it.isNative }
      }
  
@@ -185,7 +271,7 @@ index 179230cc..8a34f907 100644
          graph: ExceptionalUnitGraph,
          caller: ReferenceValue?,
          callParameters: List<SymbolicValue>,
-@@ -3264,7 +3264,7 @@ class Traverser(
+@@ -3512,7 +3512,7 @@ class Traverser(
          return if (negate) mkNot(eq) else eq
      }
  
@@ -194,7 +280,7 @@ index 179230cc..8a34f907 100644
          val canBeNull = addrEq(addr, nullObjectAddr)
          val canNotBeNull = mkNot(canBeNull)
          val notMarked = mkEq(memory.isSpeculativelyNotNull(addr), mkFalse())
-@@ -3510,7 +3510,7 @@ class Traverser(
+@@ -3755,7 +3755,7 @@ class Traverser(
              }
          }
  
@@ -203,7 +289,7 @@ index 179230cc..8a34f907 100644
          val preferredTypes = typeResolver.findTopRatedTypes(possibleTypes, take = NUMBER_OF_PREFERRED_TYPES)
          val mostCommonType = preferredTypes.singleOrNull() ?: OBJECT_TYPE
          val typeStorage = typeResolver.constructTypeStorage(mostCommonType, preferredTypes)
-@@ -3530,7 +3530,7 @@ class Traverser(
+@@ -3775,7 +3775,7 @@ class Traverser(
       * @see TypeRegistry.softEmptyTypes
       * @see TypeRegistry.softZeroNumDimensions
       */
@@ -212,7 +298,7 @@ index 179230cc..8a34f907 100644
          memory.initialArrays.forEach { queuedSymbolicStateUpdates += UtMkTermArrayExpression(it).asHardConstraint() }
          queuedSymbolicStateUpdates += memory.softZeroArraysLengths().asHardConstraint()
          queuedSymbolicStateUpdates += typeRegistry.softZeroNumDimensions().asHardConstraint()
-@@ -3543,7 +3543,7 @@ class Traverser(
+@@ -3788,7 +3788,7 @@ class Traverser(
       *
       * @return updated memory updates.
       */
@@ -221,7 +307,7 @@ index 179230cc..8a34f907 100644
          declaringClass: SootClass,
          updates: MemoryUpdate
      ): MemoryUpdate {
-@@ -3585,7 +3585,7 @@ class Traverser(
+@@ -3838,7 +3838,7 @@ class Traverser(
          )
      }
  
@@ -230,7 +316,16 @@ index 179230cc..8a34f907 100644
          val resolvedParameters = environment.state.parameters.map { it.value }
  
          //choose types that have biggest priority
-@@ -3730,7 +3730,7 @@ class Traverser(
+@@ -3950,7 +3950,7 @@ class Traverser(
+         )
+     }
+ 
+-    private fun updateQueued(
++    protected fun updateQueued(
+         edge: Edge,
+         update: SymbolicStateUpdate = SymbolicStateUpdate(),
+         doesntThrow: Boolean = false
+@@ -3983,7 +3983,7 @@ class Traverser(
          )
      }
  
@@ -241,10 +336,10 @@ index 179230cc..8a34f907 100644
  }
 \ No newline at end of file
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
-index 94e3197f..9f7eb413 100644
+index 10a9138a..ccb7ba3d 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
-@@ -61,7 +61,7 @@ class EngineController {
+@@ -62,7 +62,7 @@ class EngineController {
  }
  
  //for debugging purpose only
@@ -253,7 +348,7 @@ index 94e3197f..9f7eb413 100644
  
  private val defaultIdGenerator = ReferencePreservingIntIdGenerator()
  
-@@ -96,32 +96,32 @@ private fun pathSelector(graph: InterProceduralUnitGraph, typeRegistry: TypeRegi
+@@ -97,32 +97,32 @@ private fun pathSelector(graph: InterProceduralUnitGraph, typeRegistry: TypeRegi
          }
      }
  
@@ -297,7 +392,7 @@ index 94e3197f..9f7eb413 100644
          mockStrategy,
          classUnderTest,
          hierarchy,
-@@ -133,9 +133,9 @@ class UtBotSymbolicEngine(
+@@ -134,9 +134,9 @@ class UtBotSymbolicEngine(
  
      fun detachMockListener(mockListener: MockListener) = mocker.mockListenerController?.detach(mockListener)
  
@@ -309,7 +404,7 @@ index 94e3197f..9f7eb413 100644
          methodUnderTest,
          typeRegistry,
          hierarchy,
-@@ -145,9 +145,9 @@ class UtBotSymbolicEngine(
+@@ -146,9 +146,9 @@ class UtBotSymbolicEngine(
      )
  
      //HACK (long strings)
@@ -339,7 +434,7 @@ index 94e3197f..9f7eb413 100644
  
          require(trackableResources.isEmpty())
  
-@@ -410,7 +410,7 @@ class UtBotSymbolicEngine(
+@@ -416,7 +416,7 @@ class UtBotSymbolicEngine(
          }
      }
  
@@ -348,7 +443,7 @@ index 94e3197f..9f7eb413 100644
          stateBefore: EnvironmentModels,
          e: ConcreteExecutionFailureException
      ) {
-@@ -422,7 +422,7 @@ class UtBotSymbolicEngine(
+@@ -428,7 +428,7 @@ class UtBotSymbolicEngine(
          emit(failedConcreteExecution)
      }
  
@@ -357,7 +452,7 @@ index 94e3197f..9f7eb413 100644
          state: ExecutionState,
      ) {
          // some checks to be sure the state is correct
-@@ -528,7 +528,7 @@ class UtBotSymbolicEngine(
+@@ -547,7 +547,7 @@ class UtBotSymbolicEngine(
      }
  }
  
@@ -366,7 +461,7 @@ index 94e3197f..9f7eb413 100644
      val (thisInstanceBefore, paramsBefore) = when {
          methodUnderTest.isStatic -> null to parameters
          methodUnderTest.isConstructor -> null to parameters.drop(1)
-@@ -537,7 +537,7 @@ private fun ResolvedModels.constructStateForMethod(methodUnderTest: ExecutableId
+@@ -556,7 +556,7 @@ private fun ResolvedModels.constructStateForMethod(methodUnderTest: ExecutableId
      return EnvironmentModels(thisInstanceBefore, paramsBefore, statics)
  }
  
@@ -375,7 +470,7 @@ index 94e3197f..9f7eb413 100644
      methodUnderTest: ExecutableId,
      stateBefore: EnvironmentModels,
      instrumentation: List<UtInstrumentation>
-@@ -554,7 +554,7 @@ private suspend fun ConcreteExecutor<UtConcreteExecutionResult, UtExecutionInstr
+@@ -576,7 +576,7 @@ private suspend fun ConcreteExecutor<UtConcreteExecutionResult, UtExecutionInstr
   * For example, not fully visited map can contain duplicate keys that leads to incorrect behaviour.
   * To prevent it, we need to add visited constraint for each MUT parameter-wrapper in state.
   */
@@ -384,6 +479,15 @@ index 94e3197f..9f7eb413 100644
      val visitedConstraints = mutableSetOf<UtBoolExpression>()
      val methodUnderTestWrapperParameters = methodUnderTestParameters.filterNot { it.asWrapperOrNull == null }
      val methodUnderTestWrapperParametersAddresses = methodUnderTestWrapperParameters.map { it.addr }.toSet()
+@@ -616,7 +616,7 @@ private fun makeWrapperConsistencyCheck(
+     visitedConstraints += mkEq(visitedSelectExpression, mkInt(1))
+ }
+ 
+-private fun UtConcreteExecutionResult.violatesUtMockAssumption(): Boolean {
++fun UtConcreteExecutionResult.violatesUtMockAssumption(): Boolean {
+     // We should compare FQNs instead of `if (... is UtMockAssumptionViolatedException)`
+     // because the exception from the `concreteExecutionResult` is loaded by user's ClassLoader,
+     // but the `UtMockAssumptionViolatedException` is loaded by the current ClassLoader,
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt
 index 5516d548..4a67f166 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt
@@ -409,11 +513,24 @@ index 1cf9c38e..41289f09 100644
  
          logger.debug { "Debug visualization: $path" }
  
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/types/TypeResolver.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/types/TypeResolver.kt
+index e7c5e47d..31e92729 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/engine/types/TypeResolver.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/engine/types/TypeResolver.kt
+@@ -536,7 +536,7 @@ internal val ARRAYS_SOOT_CLASS: SootClass
+ 
+ internal val OBJECT_TYPE: RefType
+     get() = Scene.v().getSootClass(Object::class.java.canonicalName).type
+-internal val STRING_TYPE: RefType
++val STRING_TYPE: RefType
+     get() = Scene.v().getSootClass(String::class.java.canonicalName).type
+ internal val STRING_BUILDER_TYPE: RefType
+     get() = Scene.v().getSootClass(java.lang.StringBuilder::class.java.canonicalName).type
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
-index facabf61..cb6d455f 100644
+index c86c96e2..20d0fd5e 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
-@@ -61,7 +61,7 @@ import kotlin.reflect.KCallable
+@@ -56,7 +56,7 @@ import kotlin.math.min
  open class TestCaseGenerator(
      private val buildDirs: List<Path>,
      private val classpath: String?,
@@ -422,7 +539,7 @@ index facabf61..cb6d455f 100644
      private val jdkInfo: JdkInfo,
      val engineActions: MutableList<(UtBotSymbolicEngine) -> Unit> = mutableListOf(),
      val isCanceled: () -> Boolean = { false },
-@@ -70,7 +70,7 @@ open class TestCaseGenerator(
+@@ -65,7 +65,7 @@ open class TestCaseGenerator(
      private val logger: KLogger = KotlinLogging.logger {}
      private val timeoutLogger: KLogger = KotlinLogging.logger(logger.name + ".timeout")
  
@@ -431,9 +548,9 @@ index facabf61..cb6d455f 100644
          get() = (buildDirs + listOfNotNull(classpath)).joinToString(File.pathSeparator)
  
      init {
-@@ -264,7 +264,7 @@ open class TestCaseGenerator(
-             )
+@@ -240,7 +240,7 @@ open class TestCaseGenerator(
          }
+     }
  
 -    private fun createSymbolicEngine(
 +    protected open fun createSymbolicEngine(

@@ -2,7 +2,12 @@ package org.example;
 
 
 public class Loop {
+    private void fun2(int k) {
+        int a = k;
+    }
+
     public int whileLoop(int k) {
+        fun2(k);
         int i = 0;
         int sum = 0;
 
