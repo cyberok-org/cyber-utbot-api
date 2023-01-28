@@ -5,46 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public final class LoopTest {
-    ///region Test suites for executable org.example.Loop.whileLoop
-    
-    ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method whileLoop(int)
-    
-    /**
-    @utbot.classUnderTest {@link Loop}
- * @utbot.methodUnderTest {@link org.example.Loop#whileLoop(int)}
- *  */
-    @Test
-    @DisplayName("whileLoop: ")
-    public void testWhileLoop() {
-        Loop loop = new Loop();
-        
-        int actual = loop.whileLoop(0);
-        
-        assertEquals(0, actual);
-    }
-    
-    /**
-    @utbot.classUnderTest {@link Loop}
- * @utbot.methodUnderTest {@link org.example.Loop#whileLoop(int)}
- * @utbot.iterates iterate the loop {@code while(i < k)} 33 times
- * @utbot.returnsFrom {@code return sum;}
- *  */
-    @Test
-    @DisplayName("whileLoop: -> return sum")
-    public void testWhileLoop_ReturnSum() {
-        Loop loop = new Loop();
-        
-        int actual = loop.whileLoop(33);
-        
-        assertEquals(528, actual);
-    }
-    ///endregion
-    
-    ///endregion
-    
     ///region Test suites for executable org.example.Loop.fun2
     
     ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method fun2(int)

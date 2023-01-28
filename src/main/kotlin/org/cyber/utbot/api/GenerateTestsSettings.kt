@@ -102,7 +102,7 @@ class GenerateTestsSettings(
     /**
      * ignore utbot pathSelectors parameters, use our
      */
-    val cyberPathSelector: Boolean = false,
+    val cyberPathSelector: Boolean = true,
 
     /**
      * if false - just run utbot without extra analyze   // TODO(remove later)

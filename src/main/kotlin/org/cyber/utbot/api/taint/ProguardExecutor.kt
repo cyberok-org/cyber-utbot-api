@@ -25,7 +25,7 @@ class ProguardExecutor(private val jarName: String) {
                     TaintSource(
                         it,
                         false,
-                        true, // todo: use ~json files, put these values there
+                        true, // todo: put these values into json
                         setOf(),
                         setOf()
                     )

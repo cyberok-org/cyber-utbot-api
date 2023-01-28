@@ -23,6 +23,8 @@ class CyberSelectorBuilder internal constructor(
     override fun build() = CyberSelector(
         withChoosingStrategy(strategy),
         requireNotNull(context.stoppingStrategy) { "StoppingStrategy isn't specified" },
-        seed
+        seed,
+        "C:\\Users\\lesya\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\jars\\JarTemp.jar",
+        graph
     )
 }
