@@ -7,7 +7,9 @@ public class Loop {
     }
 
     public int whileLoop(int k) {
-        fun2(k);
+        if (k >= 0) {
+            fun2(k);
+        }
         int i = 0;
         int sum = 0;
 

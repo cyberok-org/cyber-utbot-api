@@ -15,10 +15,27 @@ public final class LoopTest {
     /**
     @utbot.classUnderTest {@link Loop}
  * @utbot.methodUnderTest {@link org.example.Loop#whileLoop(int)}
+ * @utbot.executesCondition {@code (k >= 0): False}
+ * @utbot.returnsFrom {@code return sum;}
  *  */
     @Test
-    @DisplayName("whileLoop: ")
-    public void testWhileLoop() {
+    @DisplayName("whileLoop: k >= 0 : False -> return sum")
+    public void testWhileLoop_KLessThanZero() {
+        Loop loop = new Loop();
+        
+        int actual = loop.whileLoop(-1);
+        
+        assertEquals(0, actual);
+    }
+    
+    /**
+    @utbot.classUnderTest {@link Loop}
+ * @utbot.methodUnderTest {@link org.example.Loop#whileLoop(int)}
+ * @utbot.executesCondition {@code (k >= 0): True}
+ *  */
+    @Test
+    @DisplayName("whileLoop: -> k >= 0 : True")
+    public void testWhileLoop_KGreaterOrEqualZero() {
         Loop loop = new Loop();
         
         int actual = loop.whileLoop(0);
@@ -29,17 +46,18 @@ public final class LoopTest {
     /**
     @utbot.classUnderTest {@link Loop}
  * @utbot.methodUnderTest {@link org.example.Loop#whileLoop(int)}
- * @utbot.iterates iterate the loop {@code while(i < k)} 33 times
+ * @utbot.executesCondition {@code (k >= 0): True}
+ * @utbot.iterates iterate the loop {@code while(i < k)} 100 times
  * @utbot.returnsFrom {@code return sum;}
  *  */
     @Test
-    @DisplayName("whileLoop: -> return sum")
-    public void testWhileLoop_ReturnSum() {
+    @DisplayName("whileLoop: k >= 0 : True -> return sum")
+    public void testWhileLoop_KGreaterOrEqualZero_1() {
         Loop loop = new Loop();
         
-        int actual = loop.whileLoop(33);
+        int actual = loop.whileLoop(100);
         
-        assertEquals(528, actual);
+        assertEquals(4950, actual);
     }
     ///endregion
     

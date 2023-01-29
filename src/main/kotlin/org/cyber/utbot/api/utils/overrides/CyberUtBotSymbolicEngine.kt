@@ -8,6 +8,7 @@ import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.viewers.StatePublisher
+import org.cyber.utbot.api.utils.vulnerability.VulnerabilityHolder
 import org.utbot.common.bracket
 import org.utbot.common.debug
 import org.utbot.engine.*
@@ -40,6 +41,7 @@ class CyberUtBotSymbolicEngine(
     cyberPathSelector: Boolean = false,
     findVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
+    vulnerabilityHolder: VulnerabilityHolder = VulnerabilityHolder(),
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
     init {  // set our selector
         if (cyberPathSelector) {
@@ -55,6 +57,7 @@ class CyberUtBotSymbolicEngine(
                 typeResolver,
                 globalGraph,
                 mocker,
+                vulnerabilityHolder = vulnerabilityHolder
             )
         }
     }

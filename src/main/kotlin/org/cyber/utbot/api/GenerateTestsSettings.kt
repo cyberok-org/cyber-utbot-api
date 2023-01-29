@@ -107,7 +107,12 @@ class GenerateTestsSettings(
     /**
      * if false - just run utbot without extra analyze   // TODO(remove later)
      */
-    val findVulnerabilities: Boolean = true
+    val findVulnerabilities: Boolean = true,
+
+    /**
+     * list of directories with files of the form VulnerabilityStandard for the description of analyzed vulnerabilities
+     */
+    val vulnerabilityCheckDirectories: List<String> = listOf("src/exploitBase/funcs")
 ) {
     init {  // check is settings correct
         mockAlways.forEach { fullyQualifiedName ->
