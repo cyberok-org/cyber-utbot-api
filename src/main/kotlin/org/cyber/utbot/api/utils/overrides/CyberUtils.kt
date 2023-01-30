@@ -7,6 +7,8 @@ import org.utbot.engine.pc.UtBoolExpression
 import org.utbot.engine.pc.mkNot
 import org.utbot.engine.pc.mkOr
 import org.utbot.engine.symbolic.asHardConstraint
+import org.utbot.framework.plugin.api.UtExecutionResult
+import org.utbot.framework.plugin.api.UtExplicitlyThrownException
 
 
 @CyberNew("convenience")
@@ -16,3 +18,7 @@ fun MethodResult.update(updates: Set<UtBoolExpression>) = MethodResult(symbolicR
 @CyberNew("convenience")
 fun List<Vulnerability>?.correctPathConstraints(): Set<UtBoolExpression> =
     this?.map { it.constraints }?.flatten()?.let { setOf(mkNot(mkOr(it))) } ?: emptySet()
+
+
+@CyberNew("convenience")
+fun isVulnerability(result: UtExecutionResult) = result is UtExplicitlyThrownException && result.exception is org.cyber.utils.VulnerabilityException

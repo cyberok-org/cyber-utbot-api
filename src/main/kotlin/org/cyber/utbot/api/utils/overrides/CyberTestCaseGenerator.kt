@@ -19,6 +19,7 @@ open class CyberTestCaseGenerator(
     jdkInfo: JdkInfo,
     private val cyberPathSelector: Boolean,
     private val findVulnerabilities: Boolean,
+    private val onlyVulnerabilities: Boolean,
     private val statePublisher: StatePublisher,
     private val vulnerabilityHolder: VulnerabilityHolder
 ) : TestCaseGenerator(buildDirs, classpath, dependencyPaths, jdkInfo) {
@@ -43,6 +44,7 @@ open class CyberTestCaseGenerator(
             solverTimeoutInMillis = executionTimeEstimator.updatedSolverCheckTimeoutMillis,
             cyberPathSelector,
             findVulnerabilities,
+            onlyVulnerabilities,
             statePublisher = statePublisher,
             vulnerabilityHolder = vulnerabilityHolder
         )

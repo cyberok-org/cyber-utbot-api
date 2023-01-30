@@ -336,7 +336,7 @@ index 3ae7ca31..dff5ad5d 100644
  }
 \ No newline at end of file
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
-index 10a9138a..ccb7ba3d 100644
+index 10a9138a..f47ec562 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
 @@ -62,7 +62,7 @@ class EngineController {
@@ -448,10 +448,19 @@ index 10a9138a..ccb7ba3d 100644
      }
  
 -    private suspend fun FlowCollector<UtResult>.consumeTerminalState(
-+    protected suspend fun FlowCollector<UtResult>.consumeTerminalState(
++    protected open suspend fun FlowCollector<UtResult>.consumeTerminalState(
          state: ExecutionState,
      ) {
          // some checks to be sure the state is correct
+@@ -534,7 +534,7 @@ class UtBotSymbolicEngine(
+      * Collects entry method statement path for ML. Eliminates duplicated statements, e.g. assignment with invocation
+      * in right part.
+      */
+-    private fun entryMethodPath(state: ExecutionState): MutableList<Step> {
++    protected fun entryMethodPath(state: ExecutionState): MutableList<Step> {
+         val entryPath = mutableListOf<Step>()
+         state.fullPath().forEach { step ->
+             // TODO: replace step.stmt in methodUnderAnalysisStmts with step.depth == 0
 @@ -547,7 +547,7 @@ class UtBotSymbolicEngine(
      }
  }

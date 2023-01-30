@@ -3,12 +3,14 @@ package org.cyber.utbot.api.utils.overrides
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.viewers.StatePublisher
 import org.cyber.utbot.api.utils.vulnerability.VulnerabilityHolder
+import org.utbot.analytics.Predictors
 import org.utbot.common.bracket
 import org.utbot.common.debug
 import org.utbot.engine.*
@@ -40,6 +42,7 @@ class CyberUtBotSymbolicEngine(
     solverTimeoutInMillis: Int = UtSettings.checkSolverTimeoutMillis,
     cyberPathSelector: Boolean = false,
     findVulnerabilities: Boolean = true,
+    private val onlyVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
     vulnerabilityHolder: VulnerabilityHolder = VulnerabilityHolder(),
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
@@ -203,6 +206,113 @@ class CyberUtBotSymbolicEngine(
                     globalGraph.visitNode(state)
                 }
             }
+        }
+    }
+
+    @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "filter terminal states")
+    override suspend fun FlowCollector<UtResult>.consumeTerminalState(
+        state: ExecutionState,
+    ) {
+        // some checks to be sure the state is correct
+        require(state.label == StateLabel.TERMINAL) { "Can't process non-terminal state!" }
+        require(!state.isInNestedMethod()) { "The state has to correspond to the MUT" }
+
+        val memory = state.memory
+        val solver = state.solver
+        val parameters = state.parameters.map { it.value }
+        val symbolicResult = requireNotNull(state.methodResult?.symbolicResult) { "The state must have symbolicResult" }
+        val holder = requireNotNull(solver.lastStatus as? UtSolverStatusSAT) { "The state must be SAT!" }
+
+        val predictedTestName = Predictors.testName.predict(state.path)
+        Predictors.testName.provide(state.path, predictedTestName, "")
+
+        // resolving
+        val resolver = Resolver(
+            hierarchy,
+            memory,
+            typeRegistry,
+            typeResolver,
+            holder,
+            methodUnderTest,
+            softMaxArraySize,
+            traverser.objectCounter
+        )
+
+        val (modelsBefore, modelsAfter, instrumentation) = resolver.resolveModels(parameters)
+
+        val symbolicExecutionResult = resolver.resolveResult(symbolicResult)
+
+        @CyberNew("filter emit flag") val needEmit = !onlyVulnerabilities || isVulnerability(symbolicExecutionResult)
+
+        val stateBefore = modelsBefore.constructStateForMethod(methodUnderTest)
+        val stateAfter = modelsAfter.constructStateForMethod(methodUnderTest)
+        require(stateBefore.parameters.size == stateAfter.parameters.size)
+
+        val symbolicUtExecution = UtSymbolicExecution(
+            stateBefore = stateBefore,
+            stateAfter = stateAfter,
+            result = symbolicExecutionResult,
+            instrumentation = instrumentation,
+            path = entryMethodPath(state),
+            fullPath = state.fullPath()
+        )
+
+        globalGraph.traversed(state)
+
+        if (!UtSettings.useConcreteExecution ||
+            // Can't execute concretely because overflows do not cause actual exceptions.
+            // Still, we need overflows to act as implicit exceptions.
+            (UtSettings.treatOverflowAsError && symbolicExecutionResult is UtOverflowFailure)
+        ) {
+            logger.debug {
+                "processResult<${methodUnderTest}>: no concrete execution allowed, " +
+                        "emit purely symbolic result $symbolicUtExecution"
+            }
+            @CyberNew("filter emit") if (!needEmit) return
+            emit(symbolicUtExecution)
+            return
+        }
+
+        // Check for lambda result as it cannot be emitted by concrete execution
+        (symbolicExecutionResult as? UtExecutionSuccess)?.takeIf { it.model is UtLambdaModel }?.run {
+            logger.debug {
+                "processResult<${methodUnderTest}>: impossible to create concrete value for lambda result ($model), " +
+                        "emit purely symbolic result $symbolicUtExecution"
+            }
+
+            emit(symbolicUtExecution)
+            return
+        }
+
+        //It's possible that symbolic and concrete stateAfter/results are diverged.
+        //So we trust concrete results more.
+        try {
+            logger.debug().bracket("processResult<$methodUnderTest>: concrete execution") {
+
+                //this can throw CancellationException
+                val concreteExecutionResult = concreteExecutor.executeConcretely(
+                    methodUnderTest,
+                    stateBefore,
+                    instrumentation
+                )
+
+                if (concreteExecutionResult.violatesUtMockAssumption()) {
+                    logger.debug { "Generated test case violates the UtMock assumption: $concreteExecutionResult" }
+                    return
+                }
+
+                val concolicUtExecution = symbolicUtExecution.copy(
+                    stateAfter = concreteExecutionResult.stateAfter,
+                    result = concreteExecutionResult.result,
+                    coverage = concreteExecutionResult.coverage
+                )
+
+                @CyberNew("filter emit") if (!needEmit) return
+                emit(concolicUtExecution)
+                logger.debug { "processResult<${methodUnderTest}>: returned $concolicUtExecution" }
+            }
+        } catch (e: ConcreteExecutionFailureException) {
+            emitFailedConcreteExecutionResult(stateBefore, e)
         }
     }
 }

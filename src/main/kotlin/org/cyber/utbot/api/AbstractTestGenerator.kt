@@ -38,6 +38,7 @@ abstract class AbstractTestGenerator {
     protected abstract val cyberPathSelector: Boolean
     protected abstract val findVulnerabilities: Boolean
     protected abstract val vulnerabilityCheckDirectories: List<String>
+    protected abstract val onlyVulnerabilities: Boolean
 
     private var classpath: String? = null
     protected lateinit var classLoader: URLClassLoader
@@ -80,6 +81,7 @@ abstract class AbstractTestGenerator {
             JdkInfoDefaultProvider().info,
             cyberPathSelector,
             findVulnerabilities,
+            onlyVulnerabilities,
             statePublisher,
             vulnerabilityHolder
         )

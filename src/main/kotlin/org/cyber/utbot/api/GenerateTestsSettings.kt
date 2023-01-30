@@ -112,7 +112,12 @@ class GenerateTestsSettings(
     /**
      * list of directories with files of the form VulnerabilityStandard for the description of analyzed vulnerabilities
      */
-    val vulnerabilityCheckDirectories: List<String> = listOf("src/exploitBase/funcs")
+    val vulnerabilityCheckDirectories: List<String> = listOf("src/exploitBase/funcs"),
+
+    /**
+     * generate tests only for vulnerabilities if true
+     */
+    val onlyVulnerabilities: Boolean = true
 ) {
     init {  // check is settings correct
         mockAlways.forEach { fullyQualifiedName ->
