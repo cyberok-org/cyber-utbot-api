@@ -124,6 +124,7 @@ class GenerateTestsSettings(
             Class.forName(fullyQualifiedName, false, ClassLoader.getSystemClassLoader())
         }
         assert(generationTimeout > 0) { "GenerateTestsSettings.generationTimeout should be more then 0" }
+        UtSettings.checkSolverTimeoutMillis = 0   // disabled z3 timeout
         withUtSettings(UtSettings)
     }
 }

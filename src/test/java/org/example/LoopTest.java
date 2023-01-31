@@ -18,6 +18,7 @@ public final class LoopTest {
  *  */
     @Test
     @DisplayName("whileLoop: k >= 0 : True -> LoopFun2")
+    @org.cyber.utils.VulnerabilityInfo("testWhileLoop_KGreaterOrEqualZero")
     public void testWhileLoop_KGreaterOrEqualZero() {
         Loop loop = new Loop();
         

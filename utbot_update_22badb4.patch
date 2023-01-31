@@ -68,7 +68,7 @@ index 280006fd..25a42c15 100644
  
  fun SymbolicValue.isNullObject() =
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
-index 3ae7ca31..dff5ad5d 100644
+index 3ae7ca31..5175555f 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
 @@ -225,13 +225,13 @@ import java.lang.reflect.WildcardType
@@ -100,9 +100,12 @@ index 3ae7ca31..dff5ad5d 100644
  
      private fun findNewAddr(insideStaticInitializer: Boolean): UtAddrExpression {
          val newAddr = objectCounter.createNewAddr()
-@@ -280,7 +280,7 @@ class Traverser(
+@@ -278,9 +278,9 @@ class Traverser(
+         val signedAddr = if (insideStaticInitializer) -newAddr else newAddr
+         return UtAddrExpression(signedAddr)
      }
-     internal fun findNewAddr() = findNewAddr(environment.state.isInsideStaticInitializer).also { touchAddress(it) }
+-    internal fun findNewAddr() = findNewAddr(environment.state.isInsideStaticInitializer).also { touchAddress(it) }
++    fun findNewAddr() = findNewAddr(environment.state.isInsideStaticInitializer).also { touchAddress(it) }
  
 -    private val dynamicInvokeResolver: DynamicInvokeResolver = DelegatingDynamicInvokeResolver()
 +    protected val dynamicInvokeResolver: DynamicInvokeResolver = DelegatingDynamicInvokeResolver()
@@ -118,6 +121,15 @@ index 3ae7ca31..dff5ad5d 100644
          val type = extractParameterizedType(method, parameterIndex) as? ParameterizedType ?: return
  
          updateGenericTypeInfo(type, value)
+@@ -1616,7 +1616,7 @@ class Traverser(
+             else -> TODO("$expr")
+         }
+ 
+-    private fun initStringLiteral(stringWrapper: ObjectValue, value: String) {
++    fun initStringLiteral(stringWrapper: ObjectValue, value: String) {
+         val typeStorage = TypeStorage.constructTypeStorageWithSingleType(utStringClass.type)
+ 
+         queuedSymbolicStateUpdates += objectUpdate(
 @@ -1930,7 +1930,7 @@ class Traverser(
      // Type is needed for null values: we should know, which null do we require.
      // If valueType is NullType, return typelessNullObject. It can happen in a situation,
@@ -497,6 +509,18 @@ index 10a9138a..f47ec562 100644
      // We should compare FQNs instead of `if (... is UtMockAssumptionViolatedException)`
      // because the exception from the `concreteExecutionResult` is loaded by user's ClassLoader,
      // but the `UtMockAssumptionViolatedException` is loaded by the current ClassLoader,
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/pc/UtSolver.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/pc/UtSolver.kt
+index 12976361..e008a8db 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/engine/pc/UtSolver.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/engine/pc/UtSolver.kt
+@@ -302,6 +302,7 @@ data class UtSolver constructor(
+                 }
+                 else -> {
+                     logger.debug { "Reason of UNKNOWN: ${z3Solver.reasonUnknown}" }
++                    println("z3 Reason of UNKNOWN: ${z3Solver.reasonUnknown}")
+                     if (translatedSoft.isEmpty()) {
+                         logger.debug { "No soft constraints left, return UNKNOWN" }
+                         logger.trace { "Constraints lead to unknown: ${z3Solver.assertions.joinToString("\n")} " }
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt
 index 5516d548..4a67f166 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt
@@ -535,6 +559,96 @@ index e7c5e47d..31e92729 100644
      get() = Scene.v().getSootClass(String::class.java.canonicalName).type
  internal val STRING_BUILDER_TYPE: RefType
      get() = Scene.v().getSootClass(java.lang.StringBuilder::class.java.canonicalName).type
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/CodeGenerator.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/CodeGenerator.kt
+index 1ac8de60..be6d5490 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/CodeGenerator.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/CodeGenerator.kt
+@@ -41,7 +41,7 @@ open class CodeGenerator(
+     testClassPackageName: String = classUnderTest.packageName,
+ ) {
+ 
+-    private val logger = KotlinLogging.logger {}
++    protected val logger = KotlinLogging.logger {}
+ 
+     open var context: CgContext = CgContext(
+         classUnderTest = classUnderTest,
+@@ -66,7 +66,7 @@ open class CodeGenerator(
+         generateAsStringWithTestReport(testSets, testClassCustomName).generatedCode
+ 
+     //TODO: we support custom test class name only in utbot-online, probably support them in plugin as well
+-    fun generateAsStringWithTestReport(
++    open fun generateAsStringWithTestReport(
+         testSets: Collection<UtMethodTestSet>,
+         testClassCustomName: String? = null,
+     ): CodeGeneratorResult {
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/Domain.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/Domain.kt
+index 98579b5d..20be8d1a 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/Domain.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/Domain.kt
+@@ -662,3 +662,10 @@ enum class ParametrizedTestSource(
+         override val allItems: List<ParametrizedTestSource> = values().toList()
+     }
+ }
++
++object CyberOk {    // TODO(replace)
++    val vulnerability = BuiltinClassId(
++        canonicalName = "org.cyber.utils.VulnerabilityInfo",
++        simpleName = "VulnerabilityInfo"
++    )
++}
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
+index 602aedd1..93d1a93e 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
+@@ -265,7 +265,7 @@ sealed class CgMethod(open val isStatic: Boolean) : CgElement {
+     abstract val parameters: List<CgParameterDeclaration>
+     abstract val statements: List<CgStatement>
+     abstract val exceptions: Set<ClassId>
+-    abstract val annotations: List<CgAnnotation>
++    abstract var annotations: List<CgAnnotation>
+     abstract val documentation: CgDocumentationComment
+     abstract val requiredFields: List<CgParameterDeclaration>
+ }
+@@ -276,7 +276,7 @@ class CgTestMethod(
+     override val parameters: List<CgParameterDeclaration>,
+     override val statements: List<CgStatement>,
+     override val exceptions: Set<ClassId>,
+-    override val annotations: List<CgAnnotation>,
++    override var annotations: List<CgAnnotation>,
+     val type: CgTestMethodType,
+     override val documentation: CgDocumentationComment = CgDocumentationComment(emptyList()),
+     override val requiredFields: List<CgParameterDeclaration> = emptyList(),
+@@ -290,7 +290,7 @@ class CgErrorTestMethod(
+     override val exceptions: Set<ClassId> = emptySet()
+     override val returnType: ClassId = voidClassId
+     override val parameters: List<CgParameterDeclaration> = emptyList()
+-    override val annotations: List<CgAnnotation> = emptyList()
++    override var annotations: List<CgAnnotation> = emptyList()
+     override val requiredFields: List<CgParameterDeclaration> = emptyList()
+ }
+ 
+@@ -298,7 +298,7 @@ class CgParameterizedTestDataProviderMethod(
+     override val name: String,
+     override val statements: List<CgStatement>,
+     override val returnType: ClassId,
+-    override val annotations: List<CgAnnotation>,
++    override var annotations: List<CgAnnotation>,
+     override val exceptions: Set<ClassId>,
+ ) : CgMethod(isStatic = true) {
+     override val parameters: List<CgParameterDeclaration> = emptyList()
+diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt
+index 6df90f71..7b318f96 100644
+--- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt
++++ b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt
+@@ -120,7 +120,7 @@ sealed class UtilClassKind(
+          * @return `null` if [CgContext.utilMethodProvider] is not [UtilClassFileMethodProvider],
+          * because it means that util methods will be taken from some other provider (e.g. [TestClassUtilMethodProvider]).
+          */
+-        internal fun fromCgContextOrNull(context: CgContext): UtilClassKind? {
++        fun fromCgContextOrNull(context: CgContext): UtilClassKind? {
+             if (context.requiredUtilMethods.isEmpty()) return null
+             if (!context.mockFrameworkUsed) {
+                 return RegularUtUtils(context.codegenLanguage)
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
 index c86c96e2..20d0fd5e 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt

@@ -16,6 +16,7 @@ import org.utbot.engine.symbolic.SymbolicStateUpdate
 import org.utbot.engine.symbolic.asAssumption
 import org.utbot.engine.symbolic.asHardConstraint
 import org.utbot.engine.symbolic.asSoftConstraint
+import org.utbot.engine.types.STRING_TYPE
 import org.utbot.engine.types.TypeRegistry
 import org.utbot.engine.types.TypeResolver
 import org.utbot.framework.UtSettings
@@ -181,20 +182,14 @@ class CyberTraverser(
 
         @CyberNew("check invoke conditions") run {
             val sootClass = Scene.v().getSootClass("org.cyber.utils.Utils")
-            val vulnerabilityAssert = sootClass.getMethod("vulnerabilityAssertByMsg", listOf()) //STRING_TYPE
+            val vulnerabilityAssert = sootClass.getMethod("vulnerabilityAssertByMsg", listOf(STRING_TYPE))
 
-            invokeStateUpdate?.forEach { vulnerability ->
-                // TODO(add assert with msg later)
-//            val argList = ArrayList<Value>()
-//            val vulnerabilityAssertExpr = Jimple.v().newStaticInvokeExpr(vulnerabilityAssert.makeRef(), argList)
-//            val state = updateQueued(
-//                Edge(environment.state.stmt, JInvokeStmt(vulnerabilityAssertExpr), 0),
-//                invokeStateUpdate
-//            )
-                logger.debug { vulnerability.description }
+            invokeStateUpdate?.forEach { vulnerability ->    // TODO(not work for forEach, add vulnerability, add description)
                 val graph = ExceptionalUnitGraph(vulnerabilityAssert.activeBody)
                 val constraints = setOf(mkOr(vulnerability.constraints.toList()))
-                pushToPathSelector(graph, null, listOf(), constraints=constraints)
+                pushToPathSelector(graph, null, listOf(objectValue(STRING_TYPE, findNewAddr(), StringWrapper())
+                    .also { initStringLiteral(it, vulnerability.description ?: "") }), constraints=constraints)
+//                pushToPathSelector(graph, null, listOf(objectValue(STRING_TYPE, findNewAddr(), CyberConcreteSimpleWrapper(vulnerability.description))), constraints=constraints)
             }
         }
 

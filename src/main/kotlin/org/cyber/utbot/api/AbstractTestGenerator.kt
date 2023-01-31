@@ -1,5 +1,6 @@
 package org.cyber.utbot.api
 
+import org.cyber.utbot.api.utils.overrides.CyberCodeGenerator
 import org.cyber.utbot.api.utils.overrides.CyberTestCaseGenerator
 import org.cyber.utbot.api.utils.viewers.StatePublisher
 import org.cyber.utbot.api.utils.viewers.UTBotViewers
@@ -90,7 +91,7 @@ abstract class AbstractTestGenerator {
     private fun initializeCodeGenerator(classUnderTest: ClassId): CodeGenerator {
         val generateWarningsForStaticMocking =
             forceStaticMocking == ForceStaticMocking.FORCE && staticsMocking is NoStaticMocking
-        return CodeGenerator(
+        return CyberCodeGenerator(
             testFramework = testFramework,
             classUnderTest = classUnderTest,
             codegenLanguage = codegenLanguage,
