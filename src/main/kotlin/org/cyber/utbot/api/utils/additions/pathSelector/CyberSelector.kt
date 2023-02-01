@@ -29,9 +29,10 @@ class CyberSelector(
     private val proguardExecutor: ProguardExecutor = ProguardExecutor(jarName)
     private val traceMapper = TraceMapper()
     private val classPool: ClassPool = ClassPool.getDefault()
+    private var traceFound = false
 
     init {
-        classPool.insertClassPath("C:\\Users\\lesya\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\jars\\JarTemp.jar")
+        classPool.insertClassPath("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\jars\\TempJar.jar")
         proguardExecutor.execute()
     }
 
@@ -44,21 +45,59 @@ class CyberSelector(
         if (executionStates.size == 0) {
             return null
         }
+        // take each execution state, take first that has a trace mapping (this one will be returned)
+        // remove it from states. if no state leads to a trace return null
+        executionStates.forEachIndexed { i, stmt ->
+            if (mapStmt(stmt)) {
+                currentIndex = i
+                (choosingStrategy as CyberStrategy).drop = false
+                println("PEEK!")
+                return stmt
+            }
+        }
+        // random state peek
         if (currentIndex == -1) {
             currentIndex = random.nextInt(executionStates.size)
         }
-        return executionStates[currentIndex]
+        if (!traceFound || executionStates.size == 1) return executionStates[currentIndex]
+        else {
+            println("PEEK FAILED")
+            (choosingStrategy as CyberStrategy).drop = true
+            traceFound = false
+            return null
+        }
     }
 
     override fun pollImpl(): ExecutionState? {
         if (executionStates.size == 0) {
             return null
         }
+        // take each execution state, take first that has a trace mapping (this one will be returned)
+        // remove it from states. if no state leads to a trace return null
+        executionStates.forEachIndexed { i, stmt ->
+            if (mapStmt(stmt)) {
+                executionStates.removeAt(i)
+                currentIndex = -1
+                println("POLL!")
+                traceFound = true
+                (choosingStrategy as CyberStrategy).drop = false
+                return stmt
+            }
+        }
+        if (!traceFound || executionStates.size == 1) return randomState()
+        else {
+            println("POLL FAILED")
+            (choosingStrategy as CyberStrategy).drop = true
+            traceFound = false
+            return null
+        }
+    }
+
+    private fun randomState(): ExecutionState {
         if (currentIndex == -1) {
             currentIndex = random.nextInt(executionStates.size)
         }
         val state = executionStates[currentIndex]
-        val map = mapTraces(state)
         executionStates.removeAt(currentIndex)
         currentIndex = -1
         return state
@@ -85,6 +124,17 @@ class CyberSelector(
         val declaringClass = jimpleBody.method.declaringClass.name
         // todo: this will only work in a single class, add inter-class analysis
         val cf = classPool.get(declaringClass).classFile
-        return traceMapper.map(proguardExecutor.traces.random(), jimpleBody.units, cf)
+        return traceMapper.map(proguardExecutor.traces.random(), jimpleBody.units, cf) // todo map each trace
+    }
+    private fun mapStmt(state: ExecutionState): Boolean {
+        if (state.stmt.javaSourceStartLineNumber == -1) return true
+        val jimpleBody = graph.method(state.stmt).jimpleBody()
+        val declaringClass = jimpleBody.method.declaringClass.name
+        // todo: this will only work in a single class, add inter-class analysis
+        val cf = classPool.get(declaringClass).classFile
+        proguardExecutor.traces.forEach {
+            if (traceMapper.map(it, state.stmt, cf)) return true
+        }
+        return false
     }
 }

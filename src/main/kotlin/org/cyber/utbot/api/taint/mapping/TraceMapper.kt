@@ -5,6 +5,7 @@ import javassist.bytecode.MethodInfo
 import proguard.analysis.cpa.jvm.domain.memory.BamLocationDependentJvmMemoryLocation
 import proguard.classfile.MethodSignature
 import soot.UnitPatchingChain
+import soot.jimple.Stmt
 
 class TraceMapper {
     fun map(
@@ -31,6 +32,27 @@ class TraceMapper {
             }
         }
         return instructionsMap
+    }
+
+    fun map(
+        traceArg: List<BamLocationDependentJvmMemoryLocation<*>>,
+        stmt: Stmt,
+        cf: ClassFile,
+    ): Boolean {
+        val trace = traceArg.reversed()
+        val methods = cf.methods
+        val className = cf.name.replace('.', '/')
+        trace.forEach { el ->
+            val programLocation = el.programLocation
+            val signature = programLocation.signature
+            val method = methodByDescriptor(methods, signature, className)
+            method?.let { met ->
+                val lineNumber = met.getLineNumber(programLocation.offset)
+                // if we found a corresponding jimple instruction for the current observed trace instruction
+                if (stmt.javaSourceStartLineNumber == lineNumber) return true
+            }
+        }
+        return false
     }
 
     private fun methodByDescriptor(

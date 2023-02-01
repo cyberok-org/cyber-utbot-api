@@ -27,4 +27,6 @@ class CyberSelectorBuilder internal constructor(
         "C:\\Users\\lesya\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\jars\\JarTemp.jar",
         graph
     )
+
+
 }

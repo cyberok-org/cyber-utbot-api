@@ -6,7 +6,7 @@ public class Temp {
     public static int foo(int x, int y) {
         int a = x;
         int b = 2;
-        if (x <= y) {
+        if (x < y) {
             vulnerable(a);
         } else {
             b = y;
@@ -14,8 +14,8 @@ public class Temp {
         return a * b;
     }
 
-    private static void vulnerable(int a) {
-        System.out.println("danger!" + a);
+    public static void vulnerable(int a) {
+        a += 12;
     }
 
     public static int bar() {

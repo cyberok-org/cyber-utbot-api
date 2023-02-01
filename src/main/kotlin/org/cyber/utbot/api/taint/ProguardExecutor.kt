@@ -52,9 +52,9 @@ class ProguardExecutor(private val jarName: String) {
             .setThreshold(TaintAbstractState.bottom)
             .build()
         traces = cpaRun.extractLinearTraces()
-        traces.forEach { t ->
-            println("\nNEW\n")
-            t.forEach { println(it.toString()) }
-        }
+//        traces.forEach { t ->
+//            println("\nNEW\n")
+//            t.forEach { println(it.toString()) }
+//        }
     }
 }

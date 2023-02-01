@@ -18,7 +18,7 @@ fun main() {
     val generator = TestGenerator(settings)
     val (tests, info) = generator.run(mapOf("org.testcases.temp.Temp" to "src/main/java/org/testcases/temp/Temp").toTestUnits())
 //    val (tests, info) = generator.run(mapOf("org.example.Vulnerability" to "src/main/java/org/testcases/vulnerability/Vulnerability").toTestUnits())
-//    val (tests, info) = generator.run(mapOf("org.example.Loop" to "src/main/java/org/example/Loop.java").toTestUnits())
+//    val (tests, info) = generator.run(mapOf("org.example.Interprocedural" to "src/main/java/org/example/Interprocedural.java").toTestUnits())
 //    val (tests, info) = generator.runBunch("build/classes/java/main", "org.example.dir")
 
     tests.forEach { nameAndTest ->
