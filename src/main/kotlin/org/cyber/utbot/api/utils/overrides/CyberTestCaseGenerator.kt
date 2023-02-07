@@ -3,6 +3,7 @@ import mu.KLogger
 import mu.KotlinLogging
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.viewers.StatePublisher
+import org.cyber.utbot.api.utils.vulnerability.VulnerabilityHolder
 import org.utbot.engine.EngineController
 import org.utbot.engine.UtBotSymbolicEngine
 import org.utbot.framework.plugin.api.*
@@ -18,7 +19,9 @@ open class CyberTestCaseGenerator(
     jdkInfo: JdkInfo,
     private val cyberPathSelector: Boolean,
     private val findVulnerabilities: Boolean,
-    private val statePublisher: StatePublisher
+    private val onlyVulnerabilities: Boolean,
+    private val statePublisher: StatePublisher,
+    private val vulnerabilityHolder: VulnerabilityHolder
 ) : TestCaseGenerator(buildDirs, classpath, dependencyPaths, jdkInfo) {
     private val logger: KLogger = KotlinLogging.logger {}
 
@@ -41,7 +44,9 @@ open class CyberTestCaseGenerator(
             solverTimeoutInMillis = executionTimeEstimator.updatedSolverCheckTimeoutMillis,
             cyberPathSelector,
             findVulnerabilities,
-            statePublisher = statePublisher
+            onlyVulnerabilities,
+            statePublisher = statePublisher,
+            vulnerabilityHolder = vulnerabilityHolder
         )
     }
 }

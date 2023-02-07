@@ -8,6 +8,7 @@ public class Temp {
         int b = 2;
         if (x < y) {
             vulnerable(a);
+            throw new ArithmeticException("...");
         } else {
             b = y;
         }
@@ -23,7 +24,7 @@ public class Temp {
     }
 
     public static void main(String[] args) {
-        Random r = new Random();
-        foo(bar(), r.nextInt());
+//        Random r = new Random();
+        foo(bar(), 12);
     }
 }

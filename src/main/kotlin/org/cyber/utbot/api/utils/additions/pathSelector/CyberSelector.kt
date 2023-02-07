@@ -51,7 +51,8 @@ class CyberSelector(
             if (mapStmt(stmt)) {
                 currentIndex = i
                 (choosingStrategy as CyberStrategy).drop = false
-                println("PEEK!")
+                println("PEEK SUCCESS!")
+                traceFound = true
                 return stmt
             }
         }
@@ -59,13 +60,11 @@ class CyberSelector(
         if (currentIndex == -1) {
             currentIndex = random.nextInt(executionStates.size)
         }
-        if (!traceFound || executionStates.size == 1) return executionStates[currentIndex]
-        else {
-            println("PEEK FAILED")
+        if (traceFound && executionStates.size > 1) {
+            println("PEEK FAILED!")
             (choosingStrategy as CyberStrategy).drop = true
-            traceFound = false
-            return null
         }
+        return executionStates[currentIndex]
     }
 
     override fun pollImpl(): ExecutionState? {
@@ -78,19 +77,17 @@ class CyberSelector(
             if (mapStmt(stmt)) {
                 executionStates.removeAt(i)
                 currentIndex = -1
-                println("POLL!")
-                traceFound = true
+                println("POLL SUCCESS!")
                 (choosingStrategy as CyberStrategy).drop = false
+                traceFound = true
                 return stmt
             }
         }
-        if (!traceFound || executionStates.size == 1) return randomState()
-        else {
-            println("POLL FAILED")
+        if (traceFound && executionStates.size > 1) {
+            println("POLL FAILED!")
             (choosingStrategy as CyberStrategy).drop = true
-            traceFound = false
-            return null
         }
+        return randomState()
     }
 
     private fun randomState(): ExecutionState {
@@ -133,7 +130,7 @@ class CyberSelector(
         // todo: this will only work in a single class, add inter-class analysis
         val cf = classPool.get(declaringClass).classFile
         proguardExecutor.traces.forEach {
-            if (traceMapper.map(it, state.stmt, cf)) return true
+            if (traceMapper.map(it, state.stmt, cf) || state.stmt.javaSourceStartLineNumber == 11 || declaringClass.contains("org.cyber.utils")) return true
         }
         return false
     }

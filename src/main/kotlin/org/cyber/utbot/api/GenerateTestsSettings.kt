@@ -107,13 +107,24 @@ class GenerateTestsSettings(
     /**
      * if false - just run utbot without extra analyze   // TODO(remove later)
      */
-    val findVulnerabilities: Boolean = true
+    val findVulnerabilities: Boolean = true,
+
+    /**
+     * list of directories with files of the form VulnerabilityStandard for the description of analyzed vulnerabilities
+     */
+    val vulnerabilityCheckDirectories: List<String> = listOf("src/exploitBase/funcs"),
+
+    /**
+     * generate tests only for vulnerabilities if true
+     */
+    val onlyVulnerabilities: Boolean = true
 ) {
     init {  // check is settings correct
         mockAlways.forEach { fullyQualifiedName ->
             Class.forName(fullyQualifiedName, false, ClassLoader.getSystemClassLoader())
         }
         assert(generationTimeout > 0) { "GenerateTestsSettings.generationTimeout should be more then 0" }
+        UtSettings.checkSolverTimeoutMillis = 0   // disabled z3 timeout
         withUtSettings(UtSettings)
     }
 }

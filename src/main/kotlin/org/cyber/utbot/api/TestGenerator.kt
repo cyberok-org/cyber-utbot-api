@@ -40,6 +40,8 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val utbotViewers: Set<UTBotViewers> = settings.utbotViewers
     override val cyberPathSelector: Boolean = settings.cyberPathSelector
     override val findVulnerabilities: Boolean = settings.findVulnerabilities
+    override val vulnerabilityCheckDirectories: List<String> = settings.vulnerabilityCheckDirectories
+    override val onlyVulnerabilities: Boolean = settings.onlyVulnerabilities
 
     private val logger = KotlinLogging.logger {}
 

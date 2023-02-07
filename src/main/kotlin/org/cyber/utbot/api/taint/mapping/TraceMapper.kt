@@ -42,6 +42,7 @@ class TraceMapper {
         val trace = traceArg.reversed()
         val methods = cf.methods
         val className = cf.name.replace('.', '/')
+        val l = mutableListOf<String>()
         trace.forEach { el ->
             val programLocation = el.programLocation
             val signature = programLocation.signature

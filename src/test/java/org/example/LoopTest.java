@@ -2,30 +2,30 @@ package org.example;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+
+import static org.testng.AssertJUnit.assertEquals;
 
 public final class LoopTest {
-    ///region Test suites for executable org.example.Loop.fun2
-    
-    ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method fun2(int)
-    
+
+    ///region Test suites for executable org.example.Loop.whileLoop
+
+    ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method whileLoop(int)
+
     /**
     @utbot.classUnderTest {@link Loop}
- * @utbot.methodUnderTest {@link org.example.Loop#fun2(int)}
+ * @utbot.methodUnderTest {@link org.example.Loop#whileLoop(int)}
+ * @utbot.executesCondition {@code (k >= 0): True}
+ * @utbot.invokes org.example.Loop#fun2(int)
  *  */
     @Test
-    @DisplayName("fun2: ")
-    public void testFun2() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException  {
+    @DisplayName("whileLoop: k >= 0 : True -> LoopFun2")
+    @org.cyber.utils.VulnerabilityInfo("testWhileLoop_KGreaterOrEqualZero")
+    public void testWhileLoop_KGreaterOrEqualZero() {
         Loop loop = new Loop();
-        
-        Class loopClazz = Class.forName("org.example.Loop");
-        Class intType = int.class;
-        Method fun2Method = loopClazz.getDeclaredMethod("fun2", intType);
-        fun2Method.setAccessible(true);
-        java.lang.Object[] fun2MethodArguments = new java.lang.Object[1];
-        fun2MethodArguments[0] = -255;
-        fun2Method.invoke(loop, fun2MethodArguments);
+
+        int actual = loop.whileLoop(0);
+
+        assertEquals(0, actual);
     }
     ///endregion
     

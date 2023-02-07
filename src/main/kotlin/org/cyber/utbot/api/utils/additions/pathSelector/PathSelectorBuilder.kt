@@ -2,6 +2,8 @@ package org.cyber.utbot.api.utils.additions.pathSelector
 
 import org.utbot.engine.InterProceduralUnitGraph
 import org.utbot.engine.selectors.*
+import org.utbot.engine.selectors.strategies.ChoosingStrategy
+import org.utbot.engine.selectors.strategies.SubpathStatistics
 import org.utbot.framework.UtSettings
 
 
@@ -21,12 +23,10 @@ class CyberSelectorBuilder internal constructor(
 ) : PathSelectorBuilder<CyberSelector>(graph, context) {
     var seed: Int = UtSettings.seedInPathSelector ?: 42
     override fun build() = CyberSelector(
-        withChoosingStrategy(strategy),
+        CyberStrategy(graph),
         requireNotNull(context.stoppingStrategy) { "StoppingStrategy isn't specified" },
         seed,
         "C:\\Users\\lesya\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\jars\\JarTemp.jar",
         graph
     )
-
-
 }
