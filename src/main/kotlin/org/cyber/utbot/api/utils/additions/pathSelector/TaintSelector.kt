@@ -2,8 +2,6 @@ package org.cyber.utbot.api.utils.additions.pathSelector
 
 import javassist.ClassPool
 import org.cyber.utbot.api.taint.ProguardExecutor
-import org.cyber.utbot.api.taint.mapping.JimpleInstruction
-import org.cyber.utbot.api.taint.mapping.ProguardInstruction
 import org.cyber.utbot.api.taint.mapping.TraceMapper
 import org.utbot.engine.InterProceduralUnitGraph
 import org.utbot.engine.jimpleBody
@@ -14,22 +12,22 @@ import org.utbot.engine.state.ExecutionState
 import kotlin.random.Random
 
 
-class CyberSelector(
+internal class CyberTaintSelector(
     choosingStrategy: ChoosingStrategy,
     stoppingStrategy: StoppingStrategy,
-    seed: Int = 42,
     jarName: String,
     private val graph: InterProceduralUnitGraph
-) :
-    BasePathSelector(choosingStrategy, stoppingStrategy) {
+) : BasePathSelector(choosingStrategy, stoppingStrategy) {
 
     private val executionStates = mutableListOf<ExecutionState>()
-    private val random = Random(seed)
+    private val random = Random(42)
     private var currentIndex = -1
     private val proguardExecutor: ProguardExecutor = ProguardExecutor(jarName)
     private val traceMapper = TraceMapper()
     private val classPool: ClassPool = ClassPool.getDefault()
     private var traceFound = false
+
+    override val name = "CyberTaintSelector"
 
     init {
         classPool.insertClassPath("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\jars\\TempJar.jar")
@@ -114,15 +112,12 @@ class CyberSelector(
     override fun isEmpty() =
         executionStates.isEmpty()
 
-    override val name = "CyberSelector"
-
-    private fun mapTraces(state: ExecutionState): MutableMap<ProguardInstruction, JimpleInstruction> {
-        val jimpleBody = graph.method(state.stmt).jimpleBody()
-        val declaringClass = jimpleBody.method.declaringClass.name
-        // todo: this will only work in a single class, add inter-class analysis
-        val cf = classPool.get(declaringClass).classFile
-        return traceMapper.map(proguardExecutor.traces.random(), jimpleBody.units, cf) // todo map each trace
+    fun setExecutionStates(states: MutableList<ExecutionState>) {
+        executionStates.addAll(states)
     }
+
+    fun executionStates() = executionStates
+
     private fun mapStmt(state: ExecutionState): Boolean {
         if (state.stmt.javaSourceStartLineNumber == -1) return true
         val jimpleBody = graph.method(state.stmt).jimpleBody()
