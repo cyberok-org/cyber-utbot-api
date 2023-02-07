@@ -2,9 +2,6 @@ package org.cyber.utbot.api.utils.additions.pathSelector
 
 import org.utbot.engine.InterProceduralUnitGraph
 import org.utbot.engine.selectors.*
-import org.utbot.engine.selectors.strategies.ChoosingStrategy
-import org.utbot.engine.selectors.strategies.SubpathStatistics
-import org.utbot.framework.UtSettings
 
 
 // utbot-framework/src/main/kotlin/org/utbot/engine/selectors/PathSelectorBuilder.kt
@@ -21,11 +18,9 @@ class CyberSelectorBuilder internal constructor(
     val strategy: StrategyOption,
     context: PathSelectorContext = PathSelectorContext(graph)
 ) : PathSelectorBuilder<CyberSelector>(graph, context) {
-    var seed: Int = UtSettings.seedInPathSelector ?: 42
     override fun build() = CyberSelector(
-        CyberStrategy(graph),
+        CyberStrategy(graph), // choosing strategy
         requireNotNull(context.stoppingStrategy) { "StoppingStrategy isn't specified" },
-        seed,
         "C:\\Users\\lesya\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\jars\\JarTemp.jar",
         graph
     )

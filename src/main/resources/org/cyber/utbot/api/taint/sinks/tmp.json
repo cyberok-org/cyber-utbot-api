@@ -1,0 +1,8 @@
+{
+  "containingClass": "Lorg/testcases/temp/Temp;",
+  "signature": "vulnerable(I)V",
+  "description": "tmp",
+  "takesInstance": "false",
+  "takesArgs": [1],
+  "takesGlobals": []
+}

@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import org.cyber.utbot.api.utils.additions.pathSelector.CyberSelector
 import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
@@ -16,6 +17,7 @@ import org.utbot.common.debug
 import org.utbot.engine.*
 import org.utbot.engine.pc.UtSolver
 import org.utbot.engine.pc.UtSolverStatusSAT
+import org.utbot.engine.selectors.PathSelector
 import org.utbot.engine.selectors.StrategyOption
 import org.utbot.engine.selectors.nurs.NonUniformRandomSearch
 import org.utbot.engine.selectors.pollUntilFastSAT
@@ -46,11 +48,16 @@ class CyberUtBotSymbolicEngine(
     private val statePublisher: StatePublisher = StatePublisher(),
     vulnerabilityHolder: VulnerabilityHolder = VulnerabilityHolder(),
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
+
+    override lateinit var pathSelector: PathSelector
+
     init {  // set our selector
-        if (cyberPathSelector) {
-            pathSelector = cyberPathSelector(globalGraph, StrategyOption.DISTANCE) {
+        pathSelector = if (cyberPathSelector) {
+            cyberPathSelector(globalGraph, StrategyOption.DISTANCE) {
                 withStepsLimit(UtSettings.pathSelectorStepsLimit)
             }
+        } else {
+            pathSelector(globalGraph, typeRegistry)
         }
         if (findVulnerabilities) {
             traverser = CyberTraverser(
@@ -80,6 +87,9 @@ class CyberUtBotSymbolicEngine(
         )
 
         pathSelector.offer(initState)
+
+        @CyberNew("inform selector about the start of a new selection iteration")
+        if (pathSelector is CyberSelector) (pathSelector as CyberSelector).setNextIteration(true)
 
         pathSelector.use {
 
@@ -242,7 +252,8 @@ class CyberUtBotSymbolicEngine(
 
         val symbolicExecutionResult = resolver.resolveResult(symbolicResult)
 
-        @CyberNew("filter emit flag") val needEmit = !onlyVulnerabilities || isVulnerability(symbolicExecutionResult)
+        @CyberNew("filter emit flag")
+        val needEmit = !onlyVulnerabilities || isVulnerability(symbolicExecutionResult)
 
         val stateBefore = modelsBefore.constructStateForMethod(methodUnderTest)
         val stateAfter = modelsAfter.constructStateForMethod(methodUnderTest)

@@ -1,0 +1,9 @@
+{
+  "containingClass": "Lorg/testcases/temp/Temp;",
+  "signature": "bar()I",
+  "description": "tmp",
+  "taintsThis": "false",
+  "taintsReturn": "true",
+  "taintsArgs": [],
+  "taintsGlobals": []
+}

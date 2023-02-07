@@ -117,7 +117,7 @@ class GenerateTestsSettings(
     /**
      * generate tests only for vulnerabilities if true
      */
-    val onlyVulnerabilities: Boolean = true
+    val onlyVulnerabilities: Boolean = false
 ) {
     init {  // check is settings correct
         mockAlways.forEach { fullyQualifiedName ->

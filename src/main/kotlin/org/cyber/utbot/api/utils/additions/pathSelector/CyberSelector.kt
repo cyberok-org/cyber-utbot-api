@@ -9,10 +9,9 @@ import org.utbot.engine.selectors.BasePathSelector
 import org.utbot.engine.selectors.strategies.ChoosingStrategy
 import org.utbot.engine.selectors.strategies.StoppingStrategy
 import org.utbot.engine.state.ExecutionState
-import kotlin.random.Random
 
 
-internal class CyberTaintSelector(
+class CyberSelector(
     choosingStrategy: ChoosingStrategy,
     stoppingStrategy: StoppingStrategy,
     jarName: String,
@@ -20,12 +19,13 @@ internal class CyberTaintSelector(
 ) : BasePathSelector(choosingStrategy, stoppingStrategy) {
 
     private val executionStates = mutableListOf<ExecutionState>()
-    private val random = Random(42)
     private var currentIndex = -1
     private val proguardExecutor: ProguardExecutor = ProguardExecutor(jarName)
     private val traceMapper = TraceMapper()
     private val classPool: ClassPool = ClassPool.getDefault()
     private var traceFound = false
+    private var nextIteration = true
+    private val defaultSelector = CyberDefaultSelector()
 
     override val name = "CyberTaintSelector"
 
@@ -54,15 +54,14 @@ internal class CyberTaintSelector(
                 return stmt
             }
         }
-        // random state peek
-        if (currentIndex == -1) {
-            currentIndex = random.nextInt(executionStates.size)
-        }
         if (traceFound && executionStates.size > 1) {
             println("PEEK FAILED!")
             (choosingStrategy as CyberStrategy).drop = true
         }
-        return executionStates[currentIndex]
+        // random state peek
+        val (state, idx) = defaultSelector.peekImpl(executionStates, currentIndex)
+        currentIndex = idx
+        return state
     }
 
     override fun pollImpl(): ExecutionState? {
@@ -85,16 +84,8 @@ internal class CyberTaintSelector(
             println("POLL FAILED!")
             (choosingStrategy as CyberStrategy).drop = true
         }
-        return randomState()
-    }
-
-    private fun randomState(): ExecutionState {
-        if (currentIndex == -1) {
-            currentIndex = random.nextInt(executionStates.size)
-        }
-        val state = executionStates[currentIndex]
-        executionStates.removeAt(currentIndex)
-        currentIndex = -1
+        val (state, idx) = defaultSelector.pollImpl(executionStates, currentIndex)
+        currentIndex = idx
         return state
     }
 
@@ -112,11 +103,12 @@ internal class CyberTaintSelector(
     override fun isEmpty() =
         executionStates.isEmpty()
 
-    fun setExecutionStates(states: MutableList<ExecutionState>) {
-        executionStates.addAll(states)
+    fun setNextIteration(value: Boolean) {
+        nextIteration = value
+        if (value) {
+            // todo clear and stuff
+        }
     }
-
-    fun executionStates() = executionStates
 
     private fun mapStmt(state: ExecutionState): Boolean {
         if (state.stmt.javaSourceStartLineNumber == -1) return true
