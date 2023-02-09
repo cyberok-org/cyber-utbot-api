@@ -27,12 +27,12 @@ class CyberSelector(
     private var traceFound = false
     private val defaultSelector = CyberDefaultSelector()
     private val statesContainer = StatesContainer()
+    private var nextIterationStarted = false
 
     override val name = "CyberTaintSelector"
 
     init {
         classPool.insertClassPath("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\jars\\TempJar.jar")
-        proguardExecutor.execute()
     }
 
     override fun offerImpl(state: ExecutionState) {
@@ -47,7 +47,7 @@ class CyberSelector(
         // take each execution state, take first that has a trace mapping (this one will be returned)
         // remove it from states. if no state leads to a trace return null
         executionStates.forEachIndexed { i, stmt ->
-            if (mapStmt(stmt)) {
+            if (mapState(stmt)) {
                 currentIndex = i
                 (choosingStrategy as CyberStrategy).drop = false
                 return stmt
@@ -68,12 +68,15 @@ class CyberSelector(
         }
         // take each execution state, take first that has a trace mapping (this one will be returned)
         // remove it from states. if no state leads to a trace return null
-        executionStates.forEachIndexed { i, stmt ->
-            if (mapStmt(stmt)) {
+        executionStates.forEachIndexed { i, state ->
+            if (state.stmt.javaSourceStartLineNumber == -1) {
+                return state
+            }
+            if (mapState(state)) {
                 executionStates.removeAt(i)
                 currentIndex = -1
                 (choosingStrategy as CyberStrategy).drop = false
-                return stmt
+                return state
             }
         }
         if (traceFound && executionStates.size > 1) {
@@ -99,12 +102,17 @@ class CyberSelector(
     fun onNextIteration() {
         traceFound = false
         statesContainer.states.clear()
+        nextIterationStarted = true
     }
 
-    private fun mapStmt(state: ExecutionState): Boolean {
-        if (state.stmt.javaSourceStartLineNumber == -1) return true // NO
+    private fun mapState(state: ExecutionState): Boolean {
         if (statesContainer.states[state.stmt]?.isNotEmpty() == true) return true
         val jimpleBody = graph.method(state.stmt).jimpleBody()
+        if (nextIterationStarted) { // set ProguardExecutor's head method to the one under analysis
+            nextIterationStarted = false
+            proguardExecutor.setHeadMethodSignature(jimpleBody.method)
+            proguardExecutor.execute()
+        }
         val declaringClass = jimpleBody.method.declaringClass.name
         if (declaringClass.contains("org.cyber.utils")) return true // пока костыль
         // todo: this will only work in a single class, add inter-class analysis
