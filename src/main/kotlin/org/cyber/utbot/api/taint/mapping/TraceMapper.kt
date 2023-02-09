@@ -8,31 +8,6 @@ import soot.UnitPatchingChain
 import soot.jimple.Stmt
 
 class TraceMapper {
-    fun map(
-        traceArg: List<BamLocationDependentJvmMemoryLocation<*>>,
-        jimpleUnits: UnitPatchingChain,
-        cf: ClassFile,
-    ): MutableMap<ProguardInstruction, JimpleInstruction> {
-        val trace = traceArg.reversed()
-        val methods = cf.methods
-        val className = cf.name.replace('.', '/')
-        val instructionsMap = mutableMapOf<ProguardInstruction, JimpleInstruction>()
-        trace.forEach { el ->
-            val programLocation = el.programLocation
-            val signature = programLocation.signature
-            val method = methodByDescriptor(methods, signature, className)
-            method?.let { met ->
-                val lineNumber = met.getLineNumber(programLocation.offset)
-                val unit = jimpleUnits.find { it.javaSourceStartLineNumber == lineNumber }
-                unit?.let {
-                    val proguardInstruction = ProguardInstruction(lineNumber, programLocation)
-                    val jimpleInstruction = JimpleInstruction(lineNumber, it)
-                    instructionsMap[proguardInstruction] = jimpleInstruction
-                }
-            }
-        }
-        return instructionsMap
-    }
 
     fun map(
         traceArg: List<BamLocationDependentJvmMemoryLocation<*>>,

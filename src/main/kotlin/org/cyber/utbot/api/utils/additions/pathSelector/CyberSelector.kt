@@ -2,6 +2,7 @@ package org.cyber.utbot.api.utils.additions.pathSelector
 
 import javassist.ClassPool
 import org.cyber.utbot.api.taint.ProguardExecutor
+import org.cyber.utbot.api.taint.mapping.StatesContainer
 import org.cyber.utbot.api.taint.mapping.TraceMapper
 import org.utbot.engine.InterProceduralUnitGraph
 import org.utbot.engine.jimpleBody
@@ -24,8 +25,8 @@ class CyberSelector(
     private val traceMapper = TraceMapper()
     private val classPool: ClassPool = ClassPool.getDefault()
     private var traceFound = false
-    private var nextIteration = true
     private val defaultSelector = CyberDefaultSelector()
+    private val statesContainer = StatesContainer()
 
     override val name = "CyberTaintSelector"
 
@@ -49,13 +50,10 @@ class CyberSelector(
             if (mapStmt(stmt)) {
                 currentIndex = i
                 (choosingStrategy as CyberStrategy).drop = false
-                println("PEEK SUCCESS!")
-                traceFound = true
                 return stmt
             }
         }
         if (traceFound && executionStates.size > 1) {
-            println("PEEK FAILED!")
             (choosingStrategy as CyberStrategy).drop = true
         }
         // random state peek
@@ -74,14 +72,11 @@ class CyberSelector(
             if (mapStmt(stmt)) {
                 executionStates.removeAt(i)
                 currentIndex = -1
-                println("POLL SUCCESS!")
                 (choosingStrategy as CyberStrategy).drop = false
-                traceFound = true
                 return stmt
             }
         }
         if (traceFound && executionStates.size > 1) {
-            println("POLL FAILED!")
             (choosingStrategy as CyberStrategy).drop = true
         }
         val (state, idx) = defaultSelector.pollImpl(executionStates, currentIndex)
@@ -94,30 +89,37 @@ class CyberSelector(
         return executionStates.remove(state)
     }
 
-    override fun close() {
+    override fun close() =
         executionStates.forEach {
             it.close()
         }
-    }
 
-    override fun isEmpty() =
-        executionStates.isEmpty()
+    override fun isEmpty() = executionStates.isEmpty()
 
-    fun setNextIteration(value: Boolean) {
-        nextIteration = value
-        if (value) {
-            // todo clear and stuff
-        }
+    fun onNextIteration() {
+        traceFound = false
+        statesContainer.states.clear()
     }
 
     private fun mapStmt(state: ExecutionState): Boolean {
-        if (state.stmt.javaSourceStartLineNumber == -1) return true
+        if (state.stmt.javaSourceStartLineNumber == -1) return true // NO
+        if (statesContainer.states[state.stmt]?.isNotEmpty() == true) return true
         val jimpleBody = graph.method(state.stmt).jimpleBody()
         val declaringClass = jimpleBody.method.declaringClass.name
+        if (declaringClass.contains("org.cyber.utils")) return true // пока костыль
         // todo: this will only work in a single class, add inter-class analysis
         val cf = classPool.get(declaringClass).classFile
-        proguardExecutor.traces.forEach {
-            if (traceMapper.map(it, state.stmt, cf) || state.stmt.javaSourceStartLineNumber == 11 || declaringClass.contains("org.cyber.utils")) return true
+        val traces =
+            if (statesContainer.states[state.lastEdge?.src] == null) proguardExecutor.traces else statesContainer.states[state.lastEdge?.src]
+        traces?.forEach {
+            statesContainer.states.putIfAbsent(state.stmt, mutableSetOf())
+            if (traceMapper.map(it, state.stmt, cf)) {
+                statesContainer.states[state.stmt]?.add(it)
+            }
+        }
+        if (statesContainer.states[state.stmt]?.isNotEmpty() == true) {
+            traceFound = true
+            return true
         }
         return false
     }

@@ -22,7 +22,7 @@ class ProguardExecutor(private val jarName: String) {
         val sinks: MutableSet<JvmTaintSink> = parseSinks("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sinks")
         val cpaRun = JvmTaintMemoryLocationBamCpaRun.Builder().setCfa(cfa)
             // todo: replace with the method under analysis
-            .setMainSignature(MethodSignature("org/testcases/temp/Temp", "main", "([Ljava/lang/String;)V"))
+            .setMainSignature(MethodSignature("org/testcases/temp/Temp", "fooCaller", "()V"))
             .setTaintSources(sources)
             .setTaintSinks(sinks)
             .setMaxCallStackDepth(-1)

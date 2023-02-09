@@ -24,8 +24,4 @@ public class Temp {
     public void fooCaller() {
         foo(bar(), 12);
     }
-
-    public static void main(String[] args) {
-//        Random r = new Random();
-    }
 }

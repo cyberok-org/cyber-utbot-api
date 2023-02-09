@@ -89,7 +89,7 @@ class CyberUtBotSymbolicEngine(
         pathSelector.offer(initState)
 
         @CyberNew("inform selector about the start of a new selection iteration")
-        if (pathSelector is CyberSelector) (pathSelector as CyberSelector).setNextIteration(true)
+        if (pathSelector is CyberSelector) (pathSelector as CyberSelector).onNextIteration()
 
         pathSelector.use {
 
