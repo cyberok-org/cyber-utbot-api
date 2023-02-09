@@ -9,20 +9,20 @@ internal class CyberDefaultSelector {
     private val random = Random( UtSettings.seedInPathSelector ?: 42)
 
     fun peekImpl(executionStates: List<ExecutionState>, currentIndex: Int): Pair<ExecutionState, Int> {
-        var tmpCurrentIndex = -1
-        if (currentIndex == -1) {
+        var tmpCurrentIndex = currentIndex
+        if (tmpCurrentIndex == -1) {
             tmpCurrentIndex = random.nextInt(executionStates.size)
         }
         return executionStates[tmpCurrentIndex] to tmpCurrentIndex
     }
 
-    fun pollImpl(executionStates: MutableList<ExecutionState>, currentIndex: Int): Pair<ExecutionState, Int> {
-        var tmpCurrentIndex = -1
-        if (currentIndex == -1) {
+    fun pollImpl(executionStates: MutableList<ExecutionState>, currentIndex: Int): ExecutionState {
+        var tmpCurrentIndex = currentIndex
+        if (tmpCurrentIndex == -1) {
             tmpCurrentIndex = random.nextInt(executionStates.size)
         }
-        val state = executionStates[currentIndex]
+        val state = executionStates[tmpCurrentIndex]
         executionStates.removeAt(tmpCurrentIndex)
-        return state to -1
+        return state
     }
 }

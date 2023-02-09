@@ -10,6 +10,7 @@ import org.utbot.engine.selectors.BasePathSelector
 import org.utbot.engine.selectors.strategies.ChoosingStrategy
 import org.utbot.engine.selectors.strategies.StoppingStrategy
 import org.utbot.engine.state.ExecutionState
+import soot.jimple.Stmt
 
 
 class CyberSelector(
@@ -28,6 +29,7 @@ class CyberSelector(
     private val defaultSelector = CyberDefaultSelector()
     private val statesContainer = StatesContainer()
     private var nextIterationStarted = false
+    private var innerCallDestination: Stmt? = null
 
     override val name = "CyberTaintSelector"
 
@@ -68,22 +70,26 @@ class CyberSelector(
         }
         // take each execution state, take first that has a trace mapping (this one will be returned)
         // remove it from states. if no state leads to a trace return null
-        executionStates.forEachIndexed { i, state ->
-            if (state.stmt.javaSourceStartLineNumber == -1) {
-                return state
-            }
-            if (mapState(state)) {
-                executionStates.removeAt(i)
-                currentIndex = -1
-                (choosingStrategy as CyberStrategy).drop = false
-                return state
+        if (currentIndex == -1) {
+            executionStates.forEachIndexed { i, state ->
+                if (state.stmt.javaSourceStartLineNumber == -1) {
+                    executionStates.removeAt(i)
+                    statesContainer.states[state.lastEdge?.src]?.let { statesContainer.states.putIfAbsent(state.stmt, it) }
+                    return state
+                }
+                if (mapState(state)) {
+                    executionStates.removeAt(i)
+                    currentIndex = -1
+                    (choosingStrategy as CyberStrategy).drop = false
+                    return state
+                }
             }
         }
-        if (traceFound && executionStates.size > 1) {
+        if (traceFound && executionStates.size > 1 && currentIndex == -1) {
             (choosingStrategy as CyberStrategy).drop = true
         }
-        val (state, idx) = defaultSelector.pollImpl(executionStates, currentIndex)
-        currentIndex = idx
+        val state = defaultSelector.pollImpl(executionStates, currentIndex)
+        currentIndex = -1
         return state
     }
 
@@ -109,24 +115,44 @@ class CyberSelector(
         if (statesContainer.states[state.stmt]?.isNotEmpty() == true) return true
         val jimpleBody = graph.method(state.stmt).jimpleBody()
         if (nextIterationStarted) { // set ProguardExecutor's head method to the one under analysis
+            println("NOW IN ${jimpleBody.method.name}")
             nextIterationStarted = false
             proguardExecutor.setHeadMethodSignature(jimpleBody.method)
             proguardExecutor.execute()
+            if (proguardExecutor.traces.isEmpty()) (choosingStrategy as CyberStrategy).drop = true
         }
+        println(state.stmt)
         val declaringClass = jimpleBody.method.declaringClass.name
         if (declaringClass.contains("org.cyber.utils")) return true // пока костыль
         // todo: this will only work in a single class, add inter-class analysis
         val cf = classPool.get(declaringClass).classFile
+        val parentSrc = state.lastEdge?.src
         val traces =
-            if (statesContainer.states[state.lastEdge?.src] == null) proguardExecutor.traces else statesContainer.states[state.lastEdge?.src]
+            if (statesContainer.states[parentSrc] == null) proguardExecutor.traces else statesContainer.states[parentSrc]
         traces?.forEach {
             statesContainer.states.putIfAbsent(state.stmt, mutableSetOf())
             if (traceMapper.map(it, state.stmt, cf)) {
                 statesContainer.states[state.stmt]?.add(it)
             }
         }
+        if (state.stmt == innerCallDestination) {
+            println("here3")
+            innerCallDestination = null
+        }
         if (statesContainer.states[state.stmt]?.isNotEmpty() == true) {
             traceFound = true
+            return true
+        } else if ((parentSrc.toString().contains("virtualinvoke") ||
+                    parentSrc.toString().contains("staticinvoke"))
+            && parentSrc.toString().contains(jimpleBody.method.name)
+        ) {
+            println("here1")
+            innerCallDestination = parentSrc
+            statesContainer.states[parentSrc]?.let { statesContainer.states[state.stmt]?.addAll(it) } // plus putifabsent
+            return true
+        } else if (innerCallDestination != null) {
+            println("here2")
+            statesContainer.states[parentSrc]?.let { statesContainer.states[state.stmt]?.addAll(it) }
             return true
         }
         return false
