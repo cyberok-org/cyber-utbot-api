@@ -1,4 +1,4 @@
-package org.testcases.temp;
+package org.testcases.taint;
 
 public class Temp {
     public int foo(int x, int y) {

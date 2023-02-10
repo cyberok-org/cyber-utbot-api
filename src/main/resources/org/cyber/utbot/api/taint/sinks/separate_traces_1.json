@@ -1,0 +1,8 @@
+{
+  "containingClass": "Lorg/testcases/taint/SeparateTraces;",
+  "signature": "sink1(Ljava/lang/String;)V",
+  "description": "",
+  "takesInstance": "false",
+  "takesArgs": [1],
+  "takesGlobals": []
+}

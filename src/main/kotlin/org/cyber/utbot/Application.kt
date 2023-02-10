@@ -16,13 +16,13 @@ fun main() {
     val settings = GenerateTestsSettings("build/classes/java/main", codegenLanguage = CodegenLanguage.JAVA,
         withUtSettings = { useFuzzing = false; useDebugVisualization = true }, utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER))
     val generator = TestGenerator(settings)
-    val (tests, info) = generator.run(mapOf("org.testcases.temp.Temp" to "src/main/java/org/testcases/temp/Temp").toTestUnits())
+    val (tests, info) = generator.run(mapOf("org.testcases.taint.SeparateTraces" to "src/main/java/org/testcases/taint/SeparateTraces").toTestUnits())
 //    val (tests, info) = generator.run(mapOf("org.example.Vulnerability" to "src/main/java/org/testcases/vulnerability/Vulnerability").toTestUnits())
 //    val (tests, info) = generator.run(mapOf("org.example.Interprocedural" to "src/main/java/org/example/Interprocedural.java").toTestUnits())
 //    val (tests, info) = generator.runBunch("build/classes/java/main", "org.example.dir")
 
     tests.forEach { nameAndTest ->
-        Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
+        Files.write("src/test/java/org/example/taint/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
 //        println("name=${nameAndTest.key}\n\n${nameAndTest.value}\n")
     }
     printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)

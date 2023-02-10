@@ -1,6 +1,6 @@
 {
-  "containingClass": "Lorg/testcases/taint/Temp;",
-  "signature": "bar()I",
+  "containingClass": "Lorg/testcases/taint/SeparateTraces;",
+  "signature": "source1()Ljava/lang/String;",
   "description": "tmp",
   "taintsThis": "false",
   "taintsReturn": "true",

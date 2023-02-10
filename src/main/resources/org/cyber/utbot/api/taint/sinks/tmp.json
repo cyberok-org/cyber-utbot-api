@@ -1,5 +1,5 @@
 {
-  "containingClass": "Lorg/testcases/temp/Temp;",
+  "containingClass": "Lorg/testcases/taint/Temp;",
   "signature": "vulnerable(I)V",
   "description": "tmp",
   "takesInstance": "false",

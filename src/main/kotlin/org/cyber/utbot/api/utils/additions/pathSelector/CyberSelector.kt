@@ -34,7 +34,7 @@ class CyberSelector(
     override val name = "CyberTaintSelector"
 
     init {
-        classPool.insertClassPath("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\jars\\TempJar.jar")
+        classPool.insertClassPath("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\taint\\jars\\TempJar.jar")
     }
 
     override fun offerImpl(state: ExecutionState) {

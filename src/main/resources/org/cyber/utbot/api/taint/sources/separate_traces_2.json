@@ -1,6 +1,6 @@
 {
-  "containingClass": "Lorg/testcases/taint/Temp;",
-  "signature": "bar()I",
+  "containingClass": "Lorg/testcases/taint/SeparateTraces;",
+  "signature": "source2()I",
   "description": "tmp",
   "taintsThis": "false",
   "taintsReturn": "true",
