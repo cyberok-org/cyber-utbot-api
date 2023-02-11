@@ -3,13 +3,14 @@ package org.example;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 public final class LoopTest {
+
     ///region Test suites for executable org.example.Loop.whileLoop
-    
+
     ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method whileLoop(int)
-    
+
     /**
     @utbot.classUnderTest {@link Loop}
  * @utbot.methodUnderTest {@link org.example.Loop#whileLoop(int)}
@@ -21,9 +22,9 @@ public final class LoopTest {
     @org.cyber.utils.VulnerabilityInfo("testWhileLoop_KGreaterOrEqualZero")
     public void testWhileLoop_KGreaterOrEqualZero() {
         Loop loop = new Loop();
-        
+
         int actual = loop.whileLoop(0);
-        
+
         assertEquals(0, actual);
     }
     ///endregion
