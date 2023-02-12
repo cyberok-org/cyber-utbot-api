@@ -2,22 +2,36 @@ package org.example;
 
 
 public class Loop {
-    private void fun2(int k) {
-        int a = k;
+    private boolean fun4(String s) {
+        String a = s;
+        return true;
     }
 
-    public int whileLoop(int k) {
-        if (k >= 0) {
-            fun2(k);
-        }
-        int i = 0;
-        int sum = 0;
+//    public int whileLoop(int k) {
+//        if (k >= 0) {
+//            fun2(k);
+//        }
+//        int i = 0;
+//        int sum = 0;
+//
+//        while (i < k) {
+//            sum += i;
+//            i += 1;
+//        }
+//
+//        return sum;
+//    }
 
-        while (i < k) {
-            sum += i;
-            i += 1;
-        }
+    public boolean fun(String s) {
+        return fun4(s);
 
-        return sum;
+//        return Objects.equals(s, "1");
+//        if (Objects.equals(s, "1")) {
+//            return 1;
+//        }
+//        if (fun3(s)) {
+//            return 1;
+//        }
+//        return 2;
     }
 }

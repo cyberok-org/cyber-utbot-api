@@ -3,28 +3,59 @@ package org.example;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class LoopTest {
-    ///region Test suites for executable org.example.Loop.whileLoop
+    ///region Test suites for executable org.example.Loop.fun
     
-    ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method whileLoop(int)
+    ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method fun(java.lang.String)
     
     /**
     @utbot.classUnderTest {@link Loop}
- * @utbot.methodUnderTest {@link org.example.Loop#whileLoop(int)}
- * @utbot.executesCondition {@code (k >= 0): True}
- * @utbot.invokes org.example.Loop#fun2(int)
+ * @utbot.methodUnderTest {@link org.example.Loop#fun(java.lang.String)}
  *  */
     @Test
-    @DisplayName("whileLoop: k >= 0 : True -> LoopFun2")
-    @org.cyber.utils.VulnerabilityInfo("testWhileLoop_KGreaterOrEqualZero")
-    public void testWhileLoop_KGreaterOrEqualZero() {
+    @DisplayName("fun: ")
+    @org.cyber.utils.VulnerabilityInfo("example")
+    public void testFun() {
         Loop loop = new Loop();
+        String string = "100";
         
-        int actual = loop.whileLoop(0);
+        boolean actual = loop.fun(string);
         
-        assertEquals(0, actual);
+        assertTrue(actual);
+    }
+    
+    /**
+    @utbot.classUnderTest {@link Loop}
+ * @utbot.methodUnderTest {@link org.example.Loop#fun(java.lang.String)}
+ *  */
+    @Test
+    @DisplayName("fun: ")
+    @org.cyber.utils.VulnerabilityInfo("example")
+    public void testFun_1() {
+        Loop loop = new Loop();
+        String string = "1000";
+        
+        boolean actual = loop.fun(string);
+        
+        assertTrue(actual);
+    }
+    
+    /**
+    @utbot.classUnderTest {@link Loop}
+ * @utbot.methodUnderTest {@link org.example.Loop#fun(java.lang.String)}
+ *  */
+    @Test
+    @DisplayName("fun: ")
+    @org.cyber.utils.VulnerabilityInfo("example2")
+    public void testFun_2() {
+        Loop loop = new Loop();
+        String string = "500";
+        
+        boolean actual = loop.fun(string);
+        
+        assertTrue(actual);
     }
     ///endregion
     
