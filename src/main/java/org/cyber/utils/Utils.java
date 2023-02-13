@@ -7,7 +7,7 @@ public class Utils {
         }
     }
 
-    public void vulnerabilityAssertByMsg(String message) throws VulnerabilityException {
+    public static void vulnerabilityAssertByMsg(String message) throws VulnerabilityException {
         throw new VulnerabilityException(message);
     }
 }

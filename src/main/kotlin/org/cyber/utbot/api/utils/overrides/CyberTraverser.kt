@@ -32,7 +32,7 @@ class CyberTraverser(
 ) : Traverser(methodUnderTest, typeRegistry, hierarchy, typeResolver, globalGraph, mocker) {
     @CyberNew("decorate target invoke")
     private fun decorateTarget(target: InvocationTarget): InvocationTarget {
-        val targetClassName = target.instance?.type?.toString()
+        val targetClassName = target.method.declaringClass.name
         val targetFunctionName = target.method.name
         return vulnerabilityChecksHolder.checks( targetClassName to targetFunctionName)?.run  {
             val methodName = "$CHECK_METHOD_PREFIX\$$targetClassName.$targetFunctionName"

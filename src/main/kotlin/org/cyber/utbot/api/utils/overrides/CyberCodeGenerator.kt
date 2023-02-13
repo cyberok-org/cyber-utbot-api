@@ -15,7 +15,7 @@ import org.utbot.framework.codegen.tree.ututils.UtilClassKind
 import org.utbot.framework.codegen.util.stringLiteral
 import org.utbot.framework.plugin.api.*
 import soot.jimple.internal.JInvokeStmt
-import soot.jimple.internal.JVirtualInvokeExpr
+import soot.jimple.internal.JStaticInvokeExpr
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -41,7 +41,7 @@ class CyberCodeGenerator(
     hangingTestsTimeout, enableTestsTimeout, testClassPackageName) {
     @CyberNew("get last assert")
     private fun List<Step>.lastAssertOrNull(): Step? = this.dropLastWhile {
-        ((it.stmt as? JInvokeStmt)?.invokeExprBox?.value as? JVirtualInvokeExpr)?.methodRef?.run {
+        ((it.stmt as? JInvokeStmt)?.invokeExprBox?.value as? JStaticInvokeExpr)?.methodRef?.run {
             !(name == ASSERT_FUNCTION_NAME && declaringClass.name == ASSERT_CLASS_NAME)
         } ?: true
     }.lastOrNull()
@@ -51,7 +51,7 @@ class CyberCodeGenerator(
         val msgByMethodName = testSets
             .flatMap { it.executions.toMutableList() }
             .map { it.testMethodName to ((it as? UtSymbolicExecution)?.fullPath?.lastAssertOrNull()?.stmt?.invokeExprBox?.value
-                    as? JVirtualInvokeExpr)?.args?.first()?.toString()?.run { substring(1, this.length - 1) } }
+                    as? JStaticInvokeExpr)?.args?.first()?.toString()?.run { substring(1, this.length - 1) } }
             .filter { it.second != null }
             .toMap()
         cgClassFile.declaredClass.body.methodRegions.map { cluster ->
