@@ -2,8 +2,8 @@ package org.testcases.taint;
 
 public class SeparateTraces {
 
-    public String source1() {
-        return "aaa";
+    public int source1() {
+        return 10;
     }
 
     public int source2() {
@@ -11,24 +11,35 @@ public class SeparateTraces {
     }
 
     public void foo(int a) {
-        sink1(source1());
         if (a > 13) {
-            int val = source2();
-            sink2(24, val);
+            sink1(source1());
+//            int val = source2();
+//            sink2(24, val);
         } else if (a > 0) {
             sink2(1, 2);
+        } else if (a == -1919) {
+            sink1(source1());
+        } else if (a == -189) {
+            System.out.println("...");
         } else {
             int smth = sink2(source2(), 44);
         }
     }
 
-    public void bar() {
-        System.out.println("bar");
-        String x = source1();
+    public void bar(int i) {
+        if (i > 5) {
+            int x = source1();
+            sink1(x);
+        }
+        if (1 > 0) throw new ArithmeticException("gg");
     }
 
-    public void sink1(String s) {
-        System.out.println(s);
+    public void smth() {
+        System.out.println("bar");
+        int x = source1();
+    }
+
+    public void sink1(int s) {
     }
 
     public int sink2(int x, int y) {

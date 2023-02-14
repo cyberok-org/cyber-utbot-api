@@ -203,7 +203,15 @@ class CyberUtBotSymbolicEngine(
                             when (newState.label) {
                                 StateLabel.INTERMEDIATE -> pathSelector.offer(newState)
                                 StateLabel.CONCRETE -> statesForConcreteExecution.add(newState)
-                                StateLabel.TERMINAL -> consumeTerminalState(newState)
+                                StateLabel.TERMINAL -> {
+                                    if (pathSelector is CyberSelector) {
+                                        if (!(pathSelector as CyberSelector).traceFound()) {
+                                            continue
+                                        }
+                                    }
+                                    println("TERMINAL: ${newState.stmt}, from ${state.stmt}")
+                                    consumeTerminalState(newState)
+                                }
                             }
                         }
 

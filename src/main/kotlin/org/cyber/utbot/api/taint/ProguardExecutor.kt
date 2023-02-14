@@ -15,14 +15,14 @@ import soot.SootMethod
 class ProguardExecutor(private val jarName: String) {
     var traces: Set<List<BamLocationDependentJvmMemoryLocation<*>>> = mutableSetOf()
     private var headMethod: HeadMethod? = null
+    val sources: MutableSet<TaintSource> = mutableSetOf()
+    val sinks: MutableSet<JvmTaintSink> = mutableSetOf()
 
     fun execute() {
         val programClassPool: ClassPool = JarUtil.readJar(jarName, "**", false)
         val cfa = CfaUtil.createInterproceduralCfaFromClassPool(programClassPool)
-        val sources: MutableSet<TaintSource> =
-            parseSources("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sources")
-        val sinks: MutableSet<JvmTaintSink> =
-            parseSinks("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sinks")
+        sources.addAll(parseSources("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sources"))
+        sinks.addAll(parseSinks("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sinks"))
         val cpaRun = JvmTaintMemoryLocationBamCpaRun.Builder().setCfa(cfa)
             // todo: replace with the method under analysis
             .setMainSignature(MethodSignature(headMethod?.clazz, headMethod?.method, headMethod?.descriptor))
