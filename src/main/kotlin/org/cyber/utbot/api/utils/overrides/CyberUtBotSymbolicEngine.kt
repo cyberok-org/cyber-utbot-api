@@ -10,7 +10,7 @@ import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.viewers.StatePublisher
-import org.cyber.utbot.api.utils.vulnerability.VulnerabilityHolder
+import org.cyber.utbot.api.utils.vulnerability.VulnerabilityChecksHolder
 import org.utbot.analytics.Predictors
 import org.utbot.common.bracket
 import org.utbot.common.debug
@@ -46,7 +46,7 @@ class CyberUtBotSymbolicEngine(
     findVulnerabilities: Boolean = true,
     private val onlyVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
-    vulnerabilityHolder: VulnerabilityHolder = VulnerabilityHolder(),
+    vulnerabilityChecksHolder: VulnerabilityChecksHolder = VulnerabilityChecksHolder(),
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
 
     override lateinit var pathSelector: PathSelector
@@ -67,7 +67,7 @@ class CyberUtBotSymbolicEngine(
                 typeResolver,
                 globalGraph,
                 mocker,
-                vulnerabilityHolder = vulnerabilityHolder
+                vulnerabilityChecksHolder = vulnerabilityChecksHolder
             )
         }
     }

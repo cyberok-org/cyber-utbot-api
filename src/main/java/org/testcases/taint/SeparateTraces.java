@@ -31,7 +31,6 @@ public class SeparateTraces {
             int x = source1();
             sink1(x);
         }
-        if (1 > 0) throw new ArithmeticException("gg");
     }
 
     public void smth() {

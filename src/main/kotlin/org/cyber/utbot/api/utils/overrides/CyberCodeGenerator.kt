@@ -1,5 +1,7 @@
 package org.cyber.utbot.api.utils.overrides
 
+import org.cyber.utbot.api.utils.ASSERT_CLASS_NAME
+import org.cyber.utbot.api.utils.ASSERT_FUNCTION_NAME
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.utbot.framework.codegen.CodeGenerator
@@ -12,6 +14,8 @@ import org.utbot.framework.codegen.tree.CgTestClassConstructor
 import org.utbot.framework.codegen.tree.ututils.UtilClassKind
 import org.utbot.framework.codegen.util.stringLiteral
 import org.utbot.framework.plugin.api.*
+import soot.jimple.internal.JInvokeStmt
+import soot.jimple.internal.JStaticInvokeExpr
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -35,13 +39,27 @@ class CyberCodeGenerator(
 ): CodeGenerator(classUnderTest, paramNames, generateUtilClassFile, testFramework, mockFramework, staticsMocking, forceStaticMocking,
     generateWarningsForStaticMocking, codegenLanguage, cgLanguageAssistant, parameterizedTestSource, runtimeExceptionTestsBehaviour,
     hangingTestsTimeout, enableTestsTimeout, testClassPackageName) {
+    @CyberNew("get last assert")
+    private fun List<Step>.lastAssertOrNull(): Step? = this.dropLastWhile {
+        ((it.stmt as? JInvokeStmt)?.invokeExprBox?.value as? JStaticInvokeExpr)?.methodRef?.run {
+            !(name == ASSERT_FUNCTION_NAME && declaringClass.name == ASSERT_CLASS_NAME)
+        } ?: true
+    }.lastOrNull()
 
     @CyberNew("add information about vulnerability")
     private fun addAnnotations(cgClassFile: CgClassFile, testSets: List<CgMethodTestSet>): CgClassFile {
+        val msgByMethodName = testSets
+            .flatMap { it.executions.toMutableList() }
+            .map { it.testMethodName to ((it as? UtSymbolicExecution)?.fullPath?.lastAssertOrNull()?.stmt?.invokeExprBox?.value
+                    as? JStaticInvokeExpr)?.args?.first()?.toString()?.run { substring(1, this.length - 1) } }
+            .filter { it.second != null }
+            .toMap()
         cgClassFile.declaredClass.body.methodRegions.map { cluster ->
             cluster.content.map { region ->
                 region.content.map { method ->
-                    method.annotations = method.annotations.toMutableList().also { it.add(CgSingleArgAnnotation(CyberOk.vulnerability, stringLiteral(method.name))) }
+                    msgByMethodName[method.name]?.run {
+                        method.annotations = method.annotations.toMutableList().also { it.add(CgSingleArgAnnotation(CyberOk.vulnerability, stringLiteral(this))) }
+                    }
                 }
             }
         }

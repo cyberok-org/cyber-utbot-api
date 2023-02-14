@@ -8,6 +8,9 @@ typealias SourceCodeFileName = String
 typealias OutputFileName = String
 typealias GeneratedTests = String
 typealias JSON = String
+typealias FullyQualifiedName = String?
+typealias FunctionName = String
+typealias FunctionId = Pair<FullyQualifiedName, FunctionName>
 
 
 class TestUnit(

@@ -2,9 +2,30 @@ package org.testcases.taint;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 public final class SeparateTracesTest {
+    ///region Test suites for executable org.testcases.taint.SeparateTraces.bar
+    
+    ///region
+    
+    @Test
+    @org.cyber.utils.VulnerabilityInfo("testBar1")
+    public void testBar1() {
+        SeparateTraces separateTraces = new SeparateTraces();
+        
+        separateTraces.bar(6);
+    }
+    
+    @Test
+    @org.cyber.utils.VulnerabilityInfo("testBar2")
+    public void testBar2() {
+        SeparateTraces separateTraces = new SeparateTraces();
+        
+        separateTraces.bar(5);
+    }
+    ///endregion
+    
+    ///endregion
+    
     ///region Test suites for executable org.testcases.taint.SeparateTraces.foo
     
     ///region
@@ -47,29 +68,6 @@ public final class SeparateTracesTest {
         SeparateTraces separateTraces = new SeparateTraces();
         
         separateTraces.foo(1);
-    }
-    ///endregion
-    
-    ///endregion
-    
-    ///region Test suites for executable org.testcases.taint.SeparateTraces.bar
-    
-    ///region
-    
-    @Test
-    @org.cyber.utils.VulnerabilityInfo("testBar1")
-    public void testBar1() {
-        SeparateTraces separateTraces = new SeparateTraces();
-        
-        assertThrows(ArithmeticException.class, () -> separateTraces.bar(6));
-    }
-    
-    @Test
-    @org.cyber.utils.VulnerabilityInfo("testBar2")
-    public void testBar2() {
-        SeparateTraces separateTraces = new SeparateTraces();
-        
-        assertThrows(ArithmeticException.class, () -> separateTraces.bar(5));
     }
     ///endregion
     
