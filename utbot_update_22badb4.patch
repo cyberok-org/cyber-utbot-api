@@ -547,12 +547,15 @@ index 1cf9c38e..41289f09 100644
          logger.debug { "Debug visualization: $path" }
  
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/types/TypeResolver.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/types/TypeResolver.kt
-index e7c5e47d..31e92729 100644
+index e7c5e47d..3d5ea684 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/types/TypeResolver.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/types/TypeResolver.kt
-@@ -536,7 +536,7 @@ internal val ARRAYS_SOOT_CLASS: SootClass
+@@ -534,9 +534,9 @@ internal val CLASS_REF_SOOT_CLASS: SootClass
+ internal val ARRAYS_SOOT_CLASS: SootClass
+     get() = Scene.v().getSootClass(java.util.Arrays::class.java.canonicalName)
  
- internal val OBJECT_TYPE: RefType
+-internal val OBJECT_TYPE: RefType
++val OBJECT_TYPE: RefType
      get() = Scene.v().getSootClass(Object::class.java.canonicalName).type
 -internal val STRING_TYPE: RefType
 +val STRING_TYPE: RefType
