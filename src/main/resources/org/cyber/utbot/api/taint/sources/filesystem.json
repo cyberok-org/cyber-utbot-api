@@ -1,0 +1,9 @@
+{
+  "containingClass": "Lorg/testcases/taint/FileSystemUsage;",
+  "signature": "source(I)Ljava/lang/String;",
+  "description": "filesystem usage source example",
+  "taintsThis": "false",
+  "taintsReturn": "true",
+  "taintsArgs": [],
+  "taintsGlobals": []
+}

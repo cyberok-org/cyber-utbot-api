@@ -39,7 +39,7 @@ class CyberUtBotSymbolicEngine(
     methodUnderTest: ExecutableId,
     classpath: String,
     dependencyPaths: String,
-    mockStrategy: MockStrategy = MockStrategy.NO_MOCKS,
+    mockStrategy: MockStrategy = MockStrategy.OTHER_PACKAGES,
     chosenClassesToMockAlways: Set<ClassId>,
     solverTimeoutInMillis: Int = UtSettings.checkSolverTimeoutMillis,
     cyberPathSelector: Boolean = false,

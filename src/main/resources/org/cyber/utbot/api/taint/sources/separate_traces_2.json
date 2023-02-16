@@ -1,6 +1,6 @@
 {
   "containingClass": "Lorg/testcases/taint/SeparateTraces;",
-  "signature": "source2()I",
+  "signature": "source2()Ljava/lang/String;",
   "description": "tmp",
   "taintsThis": "false",
   "taintsReturn": "true",

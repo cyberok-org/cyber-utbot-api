@@ -1,6 +1,6 @@
 {
   "containingClass": "Lorg/testcases/taint/SeparateTraces;",
-  "signature": "sink1(I)V",
+  "signature": "sink1(Ljava/lang/String;)V",
   "description": "",
   "takesInstance": "false",
   "takesArgs": [1],
