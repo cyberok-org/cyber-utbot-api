@@ -30,12 +30,9 @@ class CyberSelector(
     private var traceFound = false
     private val defaultSelector = CyberDefaultSelector()
     private val container = StatesContainer()
-    private var nextIterationStarted = false
     private var peekTraceFound = false
-
     // stack of inner calls
-    private var innerCallDestination: ArrayDeque<Pair<Stmt?, JimpleBody?>> =
-        ArrayDeque() // parent to method under invocation
+    private var innerCallDestination: ArrayDeque<Pair<Stmt?, JimpleBody?>> = ArrayDeque() // parent to method under invocation
 
     override val name = "CyberTaintSelector"
 
@@ -45,34 +42,28 @@ class CyberSelector(
 
     fun traceFound() = traceFound
 
-    fun resetTrace() {
-        traceFound = false
-    }
-
     override fun offerImpl(state: ExecutionState) {
         executionStates += state
         currentIndex = -1
     }
 
+    /**
+     * Takes each execution state, takes first that has a trace mapping (this one will be returned).
+     * If no state leads to a trace returns a state from the default selector.
+     */
     override fun peekImpl(): ExecutionState? {
         if (executionStates.size == 0) {
             return null
         }
-        // take each execution state, take first that has a trace mapping (this one will be returned)
-        // remove it from states. if no state leads to a trace return null
         executionStates.forEachIndexed { i, state ->
             if (mapState(state)) {
                 peekTraceFound = true
                 currentIndex = i
-//                (choosingStrategy as CyberStrategy).drop = false
                 // println("peeked1 ${state.stmt}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
                 return state
             }
         }
         peekTraceFound = false
-//        if (traceFound) {
-//            (choosingStrategy as CyberStrategy).drop = true
-//        }
         // random state peek
         val (state, idx) = defaultSelector.peekImpl(executionStates, currentIndex)
         currentIndex = idx
@@ -80,13 +71,16 @@ class CyberSelector(
         return state
     }
 
+    /**
+     * If previous peek call found a mapping state - returns that one.
+     * Else, takes each execution state, takes first that has a trace mapping, removes it from states and returns it.
+     * If no state leads to a trace returns a state from the default selector.
+     */
     override fun pollImpl(): ExecutionState? {
         if (executionStates.size == 0) {
 //            // println("polled0, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
             return null
         }
-        // take each execution state, take first that has a trace mapping (this one will be returned)
-        // remove it from states. if no state leads to a trace return null
         if (currentIndex == -1) {
             executionStates.forEachIndexed { i, state ->
                 if (state.stmt.javaSourceStartLineNumber == -1) {
@@ -103,7 +97,6 @@ class CyberSelector(
                 if (mapState(state)) {
                     executionStates.removeAt(i)
                     currentIndex = -1
-//                    (choosingStrategy as CyberStrategy).drop = false
 //                    if (state.stmt.toString().contains("taint"))println("polled2 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
@@ -111,10 +104,9 @@ class CyberSelector(
         }
         if (traceFound && currentIndex == -1) {
             (choosingStrategy as CyberStrategy).unmatchedStates.addAll(executionStates)
-//            (choosingStrategy as CyberStrategy).drop = true
         }
         if (!peekTraceFound) {
-            traceFound = false
+            resetTrace()
         }
         val state = defaultSelector.pollImpl(executionStates, currentIndex)
         currentIndex = -1
@@ -134,44 +126,41 @@ class CyberSelector(
 
     override fun isEmpty() = executionStates.isEmpty()
 
-    fun onNextIteration() {
-        traceFound = false
+    /**
+     * Is called whenever symbolic engine starts analysing a new method.
+     * Sets used variables to their initial values.
+     */
+    fun onNextIteration(initState: ExecutionState) {
+        val jimpleBody = graph.method(initState.stmt).jimpleBody()
+        // println(jimpleBody)
+        // println("NOW IN ${jimpleBody.method.name}")
+        resetTrace()
         container.states.clear()
-        nextIterationStarted = true
         innerCallDestination.clear()
+        proguardExecutor.setHeadMethodSignature(jimpleBody.method)
+        proguardExecutor.execute()
+        if (proguardExecutor.traces.isEmpty()) {
+            (choosingStrategy as CyberStrategy).unmatchedStates.add(initState)
+        }
     }
 
     private fun mapState(state: ExecutionState): Boolean {
         val jimpleBody = graph.method(state.stmt).jimpleBody()
         if (innerCallDestination.isNotEmpty() && state.stmt == innerCallDestination.first().first) {
-            // println("been here")
-            innerCallDestination.removeFirst()
+            innerCallDestination.removeFirst() // returned from the inner call
             if (proguardExecutor.sinks.any { it.toString().contains(jimpleBody.method.name) }) {
                 return true // TODO(state that we finished trace traverse)
             }
         }
         if (container[state.stmt]?.isNotEmpty() == true) {
-            // println("mapped as was ${state.stmt}")
             return true
-        }
-        // println("trying to map ${state.stmt}, method ${jimpleBody.method.name}")
-        if (nextIterationStarted) { // set ProguardExecutor's head method to the one under analysis
-            println(jimpleBody)
-            println("NOW IN ${jimpleBody.method.name}")
-            nextIterationStarted = false
-            proguardExecutor.setHeadMethodSignature(jimpleBody.method)
-            proguardExecutor.execute()
-            if (proguardExecutor.traces.isEmpty()) {
-                (choosingStrategy as CyberStrategy).unmatchedStates.add(state) //drop = true
-            }
         }
         val declaringClass = jimpleBody.method.declaringClass.name
         if (isInternalMethod(declaringClass, jimpleBody)) {
-            // println("костыль ${state.stmt}")
             return true
         }
-        val cf = classPool.get(declaringClass).classFile
         val ancestor = state.lastEdge?.src
+        val cf = classPool.get(declaringClass).classFile
         val traces = if (container[ancestor] == null || !traceFound) proguardExecutor.traces else container[ancestor]
         traces?.forEach {
             container.states.putIfAbsent(state.stmt, mutableSetOf())
@@ -197,6 +186,10 @@ class CyberSelector(
         }
 //        if (state.stmt.toString().contains("taint")) println("map failed ${state.stmt}")
         return false
+    }
+
+    private fun resetTrace() {
+        traceFound = false
     }
 
     private fun isInternalMethod(clazz: String, jimpleBody: JimpleBody) =

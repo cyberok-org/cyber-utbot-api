@@ -6,16 +6,8 @@ import org.utbot.engine.state.ExecutionState
 
 class CyberStrategy(override val graph: InterProceduralUnitGraph) : ChoosingStrategy {
 
-//    var drop = false
     val unmatchedStates: MutableList<ExecutionState> = mutableListOf()
 
-    override fun shouldDrop(state: ExecutionState): Boolean {
-        if (unmatchedStates.contains(state)) {
-            unmatchedStates.remove(state)
-            return true
-        }
-        return false
-//        return drop
-    }
+    override fun shouldDrop(state: ExecutionState) = unmatchedStates.remove(state)
 
 }

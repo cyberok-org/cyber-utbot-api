@@ -89,7 +89,7 @@ class CyberUtBotSymbolicEngine(
         pathSelector.offer(initState)
 
         @CyberNew("inform selector about the start of a new selection iteration")
-        if (pathSelector is CyberSelector) (pathSelector as CyberSelector).onNextIteration()
+        if (pathSelector is CyberSelector) (pathSelector as CyberSelector).onNextIteration(initState)
 
         pathSelector.use {
 
@@ -204,7 +204,6 @@ class CyberUtBotSymbolicEngine(
                                 StateLabel.INTERMEDIATE -> pathSelector.offer(newState)
                                 StateLabel.CONCRETE -> statesForConcreteExecution.add(newState)
                                 StateLabel.TERMINAL -> {
-                                    println("HERE IN TERMINAL ${newState.stmt}, from ${state.stmt}")
                                     if (pathSelector is CyberSelector) {
                                         if (!(pathSelector as CyberSelector).traceFound()) {
                                             continue
@@ -232,7 +231,6 @@ class CyberUtBotSymbolicEngine(
     override suspend fun FlowCollector<UtResult>.consumeTerminalState(
         state: ExecutionState,
     ) {
-        println("TERMINAL2: ${state.stmt}")
         // some checks to be sure the state is correct
         require(state.label == StateLabel.TERMINAL) { "Can't process non-terminal state!" }
         require(!state.isInNestedMethod()) { "The state has to correspond to the MUT" }

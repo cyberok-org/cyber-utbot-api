@@ -20,7 +20,7 @@ fun main() {
         "build/classes/java/main", codegenLanguage = CodegenLanguage.JAVA,
         withUtSettings = {
             useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType =
-            TestSelectionStrategyType.COVERAGE_STRATEGY; summaryGenerationType = SummariesGenerationType.LIGHT
+            TestSelectionStrategyType.COVERAGE_STRATEGY; summaryGenerationType = SummariesGenerationType.FULL
         },
         utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER)
     )
