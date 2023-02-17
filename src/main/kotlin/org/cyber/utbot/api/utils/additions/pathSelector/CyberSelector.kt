@@ -10,10 +10,8 @@ import org.utbot.engine.selectors.BasePathSelector
 import org.utbot.engine.selectors.strategies.ChoosingStrategy
 import org.utbot.engine.selectors.strategies.StoppingStrategy
 import org.utbot.engine.state.ExecutionState
-import org.utbot.engine.state.StateLabel
 import soot.jimple.JimpleBody
 import soot.jimple.Stmt
-import java.util.*
 import kotlin.collections.ArrayDeque
 
 
@@ -31,7 +29,7 @@ class CyberSelector(
     private val classPool: ClassPool = ClassPool.getDefault()
     private var traceFound = false
     private val defaultSelector = CyberDefaultSelector()
-    private val statesContainer = StatesContainer()
+    private val container = StatesContainer()
     private var nextIterationStarted = false
     private var peekTraceFound = false
 
@@ -66,7 +64,7 @@ class CyberSelector(
             if (mapState(state)) {
                 peekTraceFound = true
                 currentIndex = i
-                (choosingStrategy as CyberStrategy).drop = false
+//                (choosingStrategy as CyberStrategy).drop = false
                 // println("peeked1 ${state.stmt}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
                 return state
             }
@@ -93,36 +91,34 @@ class CyberSelector(
             executionStates.forEachIndexed { i, state ->
                 if (state.stmt.javaSourceStartLineNumber == -1) {
                     executionStates.removeAt(i)
-                    statesContainer.states[state.lastEdge?.src]?.let {
-                        statesContainer.states.putIfAbsent(
+                    container[state.lastEdge?.src]?.let {
+                        container.states.putIfAbsent(
                             state.stmt,
                             it
                         )
                     }
-                    if (state.label == StateLabel.TERMINAL && !traceFound) (choosingStrategy as CyberStrategy).drop =
-                        true
-                    // println("polled1 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
+//                    if (state.stmt.toString().contains("taint"))println("polled1 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
                 if (mapState(state)) {
                     executionStates.removeAt(i)
                     currentIndex = -1
-                    (choosingStrategy as CyberStrategy).drop = false
-                    if (state.label == StateLabel.TERMINAL && !traceFound) (choosingStrategy as CyberStrategy).drop =
-                        true
-                    // println("polled2 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
+//                    (choosingStrategy as CyberStrategy).drop = false
+//                    if (state.stmt.toString().contains("taint"))println("polled2 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
             }
         }
         if (traceFound && currentIndex == -1) {
-            (choosingStrategy as CyberStrategy).drop = true
+            (choosingStrategy as CyberStrategy).unmatchedStates.addAll(executionStates)
+//            (choosingStrategy as CyberStrategy).drop = true
         }
-        if (!peekTraceFound) traceFound = false
+        if (!peekTraceFound) {
+            traceFound = false
+        }
         val state = defaultSelector.pollImpl(executionStates, currentIndex)
         currentIndex = -1
-        if (state.label == StateLabel.TERMINAL && !traceFound) (choosingStrategy as CyberStrategy).drop = true
-        // println("polled3 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
+//        if (state.stmt.toString().contains("taint")) println("polled3 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
         return state
     }
 
@@ -140,7 +136,7 @@ class CyberSelector(
 
     fun onNextIteration() {
         traceFound = false
-        statesContainer.states.clear()
+        container.states.clear()
         nextIterationStarted = true
         innerCallDestination.clear()
     }
@@ -151,62 +147,79 @@ class CyberSelector(
             // println("been here")
             innerCallDestination.removeFirst()
             if (proguardExecutor.sinks.any { it.toString().contains(jimpleBody.method.name) }) {
-                // println("returning")
-                return true
+                return true // TODO(state that we finished trace traverse)
             }
         }
-        if (statesContainer.states[state.stmt]?.isNotEmpty() == true) {
+        if (container[state.stmt]?.isNotEmpty() == true) {
             // println("mapped as was ${state.stmt}")
             return true
         }
         // println("trying to map ${state.stmt}, method ${jimpleBody.method.name}")
         if (nextIterationStarted) { // set ProguardExecutor's head method to the one under analysis
-            // println(jimpleBody)
-            // println("NOW IN ${jimpleBody.method.name}")
+            println(jimpleBody)
+            println("NOW IN ${jimpleBody.method.name}")
             nextIterationStarted = false
             proguardExecutor.setHeadMethodSignature(jimpleBody.method)
             proguardExecutor.execute()
-            if (proguardExecutor.traces.isEmpty()) (choosingStrategy as CyberStrategy).drop = true
-        }
-        val declaringClass = jimpleBody.method.declaringClass.name
-        if (declaringClass.contains("org.cyber.utils") || jimpleBody.method.name.contains("internalCheck")
-            || declaringClass.contains("org.cyber.exploitBase")
-        ) {
-            // println("костыль ${state.stmt}")
-            return true
-        } // пока костыль
-        // todo: this will only work in a single class, add inter-class analysis
-        val cf = classPool.get(declaringClass).classFile
-        val parentSrc = state.lastEdge?.src
-        val traces =
-            if (statesContainer.states[parentSrc] == null || !traceFound) proguardExecutor.traces else statesContainer.states[parentSrc]
-        traces?.forEach {
-            statesContainer.states.putIfAbsent(state.stmt, mutableSetOf())
-            if (traceMapper.map(it, state.stmt, cf)) {
-                statesContainer.states[state.stmt]?.add(it)
+            if (proguardExecutor.traces.isEmpty()) {
+                (choosingStrategy as CyberStrategy).unmatchedStates.add(state) //drop = true
             }
         }
-        if (statesContainer.states[state.stmt]?.isNotEmpty() == true) {
-            // println("mapped successfully1 ${state.stmt}")
+        val declaringClass = jimpleBody.method.declaringClass.name
+        if (isInternalMethod(declaringClass, jimpleBody)) {
+            // println("костыль ${state.stmt}")
+            return true
+        }
+        val cf = classPool.get(declaringClass).classFile
+        val ancestor = state.lastEdge?.src
+        val traces = if (container[ancestor] == null || !traceFound) proguardExecutor.traces else container[ancestor]
+        traces?.forEach {
+            container.states.putIfAbsent(state.stmt, mutableSetOf())
+            if (traceMapper.map(it, state.stmt, cf)) {
+                container[state.stmt]?.add(it)
+            }
+        }
+        if (container[state.stmt]?.isNotEmpty() == true) {
+//            if (state.stmt.toString().contains("taint")) println("mapped successfully1 ${state.stmt}, tracefound = $traceFound")
             traceFound = true
             return true
-        } else if ((parentSrc.toString().contains("virtualinvoke") ||
-                    parentSrc.toString().contains("staticinvoke") ||
-                    parentSrc.toString().contains("specialinvoke")) // add the rest
-            && parentSrc.toString().contains(jimpleBody.method.name)
-        ) {
-            innerCallDestination.addFirst(parentSrc to jimpleBody)
-            statesContainer.states[parentSrc]?.let { statesContainer.states[state.stmt]?.addAll(it) } // plus putifabsent
-            // println("mapped successfully2 ${state.stmt}, parent = $parentSrc")
+        } else if (isInvocation(ancestor.toString(), jimpleBody)) {
+            innerCallDestination.addFirst(ancestor to jimpleBody)
+            container[ancestor]?.let { container[state.stmt]?.addAll(it) } // plus putifabsent
+//            if (state.stmt.toString().contains("taint"))println("mapped successfully2 ${state.stmt}, parent = $ancestor")
             return true
         } else if (innerCallDestination.isNotEmpty() && innerCallDestination.first().first != null
             && jimpleBody.method.name.equals(innerCallDestination.first().second?.method?.name)
         ) {
-            statesContainer.states[parentSrc]?.let { statesContainer.states[state.stmt]?.addAll(it) }
-            // println("mapped successfully3 ${state.stmt}, parent = $parentSrc, method name = ${jimpleBody.method.name}")
+            container[ancestor]?.let { container[state.stmt]?.addAll(it) }
+//            if (state.stmt.toString().contains("taint"))println("mapped successfully3 ${state.stmt}, parent = $ancestor, method name = ${jimpleBody.method.name}")
             return true
         }
-        // println("map failed ${state.stmt}")
+//        if (state.stmt.toString().contains("taint")) println("map failed ${state.stmt}")
         return false
     }
+
+    private fun isInternalMethod(clazz: String, jimpleBody: JimpleBody) =
+        internalClasses.any { clazz.contains(it) } || internalMethods.any { jimpleBody.method.name.contains(it) }
+
+    private fun isInvocation(ancestor: String, jimpleBody: JimpleBody) =
+        (ancestor.contains("virtualinvoke") ||
+                ancestor.contains("staticinvoke") ||
+                ancestor.contains("specialinvoke") ||
+                ancestor.contains("interfaceinvoke") ||
+                ancestor.contains("dynamiconvoke"))
+                && ancestor.contains(jimpleBody.method.name)
+
+    private val internalClasses: MutableList<String> =
+        mutableListOf(
+            "org.cyber.utils",
+            "org.cyber.exploitBase",
+            "utbot"
+        )
+
+    private val internalMethods: MutableList<String> =
+        mutableListOf(
+            "internalCheck"
+        )
+
 }

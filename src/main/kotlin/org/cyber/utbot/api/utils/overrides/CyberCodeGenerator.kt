@@ -70,6 +70,18 @@ class CyberCodeGenerator(
         testSets: Collection<UtMethodTestSet>,
         testClassCustomName: String?,
     ): CodeGeneratorResult {
+        val tmpTestSets : MutableList<UtMethodTestSet> = mutableListOf()
+        testSets.forEach { set ->
+            run {
+                tmpTestSets.add(
+                    UtMethodTestSet(set.method,
+                        set.executions.filter { (it as UtSymbolicExecution).path.isNotEmpty() },
+                    set.jimpleBody,
+                    set.errors,
+                    set.clustersInfo)
+                )
+            }
+        }
         val cgTestSets = testSets.map { CgMethodTestSet(it) }.toList()
         return withCustomContext(testClassCustomName) {
             context.withTestClassFileScope {

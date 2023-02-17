@@ -4,19 +4,19 @@ import java.util.Random;
 
 public class SinkClass {
     public void foo(String arg1, String arg2, String arg3) {
-        boolean rand = new Random().nextBoolean();
-        if (rand) {
-            SourceClass src = new SourceClass(new Random().nextBoolean());
+//        boolean rand = new Random().nextBoolean();
+        if (arg2.equals("arg2")) {
+            SourceClass src = new SourceClass(true);
             if (arg1.equals("arg1")) {
                 String arg = src.bar();
-                inBetween(new Random().nextBoolean(), arg2, arg3); // ok
+                inBetween(true, arg2, arg3); // ok
             } else {
                 String arg = src.bar();
-                inBetween(new Random().nextBoolean(), arg, arg3); // dangerous
+                inBetween(true, arg3, arg); // dangerous
             }
         } else {
-            SourceClass src2 = new SourceClass(new Random().nextBoolean());
-            String arg = src2.source(new Random().nextInt(), 10); // rand should be > 20
+            SourceClass src2 = new SourceClass(true);
+            String arg = src2.source(arg3.length(), 10); // len should be > 20
             inBetween(arg2.equals("..."), arg2, arg); // danger
         }
     }

@@ -15,7 +15,7 @@ public class SourceClass {
     }
 
     String source(int i, int i1) {
-        if (i + i1 > 30) return "dangerous";
-        else return "ok";
+        if (i + i1 > 30) return "aaaaa";
+        else return "bbbbb";
     }
 }

@@ -7,5 +7,9 @@ typealias Traces = MutableSet<List<BamLocationDependentJvmMemoryLocation<*>>>
 
 class StatesContainer {
     val states: MutableMap<Stmt, Traces> = mutableMapOf()
+
+    operator fun get(index: Stmt?): Traces? {
+        return states[index]
+    }
 }
 
