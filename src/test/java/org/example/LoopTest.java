@@ -32,10 +32,10 @@ public final class LoopTest {
  *  */
     @Test
     @DisplayName("fun: ")
-    @org.cyber.utils.VulnerabilityInfo("example2")
+    @org.cyber.utils.VulnerabilityInfo("example")
     public void testFun_1() {
         Loop loop = new Loop();
-        String string = "FILEEEEEEEE";
+        String string = "1000";
         
         boolean actual = loop.fun(string, -255);
         
@@ -48,10 +48,10 @@ public final class LoopTest {
  *  */
     @Test
     @DisplayName("fun: ")
-    @org.cyber.utils.VulnerabilityInfo("example")
+    @org.cyber.utils.VulnerabilityInfo("example2")
     public void testFun_2() {
         Loop loop = new Loop();
-        String string = "1000";
+        String string = "500";
         
         boolean actual = loop.fun(string, -255);
         

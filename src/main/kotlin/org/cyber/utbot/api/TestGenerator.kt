@@ -1,6 +1,7 @@
 package org.cyber.utbot.api
 
 import mu.KotlinLogging
+import org.cyber.utbot.api.abstraction.extraChecks.ExtraVulnerabilityCheck
 import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.*
 import org.cyber.utbot.api.utils.viewers.stateViewers.TerminalStatisticViewer
@@ -41,6 +42,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val cyberPathSelector: Boolean = settings.cyberPathSelector
     override val findVulnerabilities: Boolean = settings.findVulnerabilities
     override val vulnerabilityCheckDirectories: List<String> = settings.vulnerabilityCheckDirectories
+    override val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck> = settings.extraVulnerabilityChecks
     override val onlyVulnerabilities: Boolean = settings.onlyVulnerabilities
 
     private val logger = KotlinLogging.logger {}

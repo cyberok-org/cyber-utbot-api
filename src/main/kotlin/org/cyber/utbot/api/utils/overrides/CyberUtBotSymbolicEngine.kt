@@ -147,15 +147,21 @@ class CyberUtBotSymbolicEngine(
                                 listOf(),
                                 concreteExecutionResult.coverage
                             )
-                            emit(concreteUtExecution)
+                            @CyberModify("filter emit") if (!onlyVulnerabilities) {
+                                emit(concreteUtExecution)
+                            }
 
                             logger.debug { "concolicStrategy<${methodUnderTest}>: returned $concreteUtExecution" }
                         } catch (e: CancellationException) {
                             logger.debug(e) { "Cancellation happened" }
                         } catch (e: ConcreteExecutionFailureException) {
-                            emitFailedConcreteExecutionResult(stateBefore, e)
+                            @CyberModify("filter emit") if (!onlyVulnerabilities) {
+                                emitFailedConcreteExecutionResult(stateBefore, e)
+                            }
                         } catch (e: Throwable) {
-                            emit(UtError("Concrete execution failed", e))
+                            @CyberModify("filter emit") if (!onlyVulnerabilities) {
+                                emit(UtError("Concrete execution failed", e))
+                            }
                         }
                     }
 
@@ -185,7 +191,9 @@ class CyberUtBotSymbolicEngine(
                         val newStates = try {
                             traverser.traverse(state)
                         } catch (ex: Throwable) {
-                            emit(UtError(ex.description, ex))
+                            @CyberModify("filter emit") if (!onlyVulnerabilities) {
+                                emit(UtError(ex.description, ex))
+                            }
                             return@measureTimeMillis
                         }
                         for (newState in newStates) {
@@ -280,6 +288,7 @@ class CyberUtBotSymbolicEngine(
                         "emit purely symbolic result $symbolicUtExecution"
             }
 
+            @CyberModify("filter emit") if (onlyVulnerabilities) return
             emit(symbolicUtExecution)
             return
         }
@@ -312,6 +321,7 @@ class CyberUtBotSymbolicEngine(
                 logger.debug { "processResult<${methodUnderTest}>: returned $concolicUtExecution" }
             }
         } catch (e: ConcreteExecutionFailureException) {
+            @CyberModify("filter emit") if (onlyVulnerabilities) return
             emitFailedConcreteExecutionResult(stateBefore, e)
         }
     }

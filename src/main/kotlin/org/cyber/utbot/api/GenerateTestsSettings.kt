@@ -1,5 +1,6 @@
 package org.cyber.utbot.api
 
+import org.cyber.utbot.api.abstraction.extraChecks.ExtraVulnerabilityCheck
 import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.utbot.engine.Mocker
 import org.utbot.framework.UtSettings
@@ -113,6 +114,11 @@ class GenerateTestsSettings(
      * list of directories with files of the form VulnerabilityStandard for the description of analyzed vulnerabilities
      */
     val vulnerabilityCheckDirectories: List<String> = listOf("src/exploitBase/funcs"),
+
+    /**
+     * structures similar to those analyzed from the base (vulnerabilityCheckDirectories), set in runtime
+     */
+    val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck> = emptyList(),
 
     /**
      * generate tests only for vulnerabilities if true

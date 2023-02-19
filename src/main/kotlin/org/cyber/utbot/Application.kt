@@ -19,13 +19,11 @@ fun main() {
         withUtSettings = { useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },
         utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER))
     val generator = TestGenerator(settings)
-//    val (tests, info) = generator.run(mapOf("org.example.Vulnerability" to "src/main/java/org/testcases/vulnerability/Vulnerability").toTestUnits())
+//    val (tests, info) = generator.run(mapOf("org.example.Loop" to "src/main/java/org/example/Loop.java").toTestUnits())
     val (tests, info) = generator.run(mapOf("org.example.Loop" to "src/main/java/org/example/Loop.java").toTestUnits())
-//    val (tests, info) = generator.runBunch("build/classes/java/main", "org.example.dir")
 
     tests.forEach { nameAndTest ->
         Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
-//        println("name=${nameAndTest.key}\n\n${nameAndTest.value}\n")
     }
     printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
 }

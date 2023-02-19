@@ -1,5 +1,6 @@
 package org.cyber.utbot.api
 
+import org.cyber.utbot.api.abstraction.extraChecks.ExtraVulnerabilityCheck
 import org.cyber.utbot.api.utils.overrides.CyberCodeGenerator
 import org.cyber.utbot.api.utils.overrides.CyberTestCaseGenerator
 import org.cyber.utbot.api.utils.viewers.StatePublisher
@@ -39,6 +40,7 @@ abstract class AbstractTestGenerator {
     protected abstract val cyberPathSelector: Boolean
     protected abstract val findVulnerabilities: Boolean
     protected abstract val vulnerabilityCheckDirectories: List<String>
+    protected abstract val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck>
     protected abstract val onlyVulnerabilities: Boolean
 
     private var classpath: String? = null
@@ -46,7 +48,8 @@ abstract class AbstractTestGenerator {
     protected val newlineSeparator: String by lazy { System.lineSeparator() }
 
     protected val statePublisher: StatePublisher by lazy { StatePublisher(utbotViewers.mapNotNull { it.stateViewer() }.toMutableList()) }
-    protected val vulnerabilityChecksHolder: VulnerabilityChecksHolder by lazy { VulnerabilityChecksHolder(vulnerabilityCheckDirectories) }
+    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder by lazy { VulnerabilityChecksHolder(vulnerabilityCheckDirectories)
+        .also { it.register(extraVulnerabilityChecks) } }
 
     protected fun updateClassLoader(classpath: String) {
         if (this.classpath != classpath) {

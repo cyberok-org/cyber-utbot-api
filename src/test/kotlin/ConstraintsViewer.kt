@@ -8,11 +8,13 @@ import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.utbot.common.PathUtil.toPath
+import org.utbot.framework.TestSelectionStrategyType
+import org.utbot.framework.UtSettings
 import org.utbot.framework.plugin.api.CodegenLanguage
 import java.nio.file.Files
 
 
-class ConstraintsViewer {
+class ConstraintsViewer {   // one test to change something and see what happens
     private val postfix = "Test.java"
     private val saveDirPrefix = "src/test/java"
     private val classpath = "build/classes/java/main"
@@ -35,8 +37,10 @@ class ConstraintsViewer {
     @Test
     fun generateTest() {
         val classname = "org.testcases.ifs.TernaryNested"
+        val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, generationTimeout = 60_000,
+            withUtSettings = { UtSettings.useFuzzing = false; UtSettings.useDebugVisualization = true; },
+            utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), onlyVulnerabilities = false)
 
-        val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, generationTimeout = 60_000, withUtSettings = { it.useFuzzing = false })
         val generator = TestGenerator(settings)
         val (tests, info) = generator.run(mapOf(classname to "$sourceDir/${classname.replace('.', '/')}.java").toTestUnits())
         saveTests(tests)

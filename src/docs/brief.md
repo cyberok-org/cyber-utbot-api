@@ -21,3 +21,11 @@
 Какие-то заметки - [notes](utbot/notes.md)
 
 В целом все доки по **utbot** в этом репозитории - [тут](utbot). Какие-то доки от самого **utbot** - [тут](../../../docs).
+
+## UTBot VM options
+
+Какие-то падения utbot решались добавлением следующих опций для запуска. 
+
+```
+VM options (configuration): --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+```
