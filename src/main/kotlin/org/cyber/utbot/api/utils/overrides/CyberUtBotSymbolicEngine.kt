@@ -204,6 +204,7 @@ class CyberUtBotSymbolicEngine(
                                 StateLabel.INTERMEDIATE -> pathSelector.offer(newState)
                                 StateLabel.CONCRETE -> statesForConcreteExecution.add(newState)
                                 StateLabel.TERMINAL -> {
+                                    @CyberNew("ignore terminal state if the trace was not found yet")
                                     if (pathSelector is CyberSelector) {
                                         if (!(pathSelector as CyberSelector).traceFound()) {
                                             continue

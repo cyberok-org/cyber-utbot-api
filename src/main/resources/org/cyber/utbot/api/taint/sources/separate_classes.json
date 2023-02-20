@@ -1,9 +1,9 @@
-{
-  "containingClass": "Lorg/testcases/taint/sepclasses/SourceClass;",
-  "signature": "source(II)Ljava/lang/String;",
-  "description": "",
-  "taintsThis": "false",
-  "taintsReturn": "true",
-  "taintsArgs": [],
-  "taintsGlobals": []
-}
+  {
+    "containingClass": "Lorg/testcases/taint/sepclasses/SourceClass;",
+    "signature": "source(II)Ljava/lang/String;",
+    "description": "",
+    "taintsThis": "false",
+    "taintsReturn": "true",
+    "taintsArgs": [],
+    "taintsGlobals": []
+  }
