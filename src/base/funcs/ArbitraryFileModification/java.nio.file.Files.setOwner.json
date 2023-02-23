@@ -1,0 +1,8 @@
+{
+  "fullyQualified": "java.nio.file.Files",
+  "function": "setOwner",
+  "description": "arbitrary file modification",
+  "functions": [
+    "src/base/checks/files/path8.json"
+  ]
+}

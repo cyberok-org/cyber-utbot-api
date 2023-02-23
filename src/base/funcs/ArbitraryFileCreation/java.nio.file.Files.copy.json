@@ -1,0 +1,8 @@
+{
+  "fullyQualified": "java.nio.file.Files",
+  "function": "copy",
+  "description": "arbitrary file creation",
+  "functions": [
+    "src/base/checks/files/path1.json"
+  ]
+}

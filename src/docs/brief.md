@@ -27,5 +27,14 @@
 Какие-то падения utbot решались добавлением следующих опций для запуска. 
 
 ```
-VM options (configuration): --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+VM options (configuration): 
+-Xmx1536M
+--add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens java.base/java.util=ALL-UNNAMED
+--add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
+--add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+--add-exports=java.base/sun.nio.fs=ALL-UNNAMED
 ```

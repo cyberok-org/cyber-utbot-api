@@ -1,0 +1,8 @@
+{
+  "fullyQualified": "java.lang.ClassLoader",
+  "function": "getResourceAsStream",
+  "description": "arbitrary file reading",
+  "functions": [
+    "src/base/checks/files/path2.json"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "fullyQualified": "java.nio.file.Files",
+  "function": "newBufferedReader",
+  "description": "arbitrary file reading",
+  "functions": [
+    "src/base/checks/files/path1.json"
+  ]
+}

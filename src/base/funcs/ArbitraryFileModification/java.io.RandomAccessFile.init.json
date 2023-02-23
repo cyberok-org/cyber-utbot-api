@@ -1,0 +1,8 @@
+{
+  "fullyQualified": "java.io.RandomAccessFile",
+  "function": "<init>",
+  "description": "arbitrary file modification",
+  "functions": [
+    "src/base/checks/files/path9.json"
+  ]
+}

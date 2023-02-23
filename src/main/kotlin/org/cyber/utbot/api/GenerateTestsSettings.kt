@@ -4,7 +4,6 @@ import org.cyber.utbot.api.abstraction.extraChecks.ExtraVulnerabilityCheck
 import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.utbot.engine.Mocker
 import org.utbot.framework.UtSettings
-import org.utbot.framework.codegen.*
 import org.utbot.framework.codegen.domain.*
 import org.utbot.framework.plugin.api.CodegenLanguage
 import org.utbot.framework.plugin.api.MockStrategyApi
