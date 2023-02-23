@@ -1,0 +1,8 @@
+{
+  "containingClass": "Ljava/nio/file/spi/FileSystemProvider",
+  "signature": "copy(Ljava/nio/file/Path;Ljava/nio/file/Path;[Ljava/nio/file/CopyOption;)V",
+  "description": "FileSystemProvider.copy(...) with unchecked source and target arguments",
+  "takesInstance": "false",
+  "takesArgs": [1, 2],
+  "takesGlobals": []
+}

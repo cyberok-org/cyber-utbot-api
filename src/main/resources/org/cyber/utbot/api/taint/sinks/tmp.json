@@ -1,6 +1,6 @@
 {
-  "containingClass": "Lorg/testcases/taint/Temp;",
-  "signature": "vulnerable(I)V",
+  "containingClass": "Lorg/testcases/taint/Example;",
+  "signature": "sink(Ljava/lang/String;)V",
   "description": "tmp",
   "takesInstance": "false",
   "takesArgs": [1],

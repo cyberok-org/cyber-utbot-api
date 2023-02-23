@@ -1,8 +1,8 @@
-{
-  "containingClass": "Lorg/testcases/taint/sepclasses/SinkClass;",
-  "signature": "sink(Ljava/lang/String;Ljava/lang/String;)V",
-  "description": "",
-  "takesInstance": "false",
-  "takesArgs": [2],
-  "takesGlobals": []
-}
+  {
+    "containingClass": "Lorg/testcases/taint/sepclasses/SinkClass;",
+    "signature": "sink(Ljava/lang/String;Ljava/lang/String;)V",
+    "description": "",
+    "takesInstance": "false",
+    "takesArgs": [2],
+    "takesGlobals": []
+  }

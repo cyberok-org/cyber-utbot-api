@@ -1,0 +1,8 @@
+{
+  "containingClass": "Ljava/io/PrintWriter;",
+  "signature": "<init>(Ljava/lang/String;)V",
+  "description": "PrintWriter initialization with unchecked fileName argument",
+  "takesInstance": "false",
+  "takesArgs": [1],
+  "takesGlobals": []
+}

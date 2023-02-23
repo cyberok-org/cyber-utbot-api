@@ -1,0 +1,8 @@
+{
+  "containingClass": "Ljava/nio/file/Files;",
+  "signature": "newOutputStream(Ljava/nio/file/Path;[Ljava/nio/file/OpenOption;)Ljava/io/OutputStream;",
+  "description": "Files.newOutputStream(...) with unchecked path argument",
+  "takesInstance": "false",
+  "takesArgs": [1],
+  "takesGlobals": []
+}

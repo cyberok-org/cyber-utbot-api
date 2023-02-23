@@ -132,8 +132,8 @@ class CyberSelector(
      */
     fun onNextIteration(initState: ExecutionState) {
         val jimpleBody = graph.method(initState.stmt).jimpleBody()
-        // println(jimpleBody)
-        // println("NOW IN ${jimpleBody.method.name}")
+         println(jimpleBody)
+         println("NOW IN ${jimpleBody.method.name}")
         resetTrace()
         container.states.clear()
         innerCallDestination.clear()

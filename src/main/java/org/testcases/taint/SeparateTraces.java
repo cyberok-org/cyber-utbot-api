@@ -3,11 +3,11 @@ package org.testcases.taint;
 public class SeparateTraces {
 
     public String source1() {
-        return "aaa";
+        return "source1";
     }
 
     public String source2() {
-        return "bbb";
+        return "source2";
     }
 
     public void foo(int a) {
