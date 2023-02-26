@@ -10,13 +10,10 @@ import org.cyber.utbot.api.utils.vulnerability.VulnerabilityChecksHolder
 import org.utbot.engine.*
 import org.utbot.engine.Hierarchy
 import org.utbot.engine.pc.*
-import org.utbot.engine.symbolic.SymbolicStateUpdate
-import org.utbot.engine.symbolic.asAssumption
-import org.utbot.engine.symbolic.asHardConstraint
 import org.utbot.engine.types.TypeRegistry
 import org.utbot.engine.types.TypeResolver
 import org.utbot.framework.plugin.api.ExecutableId
-import org.utbot.framework.util.graph
+import org.utbot.framework.util.executableId
 import soot.*
 
 
@@ -42,60 +39,131 @@ class CyberTraverser(
         } ?: target
     }
 
-    @CyberModify("org/utbot/engine/Traverser.kt", "added decorateTarget call")
-    override fun TraversalContext.invoke(
-        target: InvocationTarget,
-        parameters: List<SymbolicValue>
-    ): List<MethodResult> = @CyberNew("\"decorateTarget(target, parameters).let { target ->\" new, decorate target") decorateTarget(target).let { target ->
-        with(target.method) {
-            val substitutedMethod = typeRegistry.findSubstitutionOrNull(this)
+    @CyberModify("org/utbot/engine/Traverser.kt", "added decorateTarget call for overrideInvocation")
+    override fun TraversalContext.commonInvokePart(invocation: Invocation): List<MethodResult> {
+        val method = invocation.method.executableId
 
-            if (isNative && substitutedMethod == null) return processNativeMethod(target)
+        // This code is supposed to support generic information from signatures for nested methods.
+        // If we have some method 'foo` and a method `bar(List<Integer>), and inside `foo`
+        // there is an invocation `bar(object)`, this object must have information about
+        // its `Integer` generic type.
+        invocation.parameters.forEachIndexed { index, param ->
+            if (param !is ReferenceValue) return@forEachIndexed
 
-            // If we face UtMock.assume call, we should continue only with the branch
-            // where the predicate from the parameters is equal true
-            when {
-                isUtMockAssume || isUtMockAssumeOrExecuteConcretely -> {
-                    val param = UtCastExpression(parameters.single() as PrimitiveValue, BooleanType.v())
+            updateGenericTypeInfoFromMethod(method, param, parameterIndex = index + 1)
+        }
 
-                    val assumptionStmt = mkEq(param, UtTrue)
-                    val (hardConstraints, assumptions) = if (isUtMockAssume) {
-                        // For UtMock.assume we must add the assumeStmt to the hard constraints
-                        setOf(assumptionStmt) to emptySet()
-                    } else {
-                        // For assumeOrExecuteConcretely we must add the statement to the assumptions.
-                        // It is required to have opportunity to remove it later in case of unsat state
-                        // because of it and execute the state concretely.
-                        emptySet<UtBoolExpression>() to setOf(assumptionStmt)
-                    }
+        if (invocation.instance != null) {
+            updateGenericTypeInfoFromMethod(method, invocation.instance!!, parameterIndex = 0)
+        }
 
-                    val symbolicStateUpdate = SymbolicStateUpdate(
-                        hardConstraints = hardConstraints.asHardConstraint(),
-                        assumptions = assumptions.asAssumption()
-                    )
+        /**
+         * First, check if there is override for the invocation itself, not for the targets.
+         *
+         * Note that calls with super syntax are represented by invokeSpecial instruction, but we don't support them in wrappers,
+         * so here we resolve [invocation] to the inherited method invocation if it's something like:
+         *
+         * ```java
+         * public class InheritedWrapper extends BaseWrapper {
+         *     public void add(Object o) {
+         *         // some stuff
+         *         super.add(o); // this resolves to InheritedWrapper::add instead of BaseWrapper::add
+         *     }
+         * }
+         * ```
+         *
+         * TODO: https://github.com/UnitTestBot/UTBotJava/issues/819 -- Support super calls in inherited wrappers
+         */
+        val artificialMethodOverride = overrideInvocation(invocation, target = null)
 
-                    val stateToContinue = updateQueued(
-                        globalGraph.succ(environment.state.stmt),
-                        symbolicStateUpdate
-                    )
-                    offerState(stateToContinue)
+        // The problem here is that we might have an unsat current state.
+        // We get states with `SAT` last status only for traversing,
+        // but during the parameters resolving this status might be changed.
+        // It happens inside the `org.utbot.engine.Traverser.initStringLiteral` function.
+        // So, if it happens, we should just drop the state we processing now.
+        if (environment.state.solver.lastStatus is UtSolverStatusUNSAT) {
+            return emptyList()
+        }
 
-                    // we already pushed state with the fulfilled predicate, so we can just drop our branch here by
-                    // adding UtFalse to the constraints.
-                    queuedSymbolicStateUpdates += UtFalse.asHardConstraint()
-                    emptyList()
+        // If so, return the result of the override
+        if (artificialMethodOverride.success) {
+            @CyberNew("decorate target") run {
+                val target = InvocationTarget(invocation.instance, invocation.method)
+                val newTarget = decorateTarget(target)
+                if (target != newTarget) {
+                    return invoke(target, invocation.parameters)
                 }
+            }
+            if (artificialMethodOverride.results.size > 1) {
+                environment.state.definitelyFork()
+            }
 
-                declaringClass == utOverrideMockClass -> utOverrideMockInvoke(target, parameters)
-                declaringClass == utLogicMockClass -> utLogicMockInvoke(target, parameters)
-                declaringClass == utArrayMockClass -> utArrayMockInvoke(target, parameters)
-                isUtMockForbidClassCastException -> isUtMockDisableClassCastExceptionCheckInvoke(parameters)
-                else -> {
-                    val graph = substitutedMethod?.jimpleBody()?.graph() ?: jimpleBody().graph()
-                    pushToPathSelector(graph, target.instance, parameters, target.constraints, isLibraryMethod)
-                    emptyList()
+            return mutableListOf<MethodResult>().apply {
+                for (result in artificialMethodOverride.results) {
+                    when (result) {
+                        is MethodResult -> add(result)
+                        is GraphResult -> pushToPathSelector(
+                            result.graph,
+                            invocation.instance,
+                            invocation.parameters,
+                            result.constraints,
+                            isLibraryMethod = true
+                        )
+                    }
                 }
             }
         }
+
+        // If there is no such invocation, use the generator to produce invocation targets
+        val targets = invocation.generator.invoke()
+
+        // Take all the targets and run them, at least one target must exist
+        require(targets.isNotEmpty()) { "No targets for $invocation" }
+
+        // Note that sometimes invocation on the particular targets should be overridden as well.
+        // For example, Collection.size will produce two targets (ArrayList and HashSet)
+        // that will override the invocation.
+        val overrideResults = targets
+            .map { @CyberNew("decorate target") decorateTarget(it) }
+            .map { it to overrideInvocation(invocation, it) }
+
+        if (overrideResults.sumOf { (_, overriddenResult) -> overriddenResult.results.size } > 1) {
+            environment.state.definitelyFork()
+        }
+
+        // Separate targets for which invocation should be overridden
+        // from the targets that should be processed regularly.
+        val (overridden, original) = overrideResults.partition { it.second.success }
+
+        val overriddenResults = overridden
+            .flatMap { (target, overriddenResult) ->
+                mutableListOf<MethodResult>().apply {
+                    for (result in overriddenResult.results) {
+                        when (result) {
+                            is MethodResult -> add(result)
+                            is GraphResult -> pushToPathSelector(
+                                result.graph,
+                                // take the instance from the target
+                                target.instance,
+                                invocation.parameters,
+                                // It is important to add constraints for the target as well, because
+                                // those constraints contain information about the type of the
+                                // instance from the target
+                                target.constraints + result.constraints,
+                                // Since we override methods of the classes from the standard library
+                                isLibraryMethod = true
+                            )
+                        }
+                    }
+                }
+            }
+
+        // Add results for the targets that should be processed without override
+        val originResults = original.flatMap { (target: InvocationTarget, _) ->
+            invoke(target, invocation.parameters)
+        }
+
+        // Return their concatenation
+        return overriddenResults + originResults
     }
 }

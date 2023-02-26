@@ -21,7 +21,8 @@ fun main() {
     val classpath = "build/classes/java/main"
 
     val otherMocks = emptyList<String>()
-//    val otherMocks = listOf("java.nio.file.Files")
+//    val otherMocks = listOf("java.nio.file.Paths", "java.io.FileWriter", "java.io.PrintWriter")
+//    // mocks: "java.nio.file.Files", "java.io.File", "java.nio.file.spi.FileSystemProvider", "javax.swing.filechooser.FileSystemView"
 
     val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
         withUtSettings = { useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },

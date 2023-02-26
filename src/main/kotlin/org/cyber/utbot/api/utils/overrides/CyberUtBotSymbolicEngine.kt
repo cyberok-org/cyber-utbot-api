@@ -24,6 +24,7 @@ import org.utbot.engine.state.ExecutionStackElement
 import org.utbot.engine.state.ExecutionState
 import org.utbot.engine.state.StateLabel
 import org.utbot.engine.symbolic.SymbolicState
+import org.utbot.engine.util.mockListeners.MockListenerController
 import org.utbot.framework.UtSettings
 import org.utbot.framework.UtSettings.processUnknownStatesDuringConcreteExecution
 import org.utbot.framework.UtSettings.useDebugVisualization
@@ -53,6 +54,13 @@ class CyberUtBotSymbolicEngine(
             }
         }
         if (findVulnerabilities) {
+            mocker = CyberMocker(
+                mockStrategy,
+                classUnderTest,
+                hierarchy,
+                chosenClassesToMockAlways,
+                MockListenerController(controller)
+            )
             traverser = CyberTraverser(
                 methodUnderTest,
                 typeRegistry,
