@@ -40,6 +40,8 @@ abstract class AbstractTestGenerator {
     protected abstract val cyberPathSelector: Boolean
     protected abstract val findVulnerabilities: Boolean
     protected abstract val vulnerabilityCheckDirectories: List<String>
+    protected abstract val vulnerabilityChecksAnalysisSuffix: String
+    protected abstract val vulnerabilityChecksSuffix: String
     protected abstract val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck>
     protected abstract val onlyVulnerabilities: Boolean
 
@@ -48,7 +50,7 @@ abstract class AbstractTestGenerator {
     protected val newlineSeparator: String by lazy { System.lineSeparator() }
 
     protected val statePublisher: StatePublisher by lazy { StatePublisher(utbotViewers.mapNotNull { it.stateViewer() }.toMutableList()) }
-    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder by lazy { VulnerabilityChecksHolder(vulnerabilityCheckDirectories)
+    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder by lazy { VulnerabilityChecksHolder(vulnerabilityCheckDirectories, vulnerabilityChecksAnalysisSuffix, vulnerabilityChecksSuffix)
         .also { it.register(extraVulnerabilityChecks) } }
 
     protected fun updateClassLoader(classpath: String) {

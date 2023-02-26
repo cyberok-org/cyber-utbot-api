@@ -44,7 +44,7 @@ class CyberUtBotSymbolicEngine(
     findVulnerabilities: Boolean = true,
     private val onlyVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
-    vulnerabilityChecksHolder: VulnerabilityChecksHolder = VulnerabilityChecksHolder(),
+    vulnerabilityChecksHolder: VulnerabilityChecksHolder,
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
     init {  // set our selector
         if (cyberPathSelector) {

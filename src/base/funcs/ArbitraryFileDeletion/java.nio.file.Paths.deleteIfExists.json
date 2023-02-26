@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "java.nio.file.Files",
-  "function": "deleteIfExists",
-  "description": "arbitrary file deletion",
-  "functions": [
-    "src/base/checks/files/path1.json"
-  ]
-}

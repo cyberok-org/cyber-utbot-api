@@ -1,9 +1,0 @@
-{
-  "fullyQualified": "java.util.zip.ZipFile",
-  "function": "<init>",
-  "description": "arbitrary file reading",
-  "functions": [
-    "src/base/checks/files/path2.json",
-    "src/base/checks/files/path18.json"
-  ]
-}

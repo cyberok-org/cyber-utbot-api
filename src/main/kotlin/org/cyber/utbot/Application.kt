@@ -17,20 +17,24 @@ import java.nio.file.Files
 
 
 fun main() {
+//    val classpath = "/home/andrew/UTBotJava/cyber-utbot-exploit-base/build/classes/java/main"
+    val classpath = "build/classes/java/main"
+
     val otherMocks = emptyList<String>()
 //    val otherMocks = listOf("java.nio.file.Files")
-    val settings = GenerateTestsSettings("build/classes/java/main", codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
+
+    val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
         withUtSettings = { useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },
-        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER)) // , vulnerabilityCheckDirectories=listOf("src/base/funcs"))
+        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER)) // , vulnerabilityCheckDirectories=listOf("/home/andrew/UTBotJava/cyber-utbot-exploit-base/src/base"))
     val generator = TestGenerator(settings)
     val (tests, info) = generator.run(mapOf("org.example.Loop" to "src/main/java/org/example/Loop.java").toTestUnits())
     tests.forEach { nameAndTest ->
         Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
     }
 
-//    val (tests, info) = generator.run(mapOf("org.baseExamples.ArbitraryFileCreation" to "src/main/java/org/baseExamples/ArbitraryFileCreation.java").toTestUnits())
+//    val (tests, info) = generator.run(mapOf("org.example.base.ArbitraryFileCreation" to "/home/andrew/UTBotJava/cyber-utbot-exploit-base/src/main/java/org/example/base/ArbitraryFileCreation.java").toTestUnits())
 //    tests.forEach { nameAndTest ->
-//        Files.write("src/test/java/org/baseExamples/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
+//        Files.write("/home/andrew/UTBotJava/cyber-utbot-exploit-base/src/test/java/org/example/base/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
 //    }
     printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
 }

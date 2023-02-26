@@ -1,9 +1,0 @@
-{
-  "fullyQualified": "java.io.File",
-  "function": "<init>",
-  "description": "arbitrary file creation",
-  "functions": [
-    "src/base/checks/files/path2.json",
-    "src/base/checks/files/path13.json"
-  ]
-}

@@ -42,6 +42,8 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val cyberPathSelector: Boolean = settings.cyberPathSelector
     override val findVulnerabilities: Boolean = settings.findVulnerabilities
     override val vulnerabilityCheckDirectories: List<String> = settings.vulnerabilityCheckDirectories
+    override val vulnerabilityChecksAnalysisSuffix: String = settings.vulnerabilityChecksAnalysisSuffix
+    override val vulnerabilityChecksSuffix: String = settings.vulnerabilityChecksSuffix
     override val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck> = settings.extraVulnerabilityChecks
     override val onlyVulnerabilities: Boolean = settings.onlyVulnerabilities
 

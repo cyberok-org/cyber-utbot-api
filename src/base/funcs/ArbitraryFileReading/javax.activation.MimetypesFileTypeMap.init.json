@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "javax.activation.MimetypesFileTypeMap",
-  "function": "<init>",
-  "description": "arbitrary file reading",
-  "functions": [
-    "src/base/checks/files/path2.json"
-  ]
-}

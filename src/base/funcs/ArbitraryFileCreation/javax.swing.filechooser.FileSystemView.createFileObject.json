@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "javax.swing.filechooser.FileSystemView",
-  "function": "createFileObject",
-  "description": "arbitrary file creation",
-  "functions": [
-    "src/base/checks/files/path2.json"
-  ]
-}

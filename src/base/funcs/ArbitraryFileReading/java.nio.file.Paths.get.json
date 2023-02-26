@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "java.nio.file.Paths",
-  "function": "get",
-  "description": "arbitrary file reading",
-  "functions": [
-    "src/base/checks/files/path2.json"
-  ]
-}

@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "java.nio.file.Files",
-  "function": "newByteChannel",
-  "description": "arbitrary file modification",
-  "functions": [
-    "src/base/checks/files/path6.json"
-  ]
-}

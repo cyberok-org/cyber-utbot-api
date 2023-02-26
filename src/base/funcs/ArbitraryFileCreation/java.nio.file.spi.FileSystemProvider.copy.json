@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "java.nio.file.spi.FileSystemProvider",
-  "function": "copy",
-  "description": "arbitrary file creation",
-  "functions": [
-    "src/base/checks/files/path4.json"
-  ]
-}

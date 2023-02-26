@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "java.nio.file.spi.FileSystemProvider",
-  "function": "newFileChannel",
-  "description": "arbitrary file reading",
-  "functions": [
-    "src/base/checks/files/path12.json"
-  ]
-}

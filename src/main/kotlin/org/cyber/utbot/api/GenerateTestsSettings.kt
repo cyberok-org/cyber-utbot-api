@@ -3,6 +3,7 @@ package org.cyber.utbot.api
 import org.cyber.utbot.api.abstraction.extraChecks.ExtraVulnerabilityCheck
 import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.utbot.engine.Mocker
+import org.utbot.framework.TrustedLibraries
 import org.utbot.framework.UtSettings
 import org.utbot.framework.codegen.domain.*
 import org.utbot.framework.plugin.api.CodegenLanguage
@@ -112,7 +113,17 @@ class GenerateTestsSettings(
     /**
      * list of directories with files of the form VulnerabilityStandard for the description of analyzed vulnerabilities
      */
-    val vulnerabilityCheckDirectories: List<String> = listOf("src/exploitBase/funcs"),
+    val vulnerabilityCheckDirectories: List<String> = listOf("src/exploitBase"),
+
+    /**
+     * *$vulnerabilityCheckDirectory/$vulnerabilityCheckFuncsSuffix* - path to functions checks descriptions directory
+     */
+    val vulnerabilityChecksAnalysisSuffix: String = "funcs",
+
+    /**
+     * *$vulnerabilityCheckDirectory/vulnerabilityChecksSuffix* - path to checks, referenced by *vulnerabilityChecksAnalysisSuffix files*. So path - *$vulnerabilityCheckDirectories/$vulnerabilityChecksSuffix/${path declared from function check file}*
+     */
+    val vulnerabilityChecksSuffix: String = "checks",
 
     /**
      * structures similar to those analyzed from the base (vulnerabilityCheckDirectories), set in runtime
@@ -122,9 +133,16 @@ class GenerateTestsSettings(
     /**
      * generate tests only for vulnerabilities if true
      */
-    val onlyVulnerabilities: Boolean = true
+    val onlyVulnerabilities: Boolean = true,
+
+    /**
+     * libraries that utbot will trust
+     * already trust: java, sun, javax, com.sun, org.omg, org.xml, org.w3c.dom
+     */
+    trustedLibraries: List<String> = listOf()
 ) {
     init {  // check is settings correct
+        TrustedLibraries.extraTrustedLibraries = trustedLibraries
         mockAlways.forEach { fullyQualifiedName ->
             Class.forName(fullyQualifiedName, false, ClassLoader.getSystemClassLoader())
         }

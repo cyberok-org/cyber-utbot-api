@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "java.nio.file.Files",
-  "function": "write",
-  "description": "arbitrary file modification",
-  "functions": [
-    "src/base/checks/files/path7.json"
-  ]
-}

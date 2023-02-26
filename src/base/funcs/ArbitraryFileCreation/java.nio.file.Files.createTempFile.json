@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "java.nio.file.Files",
-  "function": "createTempFile",
-  "description": "arbitrary file creation",
-  "functions": [
-    "src/base/checks/files/path5.json"
-  ]
-}

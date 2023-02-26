@@ -1,8 +1,0 @@
-{
-  "fullyQualified": "java.nio.file.spi.FileSystemProvider",
-  "function": "newOutputStream",
-  "description": "arbitrary file creation",
-  "functions": [
-    "src/base/checks/files/path3.json"
-  ]
-}
