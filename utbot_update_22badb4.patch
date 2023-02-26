@@ -25,9 +25,49 @@ index 67a5e89e..53116595 100644
  /**
   * Creates synthetic method with static initializer invocation and returns its graph.
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt
-index 231d31c1..5f0d68b2 100644
+index 231d31c1..23635d99 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt
+@@ -131,7 +131,7 @@ data class UtStaticMethodMockInfo(
+ /**
+  * Service to mock things. Knows mock strategy, class under test and class hierarchy.
+  */
+-class Mocker(
++open class Mocker(
+     private val strategy: MockStrategy,
+     private val classUnderTest: ClassId,
+     private val hierarchy: Hierarchy,
+@@ -144,14 +144,14 @@ class Mocker(
+      *
+      * @see shouldMock
+      */
+-    fun mock(type: RefType, mockInfo: UtMockInfo): ObjectValue? =
++    open fun mock(type: RefType, mockInfo: UtMockInfo): ObjectValue? =
+         if (shouldMock(type, mockInfo)) createMockObject(type, mockInfo) else null
+ 
+     /**
+      * Creates mocked instance of the [type] using mock info. Unlike to [mock], it does not
+      * check anything and always returns the constructed mock.
+      */
+-    fun forceMock(type: RefType, mockInfo: UtMockInfo): ObjectValue = createMockObject(type, mockInfo)
++    open fun forceMock(type: RefType, mockInfo: UtMockInfo): ObjectValue = createMockObject(type, mockInfo)
+ 
+     /**
+      * Checks if Engine should mock objects of particular type with current mock strategy and mock type.
+@@ -295,10 +295,10 @@ private fun createMockObject(type: RefType, mockInfo: UtMockInfo) =
+     objectValue(type, mockInfo.addr, UtMockWrapper(type, mockInfo))
+ 
+ private val mockCounter = AtomicInteger(0)
+-private fun nextMockNumber() = mockCounter.incrementAndGet()
+-private fun createMockLabel(number: Int) = "mock#$number"
++fun nextMockNumber() = mockCounter.incrementAndGet()
++fun createMockLabel(number: Int) = "mock#$number"
+ 
+-class UtMockWrapper(
++open class UtMockWrapper(
+     val type: RefType,
+     private val mockInfo: UtMockInfo
+ ) : WrapperInterface {
 @@ -347,13 +347,13 @@ class UtMockWrapper(
  internal val utMockClass: SootClass
      get() = Scene.v().getSootClass(UtMock::class.qualifiedName)
@@ -348,7 +388,7 @@ index 3ae7ca31..5175555f 100644
  }
 \ No newline at end of file
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
-index 10a9138a..f47ec562 100644
+index 10a9138a..ea595b54 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
 @@ -62,7 +62,7 @@ class EngineController {
@@ -397,10 +437,11 @@ index 10a9138a..f47ec562 100644
 -    internal val typeResolver: TypeResolver = TypeResolver(typeRegistry, hierarchy)
 +    protected val typeResolver: TypeResolver = TypeResolver(typeRegistry, hierarchy)
  
-     private val classUnderTest: ClassId = methodUnderTest.classId
+-    private val classUnderTest: ClassId = methodUnderTest.classId
++    protected val classUnderTest: ClassId = methodUnderTest.classId
  
 -    private val mocker: Mocker = Mocker(
-+    protected val mocker: Mocker = Mocker(
++    protected var mocker: Mocker = Mocker(
          mockStrategy,
          classUnderTest,
          hierarchy,
