@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
+import org.cyber.utbot.api.utils.additions.wrappers.PathWrapper
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.viewers.StatePublisher
@@ -29,7 +30,11 @@ import org.utbot.framework.UtSettings
 import org.utbot.framework.UtSettings.processUnknownStatesDuringConcreteExecution
 import org.utbot.framework.UtSettings.useDebugVisualization
 import org.utbot.framework.plugin.api.*
+import org.utbot.framework.plugin.api.util.UtContext
 import org.utbot.framework.plugin.api.util.description
+import org.utbot.framework.util.classesToLoad
+import soot.Scene
+import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 
 
@@ -70,6 +75,41 @@ class CyberUtBotSymbolicEngine(
                 mocker,
                 vulnerabilityChecksHolder = vulnerabilityChecksHolder
             )
+
+            // for overrides
+            classesToLoad = classesToLoad.plus(arrayOf(
+                // add all overrides here!!!
+                org.cyber.utils.overrides.CyberPath::class,
+            ).map { it.java }.toTypedArray())
+
+            classToWrapper += (mutableMapOf<TypeToBeWrapped, WrapperType>().apply {
+                // add all overrides here!!!
+                putSootClass(java.nio.file.Path::class, org.cyber.utils.overrides.CyberPath::class)
+            }.apply {
+                val applicationClassLoader = UtContext::class.java.classLoader
+                values.distinct().forEach {
+                    val kClass = applicationClassLoader.loadClass(it.className).kotlin
+                    putSootClass(kClass, it)
+                }
+            })
+
+            wrappers = wrappers + mutableMapOf(
+                // add all overrides here!!!
+                wrap(java.nio.file.Path::class) { type, addr -> objectValue(type, addr, PathWrapper()) }
+            ).apply {
+                arrayOf(
+                    // add all overrides here!!!
+                    wrap(org.cyber.utils.overrides.CyberPath::class) { _, addr -> objectValue(Scene.v().getSootClass(Path::class.java.canonicalName).type, addr, PathWrapper()) }
+                ).let { putAll(it) }
+            }.also {
+                val missedWrappers = it.keys.filterNot { key ->
+                    Scene.v().getSootClass(key.name).type in classToWrapper.keys
+                }
+
+                require(missedWrappers.isEmpty()) {
+                    "Missed wrappers for classes [${missedWrappers.joinToString(", ")}]"
+                }
+            }
         }
     }
 

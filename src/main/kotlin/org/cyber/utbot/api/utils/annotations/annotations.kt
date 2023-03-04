@@ -10,7 +10,9 @@ annotation class CyberNotModify(val ref: String, val reason: String = "")
 annotation class CyberModify(val ref: String, val change: String = "")
 
 
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.EXPRESSION, AnnotationTarget.LOCAL_VARIABLE)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.EXPRESSION, AnnotationTarget.LOCAL_VARIABLE,
+    AnnotationTarget.PROPERTY
+)
 @Retention(AnnotationRetention.SOURCE)
 annotation class CyberNew(val reason: String = "")
 
