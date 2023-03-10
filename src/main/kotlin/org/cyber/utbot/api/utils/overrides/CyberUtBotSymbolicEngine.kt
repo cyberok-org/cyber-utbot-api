@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import org.cyber.utbot.api.utils.additions.pathSelector.CyberSelector
 import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
+import org.cyber.utbot.api.utils.additions.wrappers.PathWrapper
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.viewers.StatePublisher
@@ -26,11 +27,16 @@ import org.utbot.engine.state.ExecutionStackElement
 import org.utbot.engine.state.ExecutionState
 import org.utbot.engine.state.StateLabel
 import org.utbot.engine.symbolic.SymbolicState
+import org.utbot.engine.util.mockListeners.MockListenerController
 import org.utbot.framework.UtSettings
 import org.utbot.framework.UtSettings.processUnknownStatesDuringConcreteExecution
 import org.utbot.framework.UtSettings.useDebugVisualization
 import org.utbot.framework.plugin.api.*
+import org.utbot.framework.plugin.api.util.UtContext
 import org.utbot.framework.plugin.api.util.description
+import org.utbot.framework.util.classesToLoad
+import soot.Scene
+import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 
 
@@ -46,7 +52,7 @@ class CyberUtBotSymbolicEngine(
     findVulnerabilities: Boolean = true,
     private val onlyVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
-    vulnerabilityChecksHolder: VulnerabilityChecksHolder = VulnerabilityChecksHolder(),
+    vulnerabilityChecksHolder: VulnerabilityChecksHolder,
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
 
     override lateinit var pathSelector: PathSelector
@@ -60,6 +66,13 @@ class CyberUtBotSymbolicEngine(
             pathSelector(globalGraph, typeRegistry)
         }
         if (findVulnerabilities) {
+            mocker = CyberMocker(
+                mockStrategy,
+                classUnderTest,
+                hierarchy,
+                chosenClassesToMockAlways,
+                MockListenerController(controller)
+            )
             traverser = CyberTraverser(
                 methodUnderTest,
                 typeRegistry,
@@ -69,6 +82,41 @@ class CyberUtBotSymbolicEngine(
                 mocker,
                 vulnerabilityChecksHolder = vulnerabilityChecksHolder
             )
+
+            // for overrides
+            classesToLoad = classesToLoad.plus(arrayOf(
+                // add all overrides here!!!
+                org.cyber.utils.overrides.CyberPath::class,
+            ).map { it.java }.toTypedArray())
+
+            classToWrapper += (mutableMapOf<TypeToBeWrapped, WrapperType>().apply {
+                // add all overrides here!!!
+                putSootClass(java.nio.file.Path::class, org.cyber.utils.overrides.CyberPath::class)
+            }.apply {
+                val applicationClassLoader = UtContext::class.java.classLoader
+                values.distinct().forEach {
+                    val kClass = applicationClassLoader.loadClass(it.className).kotlin
+                    putSootClass(kClass, it)
+                }
+            })
+
+            wrappers = wrappers + mutableMapOf(
+                // add all overrides here!!!
+                wrap(java.nio.file.Path::class) { type, addr -> objectValue(type, addr, PathWrapper()) }
+            ).apply {
+                arrayOf(
+                    // add all overrides here!!!
+                    wrap(org.cyber.utils.overrides.CyberPath::class) { _, addr -> objectValue(Scene.v().getSootClass(Path::class.java.canonicalName).type, addr, PathWrapper()) }
+                ).let { putAll(it) }
+            }.also {
+                val missedWrappers = it.keys.filterNot { key ->
+                    Scene.v().getSootClass(key.name).type in classToWrapper.keys
+                }
+
+                require(missedWrappers.isEmpty()) {
+                    "Missed wrappers for classes [${missedWrappers.joinToString(", ")}]"
+                }
+            }
         }
     }
 
@@ -157,15 +205,21 @@ class CyberUtBotSymbolicEngine(
                                 listOf(),
                                 concreteExecutionResult.coverage
                             )
-                            emit(concreteUtExecution)
+                            @CyberModify("filter emit") if (!onlyVulnerabilities) {
+                                emit(concreteUtExecution)
+                            }
 
                             logger.debug { "concolicStrategy<${methodUnderTest}>: returned $concreteUtExecution" }
                         } catch (e: CancellationException) {
                             logger.debug(e) { "Cancellation happened" }
                         } catch (e: ConcreteExecutionFailureException) {
-                            emitFailedConcreteExecutionResult(stateBefore, e)
+                            @CyberModify("filter emit") if (!onlyVulnerabilities) {
+                                emitFailedConcreteExecutionResult(stateBefore, e)
+                            }
                         } catch (e: Throwable) {
-                            emit(UtError("Concrete execution failed", e))
+                            @CyberModify("filter emit") if (!onlyVulnerabilities) {
+                                emit(UtError("Concrete execution failed", e))
+                            }
                         }
                     }
 
@@ -195,7 +249,9 @@ class CyberUtBotSymbolicEngine(
                         val newStates = try {
                             traverser.traverse(state)
                         } catch (ex: Throwable) {
-                            emit(UtError(ex.description, ex))
+                            @CyberModify("filter emit") if (!onlyVulnerabilities) {
+                                emit(UtError(ex.description, ex))
+                            }
                             return@measureTimeMillis
                         }
                         for (newState in newStates) {
@@ -301,6 +357,7 @@ class CyberUtBotSymbolicEngine(
                         "emit purely symbolic result $symbolicUtExecution"
             }
 
+            @CyberModify("filter emit") if (onlyVulnerabilities) return
             emit(symbolicUtExecution)
             return
         }
@@ -333,6 +390,7 @@ class CyberUtBotSymbolicEngine(
                 logger.debug { "processResult<${methodUnderTest}>: returned $concolicUtExecution" }
             }
         } catch (e: ConcreteExecutionFailureException) {
+            @CyberModify("filter emit") if (onlyVulnerabilities) return
             emitFailedConcreteExecutionResult(stateBefore, e)
         }
     }

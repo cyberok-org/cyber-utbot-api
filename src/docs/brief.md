@@ -21,3 +21,24 @@
 Какие-то заметки - [notes](utbot/notes.md)
 
 В целом все доки по **utbot** в этом репозитории - [тут](utbot). Какие-то доки от самого **utbot** - [тут](../../../docs).
+
+## UTBot VM options
+
+Какие-то падения utbot решались добавлением следующих опций для запуска. 
+
+```
+VM options (configuration): 
+-Xmx1536M
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens java.base/java.util=ALL-UNNAMED
+--add-opens java.base/java.nio.file=ALL-UNNAMED
+--add-opens java.base/sun.nio.fs=ALL-UNNAMED
+--add-opens java.base/java.nio.file.spi=ALL-UNNAMED
+--add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+--add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
+--add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+--add-exports=java.base/sun.nio.fs=ALL-UNNAMED
+--add-exports=java.base/sun.nio.cs=ALL-UNNAMED
+```

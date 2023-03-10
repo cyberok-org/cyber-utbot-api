@@ -39,3 +39,4 @@ out/
 ### cyberok internal
 src/main/finds.md
 src/main/java/org/testcasesGen/plan.txt
+/src/main/java/org/realExamples/

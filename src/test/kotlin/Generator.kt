@@ -8,11 +8,13 @@ import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.utbot.common.PathUtil.toPath
+import org.utbot.framework.TestSelectionStrategyType
+import org.utbot.framework.UtSettings
 import org.utbot.framework.plugin.api.CodegenLanguage
 import java.nio.file.Files
 
 
-class Generator {
+class Generator {   // just some different examples
     private val postfix = "Test.java"
     private val saveDirPrefix = "src/test/java"
     private val classpath = "build/classes/java/main"
@@ -36,20 +38,21 @@ class Generator {
     @Test
     fun generateTests() {
         val dir = "org.example"
-
         val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA)
+
         val generator = TestGenerator(settings)
         val (tests, info) = generator.runBunch(classpath, dir)
-        saveTests(tests)
+//        saveTests(tests)
         printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
     }
 
     @Test
     fun generateTest() {
         val classname = "org.testcases.ifs.Simple"
-//        val classname = "org.example.Loop"
+        val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA,
+            withUtSettings = { UtSettings.useFuzzing = false; UtSettings.useDebugVisualization = true; UtSettings.testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },
+            utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), onlyVulnerabilities = false)
 
-        val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA)
         val generator = TestGenerator(settings)
         val (tests, info) = generator.run(mapOf(classname to "$sourceDir/${classname.replace('.', '/')}.java").toTestUnits())
         saveTests(tests)
@@ -59,11 +62,13 @@ class Generator {
     @Test
     fun generateTest2() {
         val classname = "org.example.Interprocedural"
+        val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA,
+            withUtSettings = { UtSettings.useFuzzing = false; UtSettings.useDebugVisualization = true; UtSettings.testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },
+            utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), onlyVulnerabilities = false)
 
-        val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA)
         val generator = TestGenerator(settings)
         val (tests, info) = generator.run(mapOf(classname to "$sourceDir/${classname.replace('.', '/')}.java").toTestUnits())
-//        saveTests(tests)
+        saveTests(tests)
         printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
     }
 }
