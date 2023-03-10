@@ -36,6 +36,7 @@ VM options (configuration):
 --add-opens java.base/java.nio.file=ALL-UNNAMED
 --add-opens java.base/sun.nio.fs=ALL-UNNAMED
 --add-opens java.base/java.nio.file.spi=ALL-UNNAMED
+--add-opens java.desktop/sun.awt=ALL-UNNAMED
 --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
 --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
 --add-exports=java.base/sun.nio.ch=ALL-UNNAMED

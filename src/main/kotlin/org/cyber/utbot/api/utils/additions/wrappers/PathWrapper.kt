@@ -1,7 +1,9 @@
 package org.cyber.utbot.api.utils.additions.wrappers
 
+import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.overrides.CyberTraverser
 import org.utbot.engine.*
+import org.utbot.engine.pc.UtAddrExpression
 import org.utbot.framework.plugin.api.*
 import org.utbot.framework.plugin.api.util.stringClassId
 import org.utbot.framework.util.graph
@@ -17,7 +19,7 @@ private val cyberPathClass: SootClass
 class PathWrapper : BaseOverriddenWrapper(cyberPathClass.name) {
     private val toStringMethodSignature = overriddenClass.getMethodByName(org.cyber.utils.overrides.CyberPath::toString.name).subSignature
     private val initMethodSignature = overriddenClass.getMethod("<init>", emptyList()).subSignature
-    private val symbolicValues = mutableMapOf<String, Any>()
+    private val symbolicValuesByAddress = mutableMapOf<UtAddrExpression, MutableMap<String, Any>>()
 
     override fun Traverser.overrideInvoke(
         wrapper: ObjectValue,
@@ -25,14 +27,19 @@ class PathWrapper : BaseOverriddenWrapper(cyberPathClass.name) {
         parameters: List<SymbolicValue>
     ): List<InvokeResult>? = when (method.subSignature) {
         initMethodSignature -> {
-            (this as CyberTraverser).getParams(wrapper)?.run {
-                symbolicValues["path"] = first()
-                symbolicValues["other"] = this[1]
+            if (symbolicValuesByAddress[wrapper.addr] == null) {
+                val symbolicValues = mutableMapOf<String, Any>()
+                (this as CyberTraverser).getParams(wrapper)?.run {
+                    symbolicValues["path"] = this[0]
+                    symbolicValues["other"] = this[1]
+                }
+                symbolicValuesByAddress[wrapper.addr] = symbolicValues
             }
             null
         }
         toStringMethodSignature -> {
-            listOf(MethodResult(symbolicValues["path"] as ObjectValue))
+            listOf(MethodResult(symbolicValuesByAddress[wrapper.addr]?.let { it["path"] as ObjectValue }
+                ?: throw CyberException("PathWrapper ${wrapper.type} not exist")))
         }
         else -> null
     }

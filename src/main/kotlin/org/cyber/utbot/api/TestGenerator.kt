@@ -46,6 +46,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val vulnerabilityChecksSuffix: String = settings.vulnerabilityChecksSuffix
     override val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck> = settings.extraVulnerabilityChecks
     override val onlyVulnerabilities: Boolean = settings.onlyVulnerabilities
+    override val testsIgnoreEmpty: Boolean = settings.testsIgnoreEmpty
 
     private val logger = KotlinLogging.logger {}
 
@@ -62,7 +63,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
         (classpath ?: settings.classpath)?.let{ updateClassLoader(it) } ?: throw Exception("classpath should be set")
         val targetToTests = mutableMapOf<TargetQualifiedName, GeneratedTests>()
         testUnits.forEach { testUnit ->
-            targetToTests[testUnit.target] = runInside(testUnit.target, testUnit.source, testUnit.output)
+            runInside(testUnit.target, testUnit.source, testUnit.output)?.let { tests -> targetToTests[testUnit.target] = tests }
         }
         return targetToTests to getViewersResult()
     }
@@ -79,14 +80,13 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
         val classesFromPath = loadClassesFromPath(classLoader, source)
         classesFromPath.filterNot { it.java.isInterface }.filter { clazz ->
             clazz.qualifiedName != null
-        }.
-        filter { clazz ->
+        }.filter { clazz ->
             packageFilter?.run {
                 clazz.qualifiedName?.contains(this) ?: false
             } ?: true
         }.forEach {
             if (it.qualifiedName != null) {
-                targetToTests[it.qualifiedName!!] = runInside(it.qualifiedName!!)
+                runInside(it.qualifiedName!!)?.let { tests -> targetToTests[it.qualifiedName!!] = tests }
             } else {
                 logger.info("No qualified name for $it")
             }
@@ -94,8 +94,8 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
         return targetToTests to getViewersResult()
     }
 
-    private fun runInside(targetClassFqn: TargetQualifiedName, sourceCodeFile: SourceCodeFileName? = null, output: OutputFileName? = null): GeneratedTests {
-        lateinit var testClassBody: String
+    private fun runInside(targetClassFqn: TargetQualifiedName, sourceCodeFile: SourceCodeFileName? = null, output: OutputFileName? = null): GeneratedTests? {
+        var testClassBody: GeneratedTests? = null
         val started = now()
         val workingDirectory = getWorkingDirectory(targetClassFqn)
             ?: throw Exception("Cannot find the target class in the classpath")
@@ -132,9 +132,12 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
                     )
                 }
                 logger.info("generateTestSets time: ${time}ms")
-                testClassBody = generateTest(classIdUnderTest, testClassName, testSets)
-                if (settings.sarifReport != null && sourceCodeFile != null) {
-                    generateReport(targetClassFqn, testSets, testClassBody, sourceCodeFile, output)
+                if (!(testsIgnoreEmpty && testSets.all { it.executions.isEmpty() })) {
+                    testClassBody = generateTest(classIdUnderTest, testClassName, testSets).also {
+                        if (settings.sarifReport != null && sourceCodeFile != null) {
+                            generateReport(targetClassFqn, testSets, it, sourceCodeFile, output)
+                        }
+                    }
                 }
             }
         } catch (t: Throwable) {

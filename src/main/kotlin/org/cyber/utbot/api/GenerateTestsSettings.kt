@@ -136,6 +136,11 @@ class GenerateTestsSettings(
     val onlyVulnerabilities: Boolean = true,
 
     /**
+     * whether to ignore classes to pass non-generated tests
+     */
+    var testsIgnoreEmpty: Boolean = false,
+
+    /**
      * libraries that utbot will trust
      * already trust: java, sun, javax, com.sun, org.omg, org.xml, org.w3c.dom
      */

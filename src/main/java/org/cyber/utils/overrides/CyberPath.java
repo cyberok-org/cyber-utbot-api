@@ -13,8 +13,7 @@ public class CyberPath implements Path {
     @NotNull
     @Override
     public FileSystem getFileSystem() {
-        return FileSystems.getDefault();
-//        throw new UnsupportedOperationException("Not implemented yet");
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override

@@ -44,6 +44,7 @@ abstract class AbstractTestGenerator {
     protected abstract val vulnerabilityChecksSuffix: String
     protected abstract val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck>
     protected abstract val onlyVulnerabilities: Boolean
+    protected abstract val testsIgnoreEmpty: Boolean
 
     private var classpath: String? = null
     protected lateinit var classLoader: URLClassLoader
