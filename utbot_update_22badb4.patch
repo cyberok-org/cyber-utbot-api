@@ -11,6 +11,86 @@ index 3480b63c..bd2a2884 100644
  if (pythonIde.split(",").contains(ideType)) {
      include("utbot-python")
      include("utbot-cli-python")
+diff --git a/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java b/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java
+index a502764b..7ea883cf 100644
+--- a/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java
++++ b/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java
+@@ -1,19 +1,13 @@
+-package org.utils;
++package org.cyber.utils;
+ 
+-import java.security.InvalidParameterException;
+-
+-public class Utils {
++public class Utils {    // FIXME(copy from cyber-utbot-api)
+     public static void vulnerabilityAssert(boolean predicateResult, String message) throws VulnerabilityException {
+         if (!predicateResult) {
+-            throw new VulnerabilityException(message, new InvalidParameterException("these parameters lead to vulnerability"));
++            throw new VulnerabilityException(message);
+         }
+     }
+ 
+-//    public static void vulnerabilityAssertByMsg(String message) throws VulnerabilityException {
+-//        throw new VulnerabilityException(message, new InvalidParameterException("these parameters lead to vulnerability"));
+-//    }
+-
+-    public static void vulnerabilityAssertByMsg() throws VulnerabilityException {
+-        throw new VulnerabilityException("message", new InvalidParameterException("these parameters lead to vulnerability"));
++    public static void vulnerabilityAssertByMsg(String message) throws VulnerabilityException {
++        throw new VulnerabilityException(message);
+     }
+ }
+diff --git a/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java b/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java
+index f3512d6d..959013b0 100644
+--- a/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java
++++ b/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java
+@@ -1,7 +1,7 @@
+-package org.utils;
++package org.cyber.utils;
+ 
+-public class VulnerabilityException extends RuntimeException {
+-    public VulnerabilityException(String errorMessage, Throwable err) {
+-        super(errorMessage, err);
++public class VulnerabilityException extends RuntimeException {  // FIXME(copy from cyber-utbot-api)
++    public VulnerabilityException(String errorMessage) {
++        super(errorMessage);
+     }
+ };
+diff --git a/utbot-framework-api/src/main/kotlin/org/utbot/framework/TrustedLibraries.kt b/utbot-framework-api/src/main/kotlin/org/utbot/framework/TrustedLibraries.kt
+index f0bd75cb..26e086f1 100644
+--- a/utbot-framework-api/src/main/kotlin/org/utbot/framework/TrustedLibraries.kt
++++ b/utbot-framework-api/src/main/kotlin/org/utbot/framework/TrustedLibraries.kt
+@@ -23,6 +23,8 @@ object TrustedLibraries {
+         "org.w3c.dom",
+     )
+ 
++    var extraTrustedLibraries: List<String> = emptyList()
++
+     private val userTrustedLibraries: List<String>
+         get() {
+             val userTrustedLibrariesPath = System.getProperty(userTrustedLibrariesKey) ?: defaultUserTrustedLibrariesPath
+@@ -45,5 +47,5 @@ object TrustedLibraries {
+      * Represents prefixes of packages for trusted libraries -
+      * as the union of [defaultTrustedLibraries] and [userTrustedLibraries].
+      */
+-    val trustedLibraries: Set<String> by lazy { (defaultTrustedLibraries + userTrustedLibraries).toSet() }
++    val trustedLibraries: Set<String> by lazy { (defaultTrustedLibraries + userTrustedLibraries + extraTrustedLibraries).toSet() }
+ }
+\ No newline at end of file
+diff --git a/utbot-framework-api/src/main/kotlin/org/utbot/framework/plugin/api/util/ReflectionUtils.kt b/utbot-framework-api/src/main/kotlin/org/utbot/framework/plugin/api/util/ReflectionUtils.kt
+index 5cfa8ab8..46a9bb05 100644
+--- a/utbot-framework-api/src/main/kotlin/org/utbot/framework/plugin/api/util/ReflectionUtils.kt
++++ b/utbot-framework-api/src/main/kotlin/org/utbot/framework/plugin/api/util/ReflectionUtils.kt
+@@ -42,6 +42,9 @@ val Class<*>.anyInstance: Any
+ //                logger.warn(e) { "Can't create object with default ctor. Fallback to Unsafe." }
+ //            }
+ //        }
++        if (this.name == "org.cyber.utils.VulnerabilityException") {
++            return org.cyber.utils.VulnerabilityException("")
++        }
+         return Reflection.unsafe.allocateInstance(this)
+ 
+ //        val constructors = runCatching {
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/ConstructedSootMethods.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/ConstructedSootMethods.kt
 index 67a5e89e..53116595 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/ConstructedSootMethods.kt
