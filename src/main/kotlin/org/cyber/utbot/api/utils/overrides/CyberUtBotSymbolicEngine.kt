@@ -210,7 +210,7 @@ class CyberUtBotSymbolicEngine(
                                             continue
                                         }
                                     }
-                                    println("TERMINAL: ${newState.stmt}, from ${state.stmt}")
+                                    println("TERMINAL: ${newState.stmt}, from ${state.stmt}, method: ${newState.toString()}")
                                     consumeTerminalState(newState)
                                 }
                             }
@@ -263,6 +263,7 @@ class CyberUtBotSymbolicEngine(
 
         @CyberNew("filter emit flag")
         val needEmit = !onlyVulnerabilities || isVulnerability(symbolicExecutionResult)
+
 
         val stateBefore = modelsBefore.constructStateForMethod(methodUnderTest)
         val stateAfter = modelsAfter.constructStateForMethod(methodUnderTest)

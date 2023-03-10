@@ -59,7 +59,7 @@ class CyberSelector(
             if (mapState(state)) {
                 peekTraceFound = true
                 currentIndex = i
-                // println("peeked1 ${state.stmt}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
+                if (state.stmt.toString().contains("taint")) println("peeked1 ${state.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                 return state
             }
         }
@@ -67,7 +67,7 @@ class CyberSelector(
         // random state peek
         val (state, idx) = defaultSelector.peekImpl(executionStates, currentIndex)
         currentIndex = idx
-        // println("peeked2 ${state.stmt}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
+        if (state.stmt.toString().contains("taint")) println("peeked2 ${state.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
         return state
     }
 
@@ -78,7 +78,7 @@ class CyberSelector(
      */
     override fun pollImpl(): ExecutionState? {
         if (executionStates.size == 0) {
-//            // println("polled0, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
+//             println("polled0, }, traceFound = $traceFound, currentIndex = $currentIndex")
             return null
         }
         if (currentIndex == -1) {
@@ -91,13 +91,13 @@ class CyberSelector(
                             it
                         )
                     }
-//                    if (state.stmt.toString().contains("taint"))println("polled1 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
+                    if (state.stmt.toString().contains("taint"))println("polled1 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
                 if (mapState(state)) {
                     executionStates.removeAt(i)
                     currentIndex = -1
-//                    if (state.stmt.toString().contains("taint"))println("polled2 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
+                    if (state.stmt.toString().contains("taint"))println("polled2 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
             }
@@ -110,7 +110,7 @@ class CyberSelector(
         }
         val state = defaultSelector.pollImpl(executionStates, currentIndex)
         currentIndex = -1
-//        if (state.stmt.toString().contains("taint")) println("polled3 ${state.stmt},label = ${state.label}, drop = ${(choosingStrategy as CyberStrategy).drop}, traceFound = $traceFound, currentIndex = $currentIndex")
+        if (state.stmt.toString().contains("taint")) println("polled3 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
         return state
     }
 
@@ -169,19 +169,19 @@ class CyberSelector(
             }
         }
         if (container[state.stmt]?.isNotEmpty() == true) {
-//            if (state.stmt.toString().contains("taint")) println("mapped successfully1 ${state.stmt}, tracefound = $traceFound")
+            if (state.stmt.toString().contains("taint")) println("mapped successfully1 ${state.stmt}, tracefound = $traceFound")
             traceFound = true
             return true
         } else if (isInvocation(ancestor.toString(), jimpleBody)) {
             innerCallDestination.addFirst(ancestor to jimpleBody)
             container[ancestor]?.let { container[state.stmt]?.addAll(it) } // plus putifabsent
-//            if (state.stmt.toString().contains("taint"))println("mapped successfully2 ${state.stmt}, parent = $ancestor")
+            if (state.stmt.toString().contains("taint"))println("mapped successfully2 ${state.stmt}, parent = $ancestor")
             return true
         } else if (innerCallDestination.isNotEmpty() && innerCallDestination.first().first != null
             && jimpleBody.method.name.equals(innerCallDestination.first().second?.method?.name)
         ) {
             container[ancestor]?.let { container[state.stmt]?.addAll(it) }
-//            if (state.stmt.toString().contains("taint"))println("mapped successfully3 ${state.stmt}, parent = $ancestor, method name = ${jimpleBody.method.name}")
+            if (state.stmt.toString().contains("taint"))println("mapped successfully3 ${state.stmt}, parent = $ancestor, method name = ${jimpleBody.method.name}")
             return true
         }
 //        if (state.stmt.toString().contains("taint")) println("map failed ${state.stmt}")

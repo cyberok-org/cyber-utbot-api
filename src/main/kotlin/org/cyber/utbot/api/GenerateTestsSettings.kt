@@ -102,7 +102,7 @@ class GenerateTestsSettings(
     /**
      * ignore utbot pathSelectors parameters, use our
      */
-    val cyberPathSelector: Boolean = true,
+    val cyberPathSelector: Boolean = false,
 
     /**
      * if false - just run utbot without extra analyze   // TODO(remove later)
@@ -117,7 +117,7 @@ class GenerateTestsSettings(
     /**
      * generate tests only for vulnerabilities if true
      */
-    val onlyVulnerabilities: Boolean = true
+    val onlyVulnerabilities: Boolean = false
 ) {
     init {  // check is settings correct
         mockAlways.forEach { fullyQualifiedName ->

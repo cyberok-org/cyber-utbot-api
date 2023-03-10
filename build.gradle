@@ -37,6 +37,9 @@ dependencies {
     implementation group: 'org.jacoco', name: 'org.jacoco.report', version: jacocoVersion
     implementation group: 'com.guardsquare', name: 'proguard-core', version: '9.0.6'
     implementation group: 'org.javassist', name: 'javassist', version: '3.29.1-GA'
+    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
+
 
     fetchInstrumentationJar project(path: ':utbot-instrumentation', configuration: 'instrumentationArchive')
 

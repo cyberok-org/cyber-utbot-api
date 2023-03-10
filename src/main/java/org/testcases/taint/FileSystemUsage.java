@@ -6,20 +6,31 @@ import java.nio.file.Path;
 
 public class FileSystemUsage {
 
-    public void foo(int i) throws IOException {
+    public static void foo(int i) {
+        try {
+            Path p = Path.of(source(i));
+            if (i > 0) {
+                Files.createFile(p);
+            } else {
+                Files.createFile(Path.of(source(-10)));
+            }
+        } catch (IOException e) { System.out.println(e.getMessage()); }
+    }
+
+    public void bar(int i) throws IOException {
         Path p = Path.of(source(i));
-        if (i > 0) {
-            Files.createFile(p);
+
+    }
+
+    private static String source(int i) {
+        if (i > 24) {
+            return "dangerous"; // dangerous
         } else {
-            Files.createFile(Path.of(source(-10)));
+            return "ok"; // ok
         }
     }
 
-    public String source(int i) {
-        if (i > 24) {
-            return "dangerous";
-        } else {
-            return "ok";
-        }
+    public static void main(String[] args) {
+        foo(50);
     }
 }

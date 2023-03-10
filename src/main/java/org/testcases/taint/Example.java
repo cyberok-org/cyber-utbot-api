@@ -7,12 +7,15 @@ public class Example {
         }
     }
     public void sink(String s) { }
-
     public String source() {
         return "dangerous data";
     }
-    public void launch() {
-        foo(source(), "...");
+    public void launch(int x) {
+        if (x > 0) {
+            foo(source(), "...");
+        } else {
+            foo("smth", "...");
+        }
     }
 }
 

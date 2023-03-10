@@ -4,8 +4,8 @@ import java.util.Random;
 
 public class SinkClass {
     public void foo(String arg1, String arg2, String arg3) {
-//        boolean rand = new Random().nextBoolean();
-        if (arg2.equals("arg2")) {
+        boolean rand = new Random().nextBoolean();
+        if (rand) {
             SourceClass src = new SourceClass(true);
             if (arg1.equals("arg1")) {
                 String arg = src.bar();

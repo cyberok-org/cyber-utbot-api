@@ -15,7 +15,7 @@ import soot.SootMethod
 class ProguardExecutor(private val jarName: String) {
     var traces: Set<List<BamLocationDependentJvmMemoryLocation<*>>> = mutableSetOf()
     private var headMethod: HeadMethod? = null
-    val sources: MutableSet<TaintSource> = mutableSetOf()
+    private val sources: MutableSet<TaintSource> = mutableSetOf()
     val sinks: MutableSet<JvmTaintSink> = mutableSetOf()
 
     fun execute() {
