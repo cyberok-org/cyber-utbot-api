@@ -11,51 +11,6 @@ index 3480b63c..bd2a2884 100644
  if (pythonIde.split(",").contains(ideType)) {
      include("utbot-python")
      include("utbot-cli-python")
-diff --git a/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java b/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java
-index a502764b..7ea883cf 100644
---- a/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java
-+++ b/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java
-@@ -1,19 +1,13 @@
--package org.utils;
-+package org.cyber.utils;
- 
--import java.security.InvalidParameterException;
--
--public class Utils {
-+public class Utils {    // FIXME(copy from cyber-utbot-api)
-     public static void vulnerabilityAssert(boolean predicateResult, String message) throws VulnerabilityException {
-         if (!predicateResult) {
--            throw new VulnerabilityException(message, new InvalidParameterException("these parameters lead to vulnerability"));
-+            throw new VulnerabilityException(message);
-         }
-     }
- 
--//    public static void vulnerabilityAssertByMsg(String message) throws VulnerabilityException {
--//        throw new VulnerabilityException(message, new InvalidParameterException("these parameters lead to vulnerability"));
--//    }
--
--    public static void vulnerabilityAssertByMsg() throws VulnerabilityException {
--        throw new VulnerabilityException("message", new InvalidParameterException("these parameters lead to vulnerability"));
-+    public static void vulnerabilityAssertByMsg(String message) throws VulnerabilityException {
-+        throw new VulnerabilityException(message);
-     }
- }
-diff --git a/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java b/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java
-index f3512d6d..959013b0 100644
---- a/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java
-+++ b/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java
-@@ -1,7 +1,7 @@
--package org.utils;
-+package org.cyber.utils;
- 
--public class VulnerabilityException extends RuntimeException {
--    public VulnerabilityException(String errorMessage, Throwable err) {
--        super(errorMessage, err);
-+public class VulnerabilityException extends RuntimeException {  // FIXME(copy from cyber-utbot-api)
-+    public VulnerabilityException(String errorMessage) {
-+        super(errorMessage);
-     }
- };
 diff --git a/utbot-framework-api/src/main/kotlin/org/utbot/framework/TrustedLibraries.kt b/utbot-framework-api/src/main/kotlin/org/utbot/framework/TrustedLibraries.kt
 index f0bd75cb..26e086f1 100644
 --- a/utbot-framework-api/src/main/kotlin/org/utbot/framework/TrustedLibraries.kt
@@ -844,3 +799,35 @@ index e95e76f5..5cf33d5c 100644
      org.utbot.engine.overrides.collections.AbstractCollection::class,
      org.utbot.api.mock.UtMock::class,
      org.utbot.engine.overrides.UtOverrideMock::class,
+diff --git a/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java b/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java
+new file mode 100644
+index 00000000..7ea883cf
+--- /dev/null
++++ b/utbot-framework-api/src/main/java/org/cyber/utils/Utils.java
+@@ -0,0 +1,13 @@
++package org.cyber.utils;
++
++public class Utils {    // FIXME(copy from cyber-utbot-api)
++    public static void vulnerabilityAssert(boolean predicateResult, String message) throws VulnerabilityException {
++        if (!predicateResult) {
++            throw new VulnerabilityException(message);
++        }
++    }
++
++    public static void vulnerabilityAssertByMsg(String message) throws VulnerabilityException {
++        throw new VulnerabilityException(message);
++    }
++}
+diff --git a/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java b/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java
+new file mode 100644
+index 00000000..959013b0
+--- /dev/null
++++ b/utbot-framework-api/src/main/java/org/cyber/utils/VulnerabilityException.java
+@@ -0,0 +1,7 @@
++package org.cyber.utils;
++
++public class VulnerabilityException extends RuntimeException {  // FIXME(copy from cyber-utbot-api)
++    public VulnerabilityException(String errorMessage) {
++        super(errorMessage);
++    }
++};
