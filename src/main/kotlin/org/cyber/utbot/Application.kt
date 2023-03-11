@@ -29,8 +29,8 @@ fun main() {
         withUtSettings = { useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },
         utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER)) //, vulnerabilityCheckDirectories=listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"))
     val generator = TestGenerator(settings)
-    val (tests, info) = generator.run(mapOf("org.example.Loop" to "src/main/java/org/example/Loop.java").toTestUnits())
-//    val (tests, info) = generator.run(mapOf("org.example.HttpServletExample" to "src/main/java/org/example/HttpServletExample.java").toTestUnits())
+//    val (tests, info) = generator.run(mapOf("org.example.Loop" to "src/main/java/org/example/Loop.java").toTestUnits())
+    val (tests, info) = generator.run(mapOf("org.example.HttpServletExample" to "src/main/java/org/example/HttpServletExample.java").toTestUnits())
     tests.forEach { nameAndTest ->
         Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
     }

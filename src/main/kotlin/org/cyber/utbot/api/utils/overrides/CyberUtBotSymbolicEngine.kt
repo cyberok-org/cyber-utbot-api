@@ -54,9 +54,9 @@ class CyberUtBotSymbolicEngine(
     solverTimeoutInMillis: Int = UtSettings.checkSolverTimeoutMillis,
     cyberPathSelector: Boolean = false,
     findVulnerabilities: Boolean = true,
-    private val onlyVulnerabilities: Boolean = true,
+    private var onlyVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
-    vulnerabilityChecksHolder: VulnerabilityChecksHolder,
+    vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
     init {  // set our selector
         if (cyberPathSelector) {
@@ -127,6 +127,11 @@ class CyberUtBotSymbolicEngine(
                 require(missedWrappers.isEmpty()) {
                     "Missed wrappers for classes [${missedWrappers.joinToString(", ")}]"
                 }
+            }
+        } else {
+            if (onlyVulnerabilities) {
+                onlyVulnerabilities = false
+                logger.warn { "ignore onlyVulnerabilities because findVulnerabilities is false" }
             }
         }
     }

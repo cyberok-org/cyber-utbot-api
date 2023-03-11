@@ -35,7 +35,7 @@ class CyberTraverser(
     typeResolver: TypeResolver,
     globalGraph: InterProceduralUnitGraph,
     mocker: Mocker,
-    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder
+    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?
 ) : Traverser(methodUnderTest, typeRegistry, hierarchy, typeResolver, globalGraph, mocker) {
     @CyberNew("smth to override")
     private val rememberedParams = mutableSetOf<List<SymbolicValue>>()
@@ -54,7 +54,7 @@ class CyberTraverser(
     private fun decorateTarget(target: InvocationTarget): InvocationTarget {
         val targetClassName = target.method.declaringClass.name
         val targetFunctionName = target.method.name
-        return vulnerabilityChecksHolder.checks( targetClassName to targetFunctionName)?.run  {
+        return vulnerabilityChecksHolder?.checks( targetClassName to targetFunctionName)?.run  {
             val methodName = "$CHECK_METHOD_PREFIX\$$targetClassName.$targetFunctionName"
             if (environment.method.name == methodName && environment.method.declaringClass.name == VULNERABILITY_CHECKS_CLASS_NAME) return target
             val decorateFunction = decorateVulnerabilityFunction(target, methodName, checks = this)

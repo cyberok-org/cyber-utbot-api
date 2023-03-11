@@ -153,6 +153,7 @@ class GenerateTestsSettings(
         }
         assert(generationTimeout > 0) { "GenerateTestsSettings.generationTimeout should be more then 0" }
         UtSettings.checkSolverTimeoutMillis = 0   // disabled z3 timeout
+        UtSettings.runInstrumentedProcessWithDebug = true   // java.lang.NoClassDefFoundError without that (with true instrumentation failed before producing 'NoClassDefFoundError')
         withUtSettings(UtSettings)
     }
 }

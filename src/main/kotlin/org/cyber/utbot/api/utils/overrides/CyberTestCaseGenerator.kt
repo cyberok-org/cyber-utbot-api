@@ -21,7 +21,7 @@ open class CyberTestCaseGenerator(
     private val findVulnerabilities: Boolean,
     private val onlyVulnerabilities: Boolean,
     private val statePublisher: StatePublisher,
-    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder
+    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?
 ) : TestCaseGenerator(buildDirs, classpath, dependencyPaths, jdkInfo) {
     private val logger: KLogger = KotlinLogging.logger {}
 
