@@ -103,7 +103,7 @@ class GenerateTestsSettings(
     /**
      * ignore utbot pathSelectors parameters, use our
      */
-    val cyberPathSelector: Boolean = false,
+    val cyberPathSelector: Boolean = true,
 
     /**
      * if false - just run utbot without extra analyze   // TODO(remove later)
@@ -142,7 +142,7 @@ class GenerateTestsSettings(
     trustedLibraries: List<String> = listOf()
 ) {
     init {  // check is settings correct
-        TrustedLibraries.extraTrustedLibraries = trustedLibraries
+//        TrustedLibraries.extraTrustedLibraries = trustedLibraries
         mockAlways.forEach { fullyQualifiedName ->
             Class.forName(fullyQualifiedName, false, ClassLoader.getSystemClassLoader())
         }

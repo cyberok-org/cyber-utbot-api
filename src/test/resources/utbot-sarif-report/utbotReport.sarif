@@ -1,0 +1,164 @@
+{
+  "$schema" : "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version" : "2.1.0",
+  "runs" : [ {
+    "tool" : {
+      "driver" : {
+        "name" : "UnitTestBot",
+        "organization" : "utbot.org",
+        "version" : "1.0",
+        "rules" : [ {
+          "id" : "utbot.exception.NullPointerException",
+          "name" : "NullPointerException",
+          "shortDescription" : {
+            "text" : "Unexpected NullPointerException detected."
+          },
+          "fullDescription" : {
+            "text" : "Seems like an exception NullPointerException might be thrown."
+          },
+          "help" : {
+            "text" : "https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html"
+          }
+        } ]
+      }
+    },
+    "results" : [ {
+      "ruleId" : "utbot.exception.NullPointerException",
+      "level" : "error",
+      "message" : {
+        "text" : "Unexpected exception: java.lang.NullPointerException.\nTest case: `doPost(<HttpServletRequest>, null)`\n[Generated test for this case](1)"
+      },
+      "locations" : [ {
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "src/main/java/org/testcases/taint/BenchmarkTest00500.java",
+            "uriBaseId" : "%SRCROOT%"
+          },
+          "region" : {
+            "startLine" : 45,
+            "startColumn" : 9
+          }
+        }
+      } ],
+      "relatedLocations" : [ {
+        "id" : 1,
+        "physicalLocation" : {
+          "artifactLocation" : {
+            "uri" : "src/test/java/org/testcases/taint/BenchmarkTest00500Test.java",
+            "uriBaseId" : "%SRCROOT%"
+          },
+          "region" : {
+            "startLine" : 20,
+            "startColumn" : 5
+          }
+        }
+      } ],
+      "codeFlows" : [ {
+        "threadFlows" : [ {
+          "locations" : [ {
+            "location" : {
+              "message" : {
+                "text" : "BenchmarkTest00500Test.testDoPost1(BenchmarkTest00500Test.java:26)"
+              },
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "src/test/java/org/testcases/taint/BenchmarkTest00500Test.java",
+                  "uriBaseId" : "%SRCROOT%"
+                },
+                "region" : {
+                  "startLine" : 26,
+                  "startColumn" : 9
+                }
+              }
+            }
+          }, {
+            "location" : {
+              "message" : {
+                "text" : "org.testcases.taint.BenchmarkTest00500.doPost(BenchmarkTest00500.java:45)"
+              },
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "src/main/java/org/testcases/taint/BenchmarkTest00500.java",
+                  "uriBaseId" : "%SRCROOT%"
+                },
+                "region" : {
+                  "startLine" : 45,
+                  "startColumn" : 9
+                }
+              }
+            }
+          } ]
+        } ]
+      } ]
+    } ]
+  } ],
+  "allResults" : [ {
+    "ruleId" : "utbot.exception.NullPointerException",
+    "level" : "error",
+    "message" : {
+      "text" : "Unexpected exception: java.lang.NullPointerException.\nTest case: `doPost(<HttpServletRequest>, null)`\n[Generated test for this case](1)"
+    },
+    "locations" : [ {
+      "physicalLocation" : {
+        "artifactLocation" : {
+          "uri" : "src/main/java/org/testcases/taint/BenchmarkTest00500.java",
+          "uriBaseId" : "%SRCROOT%"
+        },
+        "region" : {
+          "startLine" : 45,
+          "startColumn" : 9
+        }
+      }
+    } ],
+    "relatedLocations" : [ {
+      "id" : 1,
+      "physicalLocation" : {
+        "artifactLocation" : {
+          "uri" : "src/test/java/org/testcases/taint/BenchmarkTest00500Test.java",
+          "uriBaseId" : "%SRCROOT%"
+        },
+        "region" : {
+          "startLine" : 20,
+          "startColumn" : 5
+        }
+      }
+    } ],
+    "codeFlows" : [ {
+      "threadFlows" : [ {
+        "locations" : [ {
+          "location" : {
+            "message" : {
+              "text" : "BenchmarkTest00500Test.testDoPost1(BenchmarkTest00500Test.java:26)"
+            },
+            "physicalLocation" : {
+              "artifactLocation" : {
+                "uri" : "src/test/java/org/testcases/taint/BenchmarkTest00500Test.java",
+                "uriBaseId" : "%SRCROOT%"
+              },
+              "region" : {
+                "startLine" : 26,
+                "startColumn" : 9
+              }
+            }
+          }
+        }, {
+          "location" : {
+            "message" : {
+              "text" : "org.testcases.taint.BenchmarkTest00500.doPost(BenchmarkTest00500.java:45)"
+            },
+            "physicalLocation" : {
+              "artifactLocation" : {
+                "uri" : "src/main/java/org/testcases/taint/BenchmarkTest00500.java",
+                "uriBaseId" : "%SRCROOT%"
+              },
+              "region" : {
+                "startLine" : 45,
+                "startColumn" : 9
+              }
+            }
+          }
+        } ]
+      } ]
+    } ]
+  } ]
+}
