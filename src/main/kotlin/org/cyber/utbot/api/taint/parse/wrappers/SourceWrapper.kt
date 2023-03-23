@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 class SourceWrapper(
     val containingClass: String,
-    val signature: String,
+    val methodName: String,
+    val descriptor: String,
     val description: String?,
     val taintsThis: Boolean,
     val taintsReturn: Boolean,

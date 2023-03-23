@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 class SinkWrapper(
     val containingClass: String,
-    val signature: String,
+    val methodName: String,
+    val descriptor: String,
     val description: String?,
     val takesInstance: Boolean,
     val takesArgs: Set<Int>,

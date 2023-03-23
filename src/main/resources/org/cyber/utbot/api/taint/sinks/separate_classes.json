@@ -1,6 +1,7 @@
   {
     "containingClass": "Lorg/testcases/taint/sepclasses/SinkClass;",
-    "signature": "sink(Ljava/lang/String;Ljava/lang/String;)V",
+    "methodName": "sink",
+  "descriptor": "(Ljava/lang/String;Ljava/lang/String;)V",
     "description": "",
     "takesInstance": "false",
     "takesArgs": [2],

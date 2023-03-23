@@ -136,6 +136,11 @@ class GenerateTestsSettings(
     val onlyVulnerabilities: Boolean = false,
 
     /**
+     * whether to ignore classes to pass non-generated tests
+     */
+    var testsIgnoreEmpty: Boolean = false,
+
+    /**
      * libraries that utbot will trust
      * already trust: java, sun, javax, com.sun, org.omg, org.xml, org.w3c.dom
      */
@@ -148,6 +153,7 @@ class GenerateTestsSettings(
         }
         assert(generationTimeout > 0) { "GenerateTestsSettings.generationTimeout should be more then 0" }
         UtSettings.checkSolverTimeoutMillis = 0   // disabled z3 timeout
+        UtSettings.runInstrumentedProcessWithDebug = true   // java.lang.NoClassDefFoundError without that (with true instrumentation failed before producing 'NoClassDefFoundError')
         withUtSettings(UtSettings)
     }
 }

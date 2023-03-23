@@ -21,6 +21,7 @@ class CyberSelectorBuilder internal constructor(
     override fun build() = CyberSelector(
         CyberStrategy(graph), // choosing strategy
         requireNotNull(context.stoppingStrategy) { "StoppingStrategy isn't specified" },
+//        "C:\\Users\\lesya\\BenchmarkJava\\out\\artifacts\\benchmark_jar\\benchmark.jar",
         "C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\taint\\jars\\TaintCheckJar.jar",
         graph
     )

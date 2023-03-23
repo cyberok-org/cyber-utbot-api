@@ -1,7 +1,12 @@
 package org.cyber.utbot.api.utils
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper
+import com.fasterxml.jackson.dataformat.csv.CsvParser
+import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import java.io.FileReader
+import java.io.FileWriter
 
 typealias TargetQualifiedName = String
 typealias SourceCodeFileName = String
@@ -32,9 +37,36 @@ class TestUnit(
 
 fun Map<String, String>.toTestUnits(): List<TestUnit> = this.map { TestUnit(target=it.key, source=it.value) }
 
-fun printJson(json: JSON) {
+fun JSON.pretty(): String {
     val type = object : TypeToken<Map<String, Any?>?>() {}.type
     val gson = GsonBuilder().setPrettyPrinting().create()
-    val res: Map<String, Any> = gson.fromJson(json, type)
-    println(gson.toJson(res))
+    val res: Map<String, Any> = gson.fromJson(this, type)
+    return gson.toJson(res)
+}
+
+fun printJson(json: JSON) = println(json.pretty())
+
+val csvMapper = CsvMapper().apply {
+    enable(CsvParser.Feature.TRIM_SPACES)
+    enable(CsvParser.Feature.SKIP_EMPTY_LINES)
+}
+
+inline fun <reified T> writeCsvFile(data: Collection<T>, schema: CsvSchema, fileName: String) {
+    FileWriter(fileName).use { writer ->
+        csvMapper.writer(schema.withHeader())
+            .writeValues(writer)
+            .writeAll(data)
+            .close()
+    }
+}
+
+inline fun <reified T> readCsvFile(fileName: String): List<T> { // schema: CsvSchema,
+    FileReader(fileName).use { reader ->
+        return csvMapper
+            .readerFor(T::class.java)
+            .with(CsvSchema.emptySchema().withHeader())
+            .readValues<T>(reader)
+            .readAll()
+            .toList()
+    }
 }

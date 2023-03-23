@@ -1,8 +1,8 @@
 {
-  "containingClass": "Lorg/testcases/taint/Example;",
-  "methodName": "sink",
+  "containingClass": "java/io/FileInputStream",
+  "methodName": "<init>",
   "descriptor": "(Ljava/lang/String;)V",
-  "description": "tmp",
+  "description": "",
   "takesInstance": "false",
   "takesArgs": [1],
   "takesGlobals": []

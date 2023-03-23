@@ -1,6 +1,7 @@
   {
     "containingClass": "Lorg/testcases/taint/sepclasses/SourceClass;",
-    "signature": "source(II)Ljava/lang/String;",
+    "methodName": "source",
+  "descriptor": "(II)Ljava/lang/String;",
     "description": "",
     "taintsThis": "false",
     "taintsReturn": "true",

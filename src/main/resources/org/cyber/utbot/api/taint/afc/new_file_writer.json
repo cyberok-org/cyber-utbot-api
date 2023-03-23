@@ -1,6 +1,7 @@
 {
   "containingClass": "Ljava/io/FileWriter;",
-  "signature": "<init>(Ljava/lang/String;)V",
+  "methodName": "",
+  "descriptor": "<init>(Ljava/lang/String;)V",
   "description": "FileWriter initialization with unchecked fileName argument, TODO(add all c-rs)",
   "takesInstance": "false",
   "takesArgs": [1],

@@ -44,14 +44,19 @@ abstract class AbstractTestGenerator {
     protected abstract val vulnerabilityChecksSuffix: String
     protected abstract val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck>
     protected abstract val onlyVulnerabilities: Boolean
+    protected abstract val testsIgnoreEmpty: Boolean
 
     private var classpath: String? = null
     protected lateinit var classLoader: URLClassLoader
     protected val newlineSeparator: String by lazy { System.lineSeparator() }
 
     protected val statePublisher: StatePublisher by lazy { StatePublisher(utbotViewers.mapNotNull { it.stateViewer() }.toMutableList()) }
-    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder by lazy { VulnerabilityChecksHolder(vulnerabilityCheckDirectories, vulnerabilityChecksAnalysisSuffix, vulnerabilityChecksSuffix)
-        .also { it.register(extraVulnerabilityChecks) } }
+    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder? by lazy {
+        if (findVulnerabilities) {
+            VulnerabilityChecksHolder(vulnerabilityCheckDirectories, vulnerabilityChecksAnalysisSuffix, vulnerabilityChecksSuffix)
+                .also { it.register(extraVulnerabilityChecks) }
+        } else null
+    }
 
     protected fun updateClassLoader(classpath: String) {
         if (this.classpath != classpath) {

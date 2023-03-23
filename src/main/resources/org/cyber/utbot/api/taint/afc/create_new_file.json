@@ -1,6 +1,7 @@
 {
   "containingClass": "Ljava/io/File;",
-  "signature": "createNewFile()Z",
+  "methodName": "",
+  "descriptor": "createNewFile()Z",
   "description": "File.createNewFile() with unchecked file instance itself",
   "takesInstance": "true",
   "takesArgs": [],

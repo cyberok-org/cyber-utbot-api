@@ -75,7 +75,7 @@ class CyberCodeGenerator(
             run {
                 tmpTestSets.add(
                     UtMethodTestSet(set.method,
-                        set.executions.filter { (it as UtSymbolicExecution).path.isNotEmpty() },
+                        set.executions.filterIsInstance<UtSymbolicExecution>().filter { it.path.isNotEmpty() },
                     set.jimpleBody,
                     set.errors,
                     set.clustersInfo)
