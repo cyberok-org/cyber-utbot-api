@@ -25,6 +25,10 @@ class CookieStateHolder: AnyStateHolder() {
 
         private val initSignature by lazy { sootClass.getMethod("<init>", listOf(STRING_TYPE, STRING_TYPE)).subSignature }
 
+        //
+
         override val saveArgsSignatures = emptySet<String>()
+
+        override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>) -> List<InvokeResult>?> = mutableMapOf()
     }
 }

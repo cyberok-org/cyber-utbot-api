@@ -20,8 +20,7 @@ class ReportCreator(settings: GenerateTestsSettings, private val category: Strin
     constructor(classpath: String, basePaths: List<String>, category: String? = null, extraMocks: List<String> = emptyList()) : this(GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA,
         mockAlways = MOCK_ALWAYS_DEFAULT + CYBER_MOCK_ALWAYS_DEFAULT + extraMocks, mockStrategy = MockStrategyApi.NO_MOCKS, withUtSettings = { UtSettings.useFuzzing = false;
             UtSettings.useDebugVisualization = true; UtSettings.testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },
-        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckDirectories=basePaths, trustedLibraries=
-        listOf()), category)
+        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckDirectories=basePaths), category)
 
     private fun create(test: TestUnit): ReportItem {
         return try {

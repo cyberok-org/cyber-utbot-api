@@ -46,9 +46,13 @@ class PathStateHolder: AnyStateHolder() {
         private val ofMethod1Signature by lazy { sootClass.getMethod("of", listOf(JAVA_NET_URI_TYPE)).subSignature }
         private val ofMethod2Signature by lazy { sootClass.getMethod("of", listOf(STRING_TYPE, ELEMENT_ARRAY_TYPE(STRING_TYPE))).subSignature }
 
+        //
+
         override val saveArgsSignatures = setOf(
             ofMethod1Signature,
             ofMethod2Signature
         )
+
+        override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>) -> List<InvokeResult>?> = mutableMapOf()
     }
 }

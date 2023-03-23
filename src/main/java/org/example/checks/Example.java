@@ -1,10 +1,19 @@
 package org.example.checks;
 
-import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 
 public class Example {
-    public void example(HttpServletRequest req) {
-        req.getAuthType();
-        req.getHeader("name");
+//    static String dir = System.getProperty("user.dir");
+
+//    public boolean example(String s) {
+//        System.getProperty(s);
+//        if (s.equals("1")) {
+//            return true;
+//        }
+//        return false;
+//    }
+
+    public boolean example(String s) {
+        return File.separator.equals(s);
     }
 }

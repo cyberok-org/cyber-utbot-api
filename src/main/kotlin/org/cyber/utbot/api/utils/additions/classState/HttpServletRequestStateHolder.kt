@@ -26,6 +26,10 @@ class HttpServletRequestStateHolder: AnyStateHolder() {     // TODO(add paramete
 
         private val getHeaderSignature by lazy { sootClass.getMethodByName("getHeader").subSignature }
 
+        //
+
         override val saveArgsSignatures = emptySet<String>()
+
+        override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>) -> List<InvokeResult>?> = mutableMapOf()
     }
 }

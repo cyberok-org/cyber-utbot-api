@@ -7,11 +7,10 @@ import soot.Scene
 import soot.SootClass
 import soot.SootMethod
 
-
 object MethodSubstitution {
     private fun methodResult(method: SootMethod?) = method?.run { listOf(GraphResult(jimpleBody().graph())) }
 
-    // path
+    // Path
     private val pathClass: SootClass
         get() = Scene.v().getSootClass(java.nio.file.Path::class.qualifiedName)
     private val pathOf1Signature = pathClass.getMethod("of", listOf(JAVA_NET_URI_TYPE)).signature
@@ -21,7 +20,7 @@ object MethodSubstitution {
     private val cyberPathOf1 = cyberPathClass.getMethod("of", listOf(JAVA_NET_URI_TYPE))
     private val cyberPathOf2 = cyberPathClass.getMethod("of", listOf(STRING_TYPE, ELEMENT_ARRAY_TYPE(STRING_TYPE)))
 
-    // files
+    // Files
     private val filesClass: SootClass
         get() = Scene.v().getSootClass(java.nio.file.Files::class.qualifiedName)
     private val filesCreateFileSignature = filesClass.getMethodByName(java.nio.file.Files::createFile.name).signature
@@ -34,7 +33,10 @@ object MethodSubstitution {
 //    private val URLDecoderClassDecode2Signature = URLDecoderClass.getMethod("decode", listOf(STRING_TYPE)).signature
 //    private val URLDecoderClassDecode3Signature = URLDecoderClass.getMethod("decode", listOf(STRING_TYPE, CHARSET_TYPE)).signature
 
-    //
+    // FileSystem
+//    private val fileSystemClass: SootClass
+//        get() = Scene.v().getSootClass(java.io.FileSystem::class.qualifiedName)
+//    private val fileSystemClassGetSeparatorSignature = URLDecoderClass.getMethod("getSeparator", emptyList()).signature
 
     //
 
@@ -46,6 +48,7 @@ object MethodSubstitution {
 //        URLDecoderClassDecode1Signature to { _, parameters -> listOf(MethodResult(parameters[0])) },
 //        URLDecoderClassDecode2Signature to { _, parameters -> listOf(MethodResult(parameters[0])) },
 //        URLDecoderClassDecode3Signature to { _, parameters -> listOf(MethodResult(parameters[0])) },
+//        fileSystemClassGetSeparatorSignature to  { _, _ ->  },
     )
 
     fun CyberTraverser.overrideInvoke(

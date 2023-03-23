@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import org.cyber.utbot.api.abstraction.extraChecks.ExtraVulnerabilityCheck
 import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.*
-import org.cyber.utbot.api.utils.additions.classState.StateHolder
 import org.cyber.utbot.api.utils.viewers.stateViewers.TerminalStatisticViewer
 import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.cyber.utbot.api.utils.viewers.stateViewers.EndNotTerminalStatisticViewer
@@ -147,7 +146,6 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
         } finally {
             val duration = ChronoUnit.MILLIS.between(started, now())
             logger.debug { "Generating test for [$targetClassFqn] - completed in [$duration] (ms)" }
-            StateHolder.clear()
         }
         return testClassBody
     }

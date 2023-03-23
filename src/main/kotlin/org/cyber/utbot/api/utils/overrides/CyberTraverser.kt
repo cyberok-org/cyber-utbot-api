@@ -41,6 +41,8 @@ class CyberTraverser(
     private val rememberedParams = mutableSetOf<List<SymbolicValue>>()
     private val objectValueToParams = mutableMapOf<ObjectValue, List<SymbolicValue>>()
     private val stmtToParams = mutableMapOf<Stmt, List<SymbolicValue>>()
+    @CyberNew("StateHolder")
+    private val stateHolder = StateHolder()
 
     @CyberNew("decorate target invoke")
     private fun decorateTarget(target: InvocationTarget): InvocationTarget {
@@ -296,15 +298,12 @@ class CyberTraverser(
             return OverrideResult(success = true, copyOfRange(invocation.parameters))
         }
 
-        @CyberNew("add overrides related to save params") StateHolder.run {
-            if (instance != null) {
-                val parameters = if (invocation.method.name == "<init>") {      // TODO(not only init)
-                    objectValueToParams[instance] ?: invocation.parameters      // TODO(objectValueToParams.remove(instance))
-                } else invocation.parameters
-                overrideInvoke(instance as ObjectValue, invocation.method, parameters)
-            }
-            else {
-                if (saveArgs(invocation.method)) rememberedParams.add(invocation.parameters)
+        @CyberNew("add overrides related to save params") stateHolder.run {
+            val parameters = if (invocation.method.name == "<init>" && instance != null) {      // TODO(not only init)
+                objectValueToParams[instance] ?: invocation.parameters      // TODO(objectValueToParams.remove(instance))
+            } else invocation.parameters
+            overrideInvoke(instance as? ObjectValue, invocation.method, parameters) ?: run {
+                if (instance == null && saveArgs(invocation.method)) rememberedParams.add(invocation.parameters)
                 null
             }
         }?.run { return OverrideResult(success = true, this) }
