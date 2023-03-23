@@ -6,10 +6,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
-import org.cyber.utbot.api.utils.additions.wrappers.CookieWrapper
-import org.cyber.utbot.api.utils.additions.wrappers.HttpServletResponseWrapper
-import org.cyber.utbot.api.utils.additions.wrappers.HttpServletWrapper
-import org.cyber.utbot.api.utils.additions.wrappers.PathWrapper
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.viewers.StatePublisher
@@ -33,14 +29,8 @@ import org.utbot.framework.UtSettings
 import org.utbot.framework.UtSettings.processUnknownStatesDuringConcreteExecution
 import org.utbot.framework.UtSettings.useDebugVisualization
 import org.utbot.framework.plugin.api.*
-import org.utbot.framework.plugin.api.util.UtContext
 import org.utbot.framework.plugin.api.util.description
 import org.utbot.framework.util.classesToLoad
-import soot.Scene
-import java.nio.file.Path
-import javax.servlet.http.Cookie
-import javax.servlet.http.HttpServlet
-import javax.servlet.http.HttpServletResponse
 import kotlin.system.measureTimeMillis
 
 
@@ -86,48 +76,33 @@ class CyberUtBotSymbolicEngine(
             classesToLoad = classesToLoad.plus(arrayOf(
                 // add all overrides here!!!
                 org.cyber.utils.overrides.CyberPath::class,
-                org.cyber.utils.overrides.CyberCookie::class,
-                org.cyber.utils.overrides.CyberHttpServlet::class,
-                org.cyber.utils.overrides.CyberHttpServletResponse::class,
             ).map { it.java }.toTypedArray())
 
-            classToWrapper += (mutableMapOf<TypeToBeWrapped, WrapperType>().apply {
-                // add all overrides here!!!
-                putSootClass(java.nio.file.Path::class, org.cyber.utils.overrides.CyberPath::class)
-                putSootClass(HttpServletResponse::class, org.cyber.utils.overrides.CyberHttpServletResponse::class)
-                putSootClass(Cookie::class, org.cyber.utils.overrides.CyberCookie::class)
-                putSootClass(HttpServlet::class, org.cyber.utils.overrides.CyberHttpServlet::class)
-            }.apply {
-                val applicationClassLoader = UtContext::class.java.classLoader
-                values.distinct().forEach {
-                    val kClass = applicationClassLoader.loadClass(it.className).kotlin
-                    putSootClass(kClass, it)
-                }
-            })
+//            classToWrapper += (mutableMapOf<TypeToBeWrapped, WrapperType>().apply {
+//                // add all overrides here!!!
+//            }.apply {
+//                val applicationClassLoader = UtContext::class.java.classLoader
+//                values.distinct().forEach {
+//                    val kClass = applicationClassLoader.loadClass(it.className).kotlin
+//                    putSootClass(kClass, it)
+//                }
+//            })
 
-            wrappers = wrappers + mutableMapOf(
-                // add all overrides here!!!
-                wrap(java.nio.file.Path::class) { type, addr -> objectValue(type, addr, PathWrapper()) },
-                wrap(HttpServletResponse::class) { type, addr -> objectValue(type, addr, HttpServletResponseWrapper()) },
-                wrap(Cookie::class) { type, addr -> objectValue(type, addr, CookieWrapper()) },
-                wrap(HttpServlet::class) { type, addr -> objectValue(type, addr, HttpServletWrapper()) },
-            ).apply {
-                arrayOf(
-                    // add all overrides here!!!
-                    wrap(org.cyber.utils.overrides.CyberPath::class) { _, addr -> objectValue(Scene.v().getSootClass(Path::class.java.canonicalName).type, addr, PathWrapper()) },
-                    wrap(org.cyber.utils.overrides.CyberHttpServletResponse::class) { _, addr -> objectValue(Scene.v().getSootClass(HttpServletResponse::class.java.canonicalName).type, addr, HttpServletResponseWrapper()) },
-                    wrap(org.cyber.utils.overrides.CyberCookie::class) { _, addr -> objectValue(Scene.v().getSootClass(Cookie::class.java.canonicalName).type, addr, CookieWrapper()) },
-                    wrap(org.cyber.utils.overrides.CyberHttpServlet::class) { _, addr -> objectValue(Scene.v().getSootClass(HttpServlet::class.java.canonicalName).type, addr, HttpServletWrapper()) },
-                ).let { putAll(it) }
-            }.also {
-                val missedWrappers = it.keys.filterNot { key ->
-                    Scene.v().getSootClass(key.name).type in classToWrapper.keys
-                }
-
-                require(missedWrappers.isEmpty()) {
-                    "Missed wrappers for classes [${missedWrappers.joinToString(", ")}]"
-                }
-            }
+//            wrappers = wrappers + mutableMapOf(
+//                // add all overrides here!!!
+//            ).apply {
+//                arrayOf(
+//                    // add all overrides here!!!
+//                ).let { putAll(it) }
+//            }.also {
+//                val missedWrappers = it.keys.filterNot { key ->
+//                    Scene.v().getSootClass(key.name).type in classToWrapper.keys
+//                }
+//
+//                require(missedWrappers.isEmpty()) {
+//                    "Missed wrappers for classes [${missedWrappers.joinToString(", ")}]"
+//                }
+//            }
         } else {
             if (onlyVulnerabilities) {
                 onlyVulnerabilities = false

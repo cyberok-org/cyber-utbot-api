@@ -1,34 +1,51 @@
 package org.cyber.utils.overrides;
 
 import org.jetbrains.annotations.NotNull;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
+import java.util.Iterator;
 
 public class CyberPath implements Path {
     public static Path of(String first, String... more) {
-        return new CyberPath();
+        return new CyberPath(first, more);
+    }
+
+    public static Path of(URI uri) {
+        return new CyberPath(uri);
+    }
+
+    public CyberPath(String first, String... more) {
+    }
+
+    public CyberPath(URI uri) {
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
     }
 
     @NotNull
     @Override
     public FileSystem getFileSystem() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return null;
     }
 
     @Override
     public boolean isAbsolute() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return false;
     }
 
     @Override
     public Path getRoot() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return null;
     }
 
     @Override
     public Path getFileName() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return null;
     }
 
     @Override
@@ -38,91 +55,121 @@ public class CyberPath implements Path {
 
     @Override
     public int getNameCount() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return 0;
     }
 
     @NotNull
     @Override
-    public Path getName(int index) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Path getName(int i) {
+        return null;
     }
 
     @NotNull
     @Override
-    public Path subpath(int beginIndex, int endIndex) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Path subpath(int i, int i1) {
+        return null;
     }
 
     @Override
-    public boolean startsWith(@NotNull Path other) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public boolean startsWith(@NotNull Path path) {
+        return false;
     }
 
     @Override
-    public boolean endsWith(@NotNull Path other) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public boolean startsWith(@NotNull String other) {
+        return Path.super.startsWith(other);
+    }
+
+    @Override
+    public boolean endsWith(@NotNull Path path) {
+        return false;
+    }
+
+    @Override
+    public boolean endsWith(@NotNull String other) {
+        return Path.super.endsWith(other);
     }
 
     @NotNull
     @Override
     public Path normalize() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return null;
     }
 
     @NotNull
     @Override
-    public Path resolve(@NotNull Path other) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Path resolve(@NotNull Path path) {
+        return null;
     }
 
     @NotNull
     @Override
-    public Path relativize(@NotNull Path other) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Path resolve(@NotNull String other) {
+        return Path.super.resolve(other);
+    }
+
+    @NotNull
+    @Override
+    public Path resolveSibling(@NotNull Path other) {
+        return Path.super.resolveSibling(other);
+    }
+
+    @NotNull
+    @Override
+    public Path resolveSibling(@NotNull String other) {
+        return Path.super.resolveSibling(other);
+    }
+
+    @NotNull
+    @Override
+    public Path relativize(@NotNull Path path) {
+        return null;
     }
 
     @NotNull
     @Override
     public URI toUri() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return null;
     }
 
     @NotNull
     @Override
     public Path toAbsolutePath() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return null;
     }
 
     @NotNull
     @Override
-    public Path toRealPath(@NotNull LinkOption... options) throws IOException {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Path toRealPath(@NotNull LinkOption... linkOptions) throws IOException {
+        return null;
     }
 
     @NotNull
     @Override
-    public WatchKey register(@NotNull WatchService watcher, @NotNull WatchEvent.Kind<?>[] events, WatchEvent.Modifier... modifiers) throws IOException {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    @Override
-    public int compareTo(@NotNull Path other) {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    @Override
-    public int hashCode() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public File toFile() {
+        return Path.super.toFile();
     }
 
     @NotNull
     @Override
-    public String toString() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public WatchKey register(@NotNull WatchService watchService, @NotNull WatchEvent.Kind<?>[] kinds, WatchEvent.Modifier... modifiers) throws IOException {
+        return null;
+    }
+
+    @NotNull
+    @Override
+    public WatchKey register(@NotNull WatchService watcher, @NotNull WatchEvent.Kind<?>... events) throws IOException {
+        return Path.super.register(watcher, events);
+    }
+
+    @NotNull
+    @Override
+    public Iterator<Path> iterator() {
+        return Path.super.iterator();
+    }
+
+    @Override
+    public int compareTo(@NotNull Path path) {
+        return 0;
     }
 }
