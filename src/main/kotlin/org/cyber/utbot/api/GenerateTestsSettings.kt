@@ -23,6 +23,7 @@ val CYBER_MOCK_ALWAYS_DEFAULT = listOf(         // TODO(division by packages)
     "javax.servlet.http.Cookie",
     "javax.servlet.RequestDispatcher",
     "javax.servlet.http.HttpServletResponse",
+    "java.io.PrintWriter",
 )
 
 enum class TestFrameworkGen {

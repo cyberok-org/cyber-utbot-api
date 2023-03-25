@@ -134,7 +134,7 @@ class CyberTraverser(
                 val target = InvocationTarget(invocation.instance, invocation.method)
                 val newTarget = decorateTarget(target)
                 if (target != newTarget) {
-                    return invoke(target, invocation.parameters)
+                    return invoke(newTarget, invocation.parameters)
                 }
             }
             if (artificialMethodOverride.results.size > 1) {

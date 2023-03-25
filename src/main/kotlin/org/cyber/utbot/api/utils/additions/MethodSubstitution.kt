@@ -27,11 +27,11 @@ object MethodSubstitution {
     private val filesCreateDirectoriesSignature = filesClass.getMethodByName(java.nio.file.Files::createDirectories.name).signature
 
     // URLDecoder
-//    private val URLDecoderClass: SootClass
-//        get() = Scene.v().getSootClass(java.net.URLDecoder::class.qualifiedName)
-//    private val URLDecoderClassDecode1Signature = URLDecoderClass.getMethod("decode", listOf(STRING_TYPE, STRING_TYPE)).signature
-//    private val URLDecoderClassDecode2Signature = URLDecoderClass.getMethod("decode", listOf(STRING_TYPE)).signature
-//    private val URLDecoderClassDecode3Signature = URLDecoderClass.getMethod("decode", listOf(STRING_TYPE, CHARSET_TYPE)).signature
+    private val URLDecoderClass: SootClass
+        get() = Scene.v().getSootClass(java.net.URLDecoder::class.qualifiedName)
+    private val URLDecoderClassDecode1Signature = URLDecoderClass.getMethod("decode", listOf(STRING_TYPE, STRING_TYPE)).signature
+    private val URLDecoderClassDecode2Signature = URLDecoderClass.getMethod("decode", listOf(STRING_TYPE)).signature
+    private val URLDecoderClassDecode3Signature = URLDecoderClass.getMethod("decode", listOf(STRING_TYPE, CHARSET_TYPE)).signature
 
     // FileSystem
 //    private val fileSystemClass: SootClass
@@ -45,9 +45,9 @@ object MethodSubstitution {
         pathOf2Signature to { _, _ -> methodResult(cyberPathOf2) },
 //        filesCreateFileSignature to { _, parameters -> listOf(MethodResult(parameters[0])) },
 //        filesCreateDirectoriesSignature to { _, parameters -> listOf(MethodResult(parameters[0])) },
-//        URLDecoderClassDecode1Signature to { _, parameters -> listOf(MethodResult(parameters[0])) },
-//        URLDecoderClassDecode2Signature to { _, parameters -> listOf(MethodResult(parameters[0])) },
-//        URLDecoderClassDecode3Signature to { _, parameters -> listOf(MethodResult(parameters[0])) },
+        URLDecoderClassDecode1Signature to { _, parameters -> listOf(MethodResult(parameters[0])) },
+        URLDecoderClassDecode2Signature to { _, parameters -> listOf(MethodResult(parameters[0])) },
+        URLDecoderClassDecode3Signature to { _, parameters -> listOf(MethodResult(parameters[0])) },
 //        fileSystemClassGetSeparatorSignature to  { _, _ ->  },
     )
 
