@@ -1,5 +1,5 @@
 {
-  "containingClass": "Lorg/testcases/taint/SeparateTraces;",
+  "containingClass": "org/testcases/taint/SeparateTraces",
   "methodName": "sink1",
   "descriptor": "(Ljava/lang/String;)V",
   "description": "",

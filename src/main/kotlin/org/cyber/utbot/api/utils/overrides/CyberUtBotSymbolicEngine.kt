@@ -59,13 +59,15 @@ class CyberUtBotSymbolicEngine(
     private var onlyVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
     vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
+    analysedJar: String,
+    cyberDefaultSelector: Boolean,
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
 
     override lateinit var pathSelector: PathSelector
 
     init {  // set our selector
         pathSelector = if (cyberPathSelector) {
-            cyberPathSelector(globalGraph, StrategyOption.DISTANCE) {
+            cyberPathSelector(globalGraph, StrategyOption.DISTANCE, analysedJar, cyberDefaultSelector) {
                 withStepsLimit(UtSettings.pathSelectorStepsLimit)
             }
         } else {
@@ -159,11 +161,13 @@ class CyberUtBotSymbolicEngine(
 
         pathSelector.offer(initState)
 
-        @CyberNew("inform selector about the start of a new selection iteration")
-        if (pathSelector is CyberSelector) (pathSelector as CyberSelector).onNextIteration(initState)
+        @CyberNew("inform selector about the start of a new selection iteration & add taint endpoints")
+        if (pathSelector is CyberSelector && traverser is CyberTraverser) {
+            (traverser as CyberTraverser).taintEndPoints.clear()
+            (traverser as CyberTraverser).taintEndPoints.putAll((pathSelector as CyberSelector).onNextIteration(initState).endPointToSinks)
+        }
 
         pathSelector.use {
-
             while (currentCoroutineContext().isActive) {
                 if (controller.stop)
                     break
@@ -284,12 +288,13 @@ class CyberUtBotSymbolicEngine(
                                 StateLabel.CONCRETE -> statesForConcreteExecution.add(newState)
                                 StateLabel.TERMINAL -> {
                                     @CyberNew("ignore terminal state if the trace was not found yet")
-                                    if (pathSelector is CyberSelector) {
+                                    if (pathSelector is CyberSelector && !(pathSelector as CyberSelector).defaultSelection) {
                                         if (!(pathSelector as CyberSelector).traceFound()) {
                                             continue
                                         }
+
                                     }
-                                    println("TERMINAL: ${newState.stmt}, from ${state.stmt}, method: ${newState.toString()}")
+                                    println("TERMINAL: ${newState.stmt}, from ${state.stmt}, method: ${newState}")
                                     consumeTerminalState(newState)
                                 }
                             }
@@ -308,9 +313,7 @@ class CyberUtBotSymbolicEngine(
     }
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "filter terminal states")
-    override suspend fun FlowCollector<UtResult>.consumeTerminalState(
-        state: ExecutionState,
-    ) {
+    override suspend fun FlowCollector<UtResult>.consumeTerminalState(state: ExecutionState) {
         // some checks to be sure the state is correct
         require(state.label == StateLabel.TERMINAL) { "Can't process non-terminal state!" }
         require(!state.isInNestedMethod()) { "The state has to correspond to the MUT" }
@@ -348,12 +351,13 @@ class CyberUtBotSymbolicEngine(
         val stateAfter = modelsAfter.constructStateForMethod(methodUnderTest)
         require(stateBefore.parameters.size == stateAfter.parameters.size)
 
+        val path = entryMethodPath(state)
         val symbolicUtExecution = UtSymbolicExecution(
             stateBefore = stateBefore,
             stateAfter = stateAfter,
             result = symbolicExecutionResult,
             instrumentation = instrumentation,
-            path = entryMethodPath(state),
+            path = path,
             fullPath = state.fullPath()
         )
 

@@ -1,21 +1,18 @@
 package org.testcases.taint;
 
 public class Example {
-    public void foo(String x, String y) {
-        if (!x.equals(y)) {
-            sink(x);
-        }
-    }
-    public void sink(String s) { }
     public String source() {
-        return "dangerous data";
+        return "malicious data";
     }
-    public void launch(int x) {
-        if (x > 0) {
-            foo(source(), "...");
-        } else {
-            foo("smth", "...");
-        }
+    public void sink(String s) {
+        // something unsafe
+    }
+    public void bar(int x) {
+        String s = source();
+    }
+    public void foo() {
+        String source = source();
+        sink(source); // dangerous!
     }
 }
 

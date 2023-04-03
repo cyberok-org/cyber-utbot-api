@@ -35,10 +35,10 @@ fun main() {
     val otherMocks = emptyList<String>()
 
     val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
-        withUtSettings = { useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },
+        withUtSettings = { useFuzzing = false; useDebugVisualization = true; },
         utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER)) //, vulnerabilityCheckDirectories=listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"))
     val generator = TestGenerator(settings)
-    val (tests, info) = generator.run(mapOf("org.testcases.taint.sepclasses.SinkClass" to "src/main/java/org/testcases/taint/sepclasses/SinkClass").toTestUnits())
+    val (tests, info) = generator.run(mapOf("org.testcases.taint.Example" to "src/main/java/org/testcases/taint/Example").toTestUnits())
 
 //    val (tests, info) = generator.run(mapOf("org.owasp.benchmark.testcode3.BenchmarkTest00133" to "C:/Users/lesya/BenchmarkJava/src/main/java/org/owasp/benchmark/testcode3/BenchmarkTest00133.java").toTestUnits())
     tests.forEach { nameAndTest ->
@@ -48,15 +48,12 @@ fun main() {
         )
 //        println("name=${nameAndTest.key}\n\n${nameAndTest.value}\n")
     }
-//    printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
-//        Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
-//    }
 
 //    val (tests, info) = generator.run(mapOf("org.example.base.ArbitraryFileCreation" to "$UTBOT_DIR/cyber-utbot-exploit-base/src/main/java/org/example/base/ArbitraryFileCreation.java").toTestUnits())
 //    tests.forEach { nameAndTest ->
 //        Files.write("$UTBOT_DIR/cyber-utbot-exploit-base/src/test/java/org/example/base/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
 //    }
-    printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
+//    printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
 }
 
 fun main2() {

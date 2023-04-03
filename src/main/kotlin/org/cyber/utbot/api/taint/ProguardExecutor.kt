@@ -10,35 +10,40 @@ import proguard.analysis.cpa.jvm.util.CfaUtil
 import proguard.classfile.ClassPool
 import proguard.classfile.MethodSignature
 import soot.SootMethod
+import soot.jimple.JimpleBody
 
 class ProguardExecutor(private val jarName: String) {
     var traces: Set<List<BamLocationDependentJvmMemoryLocation<*>>> = mutableSetOf()
+    val sinks: MutableSet<JvmInvokeTaintSink> = mutableSetOf()
+    lateinit var cpaRun: JvmTaintMemoryLocationBamCpaRun
     private var headMethod: HeadMethod? = null
     private val sources: MutableSet<JvmTaintSource> = mutableSetOf()
-    val sinks: MutableSet<JvmInvokeTaintSink> = mutableSetOf()
+    private val classPool: javassist.ClassPool = javassist.ClassPool.getDefault()
 
-    fun execute() {
-        val programClassPool: ClassPool = JarUtil.readJar(jarName, "**BenchmarkTest00133", false)
+    init {
+        classPool.insertClassPath(jarName)
+    }
+
+    fun execute(jimpleBody: JimpleBody) {
+        setHeadMethodSignature(jimpleBody.method)
+        val programClassPool: ClassPool = JarUtil.readJar(jarName, "**", false)
         val cfa = CfaUtil.createInterproceduralCfa(programClassPool)
-        sources.addAll(parseSources("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sources"))
-        sinks.addAll(parseSinks("C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sinks"))
-        val cpaRun = JvmTaintMemoryLocationBamCpaRun.Builder().setCfa(cfa)
-            .setMainSignature(
-                MethodSignature(headMethod?.clazz, headMethod?.method, headMethod?.descriptor)
-            )
+        sources.addAll(parseSources("src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sources")) // todo change to remote db
+        sinks.addAll(parseSinks("src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sinks"))
+        cpaRun = JvmTaintMemoryLocationBamCpaRun.Builder().setCfa(cfa)
+            .setMainSignature(MethodSignature(headMethod?.clazz, headMethod?.method, headMethod?.descriptor))
             .setTaintSources(sources)
             .setTaintSinks(sinks)
             .setMaxCallStackDepth(-1)
             .build()
         traces = cpaRun.extractLinearTraces()
-        println("TRACES")
-        traces.forEach { t ->
-            println("\nNEW\n")
-            t.forEach { println(it.toString()) }
-        }
+//        traces.forEach { t ->
+//            println("\nNEW\n")
+//            t.forEach { println(it.toString()) }
+//        }
     }
 
-    fun setHeadMethodSignature(method: SootMethod) {
+    private fun setHeadMethodSignature(method: SootMethod) {
         val name = method.name
         val sig = method.bytecodeSignature.split(name)
         val clazz = sig[0]

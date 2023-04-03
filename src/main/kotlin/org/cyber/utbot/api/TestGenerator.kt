@@ -47,6 +47,8 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck> = settings.extraVulnerabilityChecks
     override val onlyVulnerabilities: Boolean = settings.onlyVulnerabilities
     override val testsIgnoreEmpty: Boolean = settings.testsIgnoreEmpty
+    override val analysedJar: String = settings.analysedJar
+    override val cyberDefaultSelector: Boolean = settings.cyberDefaultSelector
 
     private val logger = KotlinLogging.logger {}
 

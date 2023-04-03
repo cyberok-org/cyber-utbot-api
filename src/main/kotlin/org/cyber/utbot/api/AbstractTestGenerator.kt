@@ -45,6 +45,8 @@ abstract class AbstractTestGenerator {
     protected abstract val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck>
     protected abstract val onlyVulnerabilities: Boolean
     protected abstract val testsIgnoreEmpty: Boolean
+    protected abstract val analysedJar: String
+    protected abstract val cyberDefaultSelector: Boolean
 
     private var classpath: String? = null
     protected lateinit var classLoader: URLClassLoader
@@ -94,7 +96,9 @@ abstract class AbstractTestGenerator {
             findVulnerabilities,
             onlyVulnerabilities,
             statePublisher,
-            vulnerabilityChecksHolder
+            vulnerabilityChecksHolder,
+            analysedJar,
+            cyberDefaultSelector
         )
     }
 

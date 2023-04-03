@@ -9,20 +9,24 @@ import org.utbot.engine.selectors.*
 fun cyberPathSelector(
     graph: InterProceduralUnitGraph,
     strategy: StrategyOption,
+    analysedJar: String,
+    cyberDefaultSelector: Boolean,
     builder: CyberSelectorBuilder.() -> Unit
-) = CyberSelectorBuilder(graph, strategy).apply(builder).build()
+) = CyberSelectorBuilder(graph, strategy, analysedJar, cyberDefaultSelector).apply(builder).build()
 
 
 class CyberSelectorBuilder internal constructor(
     graph: InterProceduralUnitGraph,
     val strategy: StrategyOption,
+    private val analysedJar: String,
+    private val cyberDefaultSelector: Boolean,
     context: PathSelectorContext = PathSelectorContext(graph)
 ) : PathSelectorBuilder<CyberSelector>(graph, context) {
     override fun build() = CyberSelector(
         CyberStrategy(graph), // choosing strategy
         requireNotNull(context.stoppingStrategy) { "StoppingStrategy isn't specified" },
-//        "C:\\Users\\lesya\\BenchmarkJava\\out\\artifacts\\benchmark_jar\\benchmark.jar",
-        "C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\taint\\jars\\TaintCheckJar.jar",
-        graph
+        analysedJar,
+        graph,
+        cyberDefaultSelector
     )
 }

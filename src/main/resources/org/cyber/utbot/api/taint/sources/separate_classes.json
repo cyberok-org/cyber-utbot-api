@@ -1,5 +1,5 @@
   {
-    "containingClass": "Lorg/testcases/taint/sepclasses/SourceClass;",
+    "containingClass": "org/testcases/taint/sepclasses/SourceClass",
     "methodName": "source",
   "descriptor": "(II)Ljava/lang/String;",
     "description": "",

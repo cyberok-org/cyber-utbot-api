@@ -39,12 +39,23 @@ internal fun parseSinks(directory: String): MutableSet<JvmInvokeTaintSink> {
         if (file.isDirectory) return@forEach
         val sink = gson.fromJson(file.readText(), SinkWrapper::class.java)
         sink.apply {
-            sinks.add(
-                JvmInvokeTaintSink(
-                    MethodSignature(containingClass, methodName, descriptor),
-                    takesInstance, takesArgs, takesGlobals
-                ),
-            )
+            if (takesArgs.size <= 1) {
+                sinks.add(
+                    JvmInvokeTaintSink(
+                        MethodSignature(containingClass, methodName, descriptor),
+                        takesInstance, takesArgs, takesGlobals
+                    ),
+                )
+            } else {
+                takesArgs.forEach {
+                    sinks.add(
+                        JvmInvokeTaintSink(
+                            MethodSignature(containingClass, methodName, descriptor),
+                            takesInstance, setOf(it), takesGlobals
+                        ),
+                    )
+                }
+            }
         }
     }
     return sinks

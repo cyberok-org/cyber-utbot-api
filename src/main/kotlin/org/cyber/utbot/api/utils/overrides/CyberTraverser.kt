@@ -3,7 +3,6 @@ package org.cyber.utbot.api.utils.overrides
 import org.cyber.utbot.api.utils.CHECK_METHOD_PREFIX
 import org.cyber.utbot.api.utils.VULNERABILITY_CHECKS_CLASS_NAME
 import org.cyber.utbot.api.utils.additions.vulnerability.decorateVulnerabilityFunction
-import org.cyber.utbot.api.utils.additions.wrappers.FilesWrapper
 import org.cyber.utbot.api.utils.additions.wrappers.PathWrapper
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
@@ -21,6 +20,9 @@ import org.utbot.engine.symbolic.asHardConstraint
 import org.utbot.engine.types.*
 import org.utbot.framework.plugin.api.ExecutableId
 import org.utbot.framework.util.executableId
+import proguard.analysis.cpa.jvm.domain.memory.BamLocationDependentJvmMemoryLocation
+import proguard.analysis.cpa.jvm.domain.taint.JvmInvokeTaintSink
+import proguard.analysis.cpa.jvm.domain.taint.JvmTaintSink
 import soot.*
 import soot.jimple.Stmt
 import soot.jimple.internal.JInvokeStmt
@@ -46,6 +48,7 @@ class CyberTraverser(
         "java.nio.file.Path" to { method: SootMethod, parameters: List<SymbolicValue> -> PathWrapper.staticInvoke(method, parameters) },
 //        "java.nio.file.Files" to { method: SootMethod, parameters: List<SymbolicValue> -> FilesWrapper.staticInvoke(method, parameters) }
     )
+    val taintEndPoints: MutableMap<BamLocationDependentJvmMemoryLocation<*>, List<JvmTaintSink>> = mutableMapOf()
 
     @CyberNew("smth to override")
     fun getParams(objectValue: ObjectValue) = objectValueToParams[objectValue]
@@ -137,6 +140,23 @@ class CyberTraverser(
         // If so, return the result of the override
         if (artificialMethodOverride.success) {
             @CyberNew("decorate target") run {
+                environment.state.stmt.apply {
+                    if (this is JInvokeStmt) {
+                        val args = invokeExpr.args.map { it.toString() }
+                        val params = invocation.parameters
+                        val matchedSinks = mutableListOf<JvmTaintSink?>()
+                        taintEndPoints.values.forEach { v ->
+                            matchedSinks.add(v.find {
+                                it.signature.fqn.contains(
+                                    "${invokeExpr.method.declaringClass.name.replace(".", "/")};${invokeExpr.method.name}"
+                                )
+                            })
+                        }
+                        if (taintEndPoints.isNotEmpty()) {
+
+                        }
+                    }
+                }
                 val target = InvocationTarget(invocation.instance, invocation.method)
                 val newTarget = decorateTarget(target)
                 if (target != newTarget) {
@@ -182,6 +202,22 @@ class CyberTraverser(
         // Note that sometimes invocation on the particular targets should be overridden as well.
         // For example, Collection.size will produce two targets (ArrayList and HashSet)
         // that will override the invocation.
+        val matchedSinks = mutableListOf<JvmTaintSink?>()
+        taintEndPoints.values.forEach { v ->
+            matchedSinks.add(v.find {
+                it.signature.fqn.contains(
+                    "${invocation.method.declaringClass.name.replace(".", "/")};${invocation.method.name}"
+                )
+            })
+        }
+        val taintedArgs = mutableSetOf<Pair<SymbolicValue, Int>>()
+        val params = invocation.parameters
+        if (matchedSinks.isNotEmpty()) {
+            matchedSinks.filterIsInstance<JvmInvokeTaintSink>().forEach { sink ->
+                val takesArgs = sink.takesArgs
+                takesArgs.forEach { taintedArgs.add(Pair(params[it - 1], it - 1)) }
+            }
+        }
         val overrideResults = targets
             .map { @CyberNew("decorate target") decorateTarget(it) }
             .map { it to overrideInvocation(invocation, it) }

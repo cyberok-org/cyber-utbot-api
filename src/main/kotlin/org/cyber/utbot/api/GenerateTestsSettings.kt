@@ -141,6 +141,16 @@ class GenerateTestsSettings(
     var testsIgnoreEmpty: Boolean = false,
 
     /**
+     * path to the jar of the program being analysed
+     */
+    val analysedJar: String = "C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\taint\\jars\\TaintCheckJar.jar",
+
+    /**
+     * whether to use default selector instead of cyber selector
+     */
+    var cyberDefaultSelector: Boolean = true,
+
+    /**
      * libraries that utbot will trust
      * already trust: java, sun, javax, com.sun, org.omg, org.xml, org.w3c.dom
      */

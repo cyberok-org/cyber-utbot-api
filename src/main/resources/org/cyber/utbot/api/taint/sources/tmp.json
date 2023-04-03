@@ -1,5 +1,5 @@
 {
-  "containingClass": "Lorg/testcases/taint/Example;",
+  "containingClass": "org/testcases/taint/Example",
   "methodName": "source",
   "descriptor": "()Ljava/lang/String;",
   "description": "tmp",
