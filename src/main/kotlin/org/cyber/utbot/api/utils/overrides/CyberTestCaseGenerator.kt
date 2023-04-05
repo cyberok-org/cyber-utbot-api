@@ -1,6 +1,7 @@
 package org.cyber.utbot.api.utils.overrides
 import mu.KLogger
 import mu.KotlinLogging
+import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.viewers.StatePublisher
 import org.cyber.utbot.api.utils.vulnerability.VulnerabilityChecksHolder
@@ -21,7 +22,8 @@ open class CyberTestCaseGenerator(
     private val findVulnerabilities: Boolean,
     private val onlyVulnerabilities: Boolean,
     private val statePublisher: StatePublisher,
-    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?
+    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
+    private val codeGen: CodeGen?
 ) : TestCaseGenerator(buildDirs, classpath, dependencyPaths, jdkInfo) {
     private val logger: KLogger = KotlinLogging.logger {}
 
@@ -46,7 +48,8 @@ open class CyberTestCaseGenerator(
             findVulnerabilities,
             onlyVulnerabilities,
             statePublisher = statePublisher,
-            vulnerabilityChecksHolder = vulnerabilityChecksHolder
+            vulnerabilityChecksHolder = vulnerabilityChecksHolder,
+            codeGen = codeGen
         )
     }
 }

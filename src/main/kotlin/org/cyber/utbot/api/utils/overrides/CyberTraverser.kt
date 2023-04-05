@@ -35,14 +35,13 @@ class CyberTraverser(
     typeResolver: TypeResolver,
     globalGraph: InterProceduralUnitGraph,
     mocker: Mocker,
-    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?
+    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
+    private val stateHolder: StateHolder
 ) : Traverser(methodUnderTest, typeRegistry, hierarchy, typeResolver, globalGraph, mocker) {
     @CyberNew("smth to override")
     private val rememberedParams = mutableSetOf<List<SymbolicValue>>()
     private val objectValueToParams = mutableMapOf<ObjectValue, List<SymbolicValue>>()
     private val stmtToParams = mutableMapOf<Stmt, List<SymbolicValue>>()
-    @CyberNew("StateHolder")
-    private val stateHolder = StateHolder()
 
     @CyberNew("decorate target invoke")
     private fun decorateTarget(target: InvocationTarget): InvocationTarget {
@@ -54,6 +53,21 @@ class CyberTraverser(
             val decorateFunction = decorateVulnerabilityFunction(target, methodName, checks = this)
             InvocationTarget(instance = null, method = decorateFunction, target.constraints)
         } ?: target
+    }
+
+    @CyberNew("resolver instance for stateHolder if needed")
+    private fun createResolver(): Resolver {
+        val holder = solver.check(respectSoft = false)
+        return Resolver(
+            hierarchy,
+            memory,
+            typeRegistry,
+            typeResolver,
+            holder as UtSolverStatusSAT,    // TODO is ok?
+            methodUnderTest,
+            softMaxArraySize,
+            objectCounter
+        )
     }
 
     @CyberModify("org/utbot/engine/Traverser.kt", "added update objectValueToParams")
@@ -302,7 +316,7 @@ class CyberTraverser(
             val parameters = if (invocation.method.name == "<init>" && instance != null) {      // TODO(not only init)
                 objectValueToParams[instance] ?: invocation.parameters      // TODO(objectValueToParams.remove(instance))
             } else invocation.parameters
-            overrideInvoke(instance as? ObjectValue, invocation.method, parameters) ?: run {
+            overrideInvoke(instance as? ObjectValue, invocation.method, parameters) { createResolver() } ?: run {
                 if (instance == null && saveArgs(invocation.method)) rememberedParams.add(invocation.parameters)
                 null
             }

@@ -1,6 +1,7 @@
 package org.cyber.utbot.api
 
 import org.cyber.utbot.api.abstraction.extraChecks.ExtraVulnerabilityCheck
+import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.overrides.CyberCodeGenerator
 import org.cyber.utbot.api.utils.overrides.CyberTestCaseGenerator
 import org.cyber.utbot.api.utils.viewers.StatePublisher
@@ -45,6 +46,7 @@ abstract class AbstractTestGenerator {
     protected abstract val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck>
     protected abstract val onlyVulnerabilities: Boolean
     protected abstract val testsIgnoreEmpty: Boolean
+    protected abstract val codeGen: CodeGen
 
     private var classpath: String? = null
     protected lateinit var classLoader: URLClassLoader
@@ -94,7 +96,8 @@ abstract class AbstractTestGenerator {
             findVulnerabilities,
             onlyVulnerabilities,
             statePublisher,
-            vulnerabilityChecksHolder
+            vulnerabilityChecksHolder,
+            codeGen
         )
     }
 
@@ -108,6 +111,7 @@ abstract class AbstractTestGenerator {
             staticsMocking = staticsMocking,
             forceStaticMocking = forceStaticMocking,
             generateWarningsForStaticMocking = generateWarningsForStaticMocking,
+            codeGen = codeGen
         )
     }
 

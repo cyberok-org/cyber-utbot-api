@@ -2,6 +2,7 @@ package org.cyber.utbot.api.utils.overrides
 
 import org.cyber.utbot.api.utils.ASSERT_CLASS_NAME
 import org.cyber.utbot.api.utils.ASSERT_FUNCTION_NAME
+import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.utbot.framework.codegen.CodeGenerator
@@ -35,7 +36,8 @@ class CyberCodeGenerator(
     runtimeExceptionTestsBehaviour: RuntimeExceptionTestsBehaviour = RuntimeExceptionTestsBehaviour.defaultItem,
     hangingTestsTimeout: HangingTestsTimeout = HangingTestsTimeout(),
     enableTestsTimeout: Boolean = true,
-    testClassPackageName: String = classUnderTest.packageName
+    testClassPackageName: String = classUnderTest.packageName,
+    private val codeGen: CodeGen?
 ): CodeGenerator(classUnderTest, paramNames, generateUtilClassFile, testFramework, mockFramework, staticsMocking, forceStaticMocking,
     generateWarningsForStaticMocking, codegenLanguage, cgLanguageAssistant, parameterizedTestSource, runtimeExceptionTestsBehaviour,
     hangingTestsTimeout, enableTestsTimeout, testClassPackageName) {
@@ -82,6 +84,28 @@ class CyberCodeGenerator(
                 logger.info { "Code generation phase started at ${now()}" }
                 val testClassFile = astConstructor.construct(testClassModel).run { @CyberNew("add annotations") addAnnotations(this, cgTestSets) }
                 logger.info { "Code generation phase finished at ${now()}" }
+
+                @CyberNew("additional generation") codeGen?.run {
+                    val variableConstructor = CgTestClassConstructor.CgComponents.getVariableConstructorBy(context) // FIXME
+
+                    val stateBeforeToName = mutableMapOf<String, EnvironmentModels>()
+
+                    cgTestSets.forEach { methods ->
+                        methods.executions.forEach {
+                            stateBeforeToName[it.testMethodName!!] = it.stateBefore // FIXME !!
+                        }
+                    }
+
+                    testClassFile.declaredClass.body.methodRegions.forEach { cluster ->
+                        cluster.content.forEach { region ->
+                            region.content.forEach { method ->
+                                method.statements = generate(stateBeforeToName[method.name]!!, method.statements) { model: UtModel, name: String? ->    // FIXME !!
+                                    variableConstructor.getOrCreateVariable(model, name)
+                                }
+                            }
+                        }
+                    }
+                }
 
                 logger.info { "Rendering phase started at ${now()}" }
                 testClassFile.accept(renderer)

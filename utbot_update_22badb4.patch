@@ -180,27 +180,51 @@ index 280006fd..25a42c15 100644
  
  fun SymbolicValue.isNullObject() =
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
-index 3ae7ca31..488603ad 100644
+index 3ae7ca31..8e8dcbf3 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
-@@ -225,9 +225,9 @@ import java.lang.reflect.WildcardType
+@@ -225,12 +225,12 @@ import java.lang.reflect.WildcardType
  
  private val CAUGHT_EXCEPTION = LocalVariable("@caughtexception")
  
 -class Traverser(
-+open class Traverser(
-     private val methodUnderTest: ExecutableId,
+-    private val methodUnderTest: ExecutableId,
 -    internal val typeRegistry: TypeRegistry,
+-    internal val hierarchy: Hierarchy,
++open class Traverser(
++    protected val methodUnderTest: ExecutableId,
 +    val typeRegistry: TypeRegistry,
-     internal val hierarchy: Hierarchy,
++    val hierarchy: Hierarchy,
      // TODO HACK violation of encapsulation
-     internal val typeResolver: TypeResolver,
+-    internal val typeResolver: TypeResolver,
++    val typeResolver: TypeResolver,
+     private val globalGraph: InterProceduralUnitGraph,
+     private val mocker: Mocker,
+ ) : UtContextInitializer() {
+@@ -242,7 +242,7 @@ class Traverser(
+ 
+     // TODO: move this and other mutable fields to [TraversalContext]
+     lateinit var environment: Environment
+-    private val solver: UtSolver
++    protected val solver: UtSolver
+         get() = environment.state.solver
+ 
+     // TODO HACK violation of encapsulation
+@@ -253,7 +253,7 @@ class Traverser(
+         get() = environment.state.localVariableMemory
+ 
+     //HACK (long strings)
+-    internal var softMaxArraySize = 40
++    var softMaxArraySize = 40
+ 
+     /**
+      * Contains information about the generic types used in the parameters of the method under test.
 @@ -265,9 +265,9 @@ class Traverser(
  
      private val preferredCexInstanceCache = mutableMapOf<ObjectValue, MutableSet<SootField>>()
  
 -    private var queuedSymbolicStateUpdates = SymbolicStateUpdate()
-+    protected var queuedSymbolicStateUpdates = SymbolicStateUpdate()
++    var queuedSymbolicStateUpdates = SymbolicStateUpdate()
  
 -    internal val objectCounter = ObjectCounter(TypeRegistry.objectCounterInitialValue)
 +    val objectCounter = ObjectCounter(TypeRegistry.objectCounterInitialValue)
@@ -703,28 +727,41 @@ index 98579b5d..20be8d1a 100644
 +    )
 +}
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
-index 602aedd1..93d1a93e 100644
+index 602aedd1..886515e5 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
-@@ -265,7 +265,7 @@ sealed class CgMethod(open val isStatic: Boolean) : CgElement {
+@@ -263,9 +263,9 @@ sealed class CgMethod(open val isStatic: Boolean) : CgElement {
+     abstract val name: String
+     abstract val returnType: ClassId
      abstract val parameters: List<CgParameterDeclaration>
-     abstract val statements: List<CgStatement>
+-    abstract val statements: List<CgStatement>
++    abstract var statements: List<CgStatement>
      abstract val exceptions: Set<ClassId>
 -    abstract val annotations: List<CgAnnotation>
 +    abstract var annotations: List<CgAnnotation>
      abstract val documentation: CgDocumentationComment
      abstract val requiredFields: List<CgParameterDeclaration>
  }
-@@ -276,7 +276,7 @@ class CgTestMethod(
+@@ -274,9 +274,9 @@ class CgTestMethod(
+     override val name: String,
+     override val returnType: ClassId,
      override val parameters: List<CgParameterDeclaration>,
-     override val statements: List<CgStatement>,
+-    override val statements: List<CgStatement>,
++    override var statements: List<CgStatement>,
      override val exceptions: Set<ClassId>,
 -    override val annotations: List<CgAnnotation>,
 +    override var annotations: List<CgAnnotation>,
      val type: CgTestMethodType,
      override val documentation: CgDocumentationComment = CgDocumentationComment(emptyList()),
      override val requiredFields: List<CgParameterDeclaration> = emptyList(),
-@@ -290,7 +290,7 @@ class CgErrorTestMethod(
+@@ -284,21 +284,21 @@ class CgTestMethod(
+ 
+ class CgErrorTestMethod(
+     override val name: String,
+-    override val statements: List<CgStatement>,
++    override var statements: List<CgStatement>,
+     override val documentation: CgDocumentationComment = CgDocumentationComment(emptyList())
+ ) : CgMethod(false) {
      override val exceptions: Set<ClassId> = emptySet()
      override val returnType: ClassId = voidClassId
      override val parameters: List<CgParameterDeclaration> = emptyList()
@@ -733,15 +770,25 @@ index 602aedd1..93d1a93e 100644
      override val requiredFields: List<CgParameterDeclaration> = emptyList()
  }
  
-@@ -298,7 +298,7 @@ class CgParameterizedTestDataProviderMethod(
+ class CgParameterizedTestDataProviderMethod(
      override val name: String,
-     override val statements: List<CgStatement>,
+-    override val statements: List<CgStatement>,
++    override var statements: List<CgStatement>,
      override val returnType: ClassId,
 -    override val annotations: List<CgAnnotation>,
 +    override var annotations: List<CgAnnotation>,
      override val exceptions: Set<ClassId>,
  ) : CgMethod(isStatic = true) {
      override val parameters: List<CgParameterDeclaration> = emptyList()
+@@ -598,7 +598,7 @@ object CgContinueStatement : CgStatement
+ 
+ class CgDeclaration(
+     val variableType: ClassId,
+-    val variableName: String,
++    var variableName: String,
+     val initializer: CgExpression?,
+     val isMutable: Boolean = false,
+ ) : CgStatement {
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt
 index 6df90f71..7b318f96 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt

@@ -5,6 +5,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import org.cyber.utbot.api.exceptions.CyberException
+import org.cyber.utbot.api.utils.additions.classState.StateHolder
+import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
@@ -47,7 +50,10 @@ class CyberUtBotSymbolicEngine(
     private var onlyVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
     vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
+    codeGen: CodeGen?
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
+    private val stateHolder = if (findVulnerabilities) StateHolder(codeGen) else null
+
     init {  // set our selector
         if (cyberPathSelector) {
             pathSelector = cyberPathSelector(globalGraph, StrategyOption.DISTANCE) {
@@ -69,7 +75,8 @@ class CyberUtBotSymbolicEngine(
                 typeResolver,
                 globalGraph,
                 mocker,
-                vulnerabilityChecksHolder = vulnerabilityChecksHolder
+                vulnerabilityChecksHolder = vulnerabilityChecksHolder,
+                stateHolder = stateHolder ?: throw CyberException("CyberUtBotSymbolicEngine init fail")
             )
 
             // for overrides
@@ -109,6 +116,13 @@ class CyberUtBotSymbolicEngine(
                 logger.warn { "ignore onlyVulnerabilities because findVulnerabilities is false" }
             }
         }
+    }
+
+    @CyberNew("update CodeGen info")
+    private fun updateCodeGenInfo(stateBefore: EnvironmentModels, parameters: List<SymbolicValue>, resolver: Resolver) {
+        val params = if (stateBefore.parameters.size == parameters.size) parameters else parameters.drop(1)
+        require(stateBefore.parameters.size == params.size) { "update CodeGen info fail" }
+        stateHolder?.updateCodeGenInfo(stateBefore, params.map { it.addr }) { value -> resolver.resolveModel(value) }
     }
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "add StateViewer")
@@ -183,6 +197,8 @@ class CyberUtBotSymbolicEngine(
                                 logger.debug { "Generated test case violates the UtMock assumption: $concreteExecutionResult" }
                                 return@bracket
                             }
+
+                            @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, resolvedParameters, resolver)
 
                             val concreteUtExecution = UtSymbolicExecution(
                                 stateBefore,
@@ -301,6 +317,8 @@ class CyberUtBotSymbolicEngine(
         val stateBefore = modelsBefore.constructStateForMethod(methodUnderTest)
         val stateAfter = modelsAfter.constructStateForMethod(methodUnderTest)
         require(stateBefore.parameters.size == stateAfter.parameters.size)
+
+        @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, parameters, resolver)
 
         val symbolicUtExecution = UtSymbolicExecution(
             stateBefore = stateBefore,

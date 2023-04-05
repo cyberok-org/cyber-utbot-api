@@ -4,30 +4,39 @@ import org.cyber.utbot.api.utils.additions.ELEMENT_ARRAY_TYPE
 import org.cyber.utbot.api.utils.additions.JAVA_NET_URI_TYPE
 import org.cyber.utbot.api.utils.overrides.CyberTraverser
 import org.utbot.engine.*
+import org.utbot.engine.pc.UtAddrExpression
 import org.utbot.engine.types.STRING_TYPE
+import org.utbot.framework.plugin.api.UtModel
 import soot.*
 
-class PathStateHolder: AnyStateHolder() {
-    private var path: SymbolicValue? = null         // String
-    private var more: SymbolicValue? = null         // List<String>
-    private var uri: SymbolicValue? = null          // java.net.URI
+class PathState<T>: AnyState<T> {
+    var path: T? = null         // String
+    var more: T? = null         // List<String>
+    var uri: T? = null          // java.net.URI
+}
 
-    override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>) -> List<InvokeResult>?> = mutableMapOf(
-        toStringSignature to {
-            path?.run {
-                listOf(MethodResult(path as ObjectValue))
+class PathStateHolder(registerStateHolder: (UtAddrExpression, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit):
+    CodeGenStateHolder<PathState<SymbolicValue>, PathState<UtModel>>(registerStateHolder) {
+    override val state = PathState<SymbolicValue>()
+    override val codeGenerator
+        get() = null
+
+    override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mutableMapOf(
+        toStringSignature to {_, _ ->
+            state.path?.run {
+                listOf(MethodResult(state.path as ObjectValue))
             }
         },
-        init1Signature to { params ->
-            uri ?: run {
-                uri = params[0]
+        init1Signature to { params, _ ->
+            state.uri ?: run {
+                state.uri = params[0]
             }
             null
         },
-        init2Signature to {params ->
-            path ?: run {
-                path = params[0]
-                more = params[1]
+        init2Signature to {params, _ ->
+            state.path ?: run {
+                state.path = params[0]
+                state.more = params[1]
             }
             null
         },
@@ -53,6 +62,6 @@ class PathStateHolder: AnyStateHolder() {
             ofMethod2Signature
         )
 
-        override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>) -> List<InvokeResult>?> = mutableMapOf()
+        override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mutableMapOf()
     }
 }

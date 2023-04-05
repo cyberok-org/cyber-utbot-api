@@ -17,10 +17,9 @@ import org.utbot.framework.UtSettings.useDebugVisualization
 import org.utbot.framework.UtSettings.useFuzzing
 import org.utbot.framework.plugin.api.CodegenLanguage
 import org.utbot.framework.plugin.api.MockStrategyApi
-import java.nio.file.Files
 
 
-fun main2() {
+fun main() {
 //    val classpath = "$UTBOT_DIR/cyber-utbot-exploit-base/build/classes/java/main"
     val classpath = "build/classes/java/main:/home/andrew/.jdks/openjdk-17.0.2/bin/javax.servlet-api-3.1.0.jar"
 //    val classpath = "/home/andrew/ex/build/classes/java/main:/home/andrew/.jdks/openjdk-17.0.2/bin/javax.servlet-api-3.1.0.jar"
@@ -47,7 +46,7 @@ fun main2() {
 //    printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
 }
 
-fun main() {
+fun main2() {
     val bench = readCsvFile<BenchInfo>("$UTBOT_DIR/cyber-utbot-api/src/test/resources/want.csv").associate {
         it.target to it.source
     }.toTestUnits()
