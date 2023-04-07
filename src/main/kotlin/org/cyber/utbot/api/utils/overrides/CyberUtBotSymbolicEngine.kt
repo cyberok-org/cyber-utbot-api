@@ -5,17 +5,19 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import mu.KotlinLogging
 import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.additions.classState.StateHolder
 import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
+import org.cyber.utbot.api.utils.annotations.CyberNotModify
 import org.cyber.utbot.api.utils.viewers.StatePublisher
 import org.cyber.utbot.api.utils.vulnerability.VulnerabilityChecksHolder
 import org.utbot.analytics.Predictors
-import org.utbot.common.bracket
 import org.utbot.common.debug
+import org.utbot.common.measureTime
 import org.utbot.engine.*
 import org.utbot.engine.pc.UtSolver
 import org.utbot.engine.pc.UtSolverStatusSAT
@@ -36,6 +38,8 @@ import org.utbot.framework.plugin.api.util.description
 import org.utbot.framework.util.classesToLoad
 import kotlin.system.measureTimeMillis
 
+@CyberNotModify("org/utbot/engine/UtBotSymbolicEngine.kt", "shold be private in UtBotSymbolicEngine")
+private val logger = KotlinLogging.logger {}
 
 class CyberUtBotSymbolicEngine(
     controller: EngineController,
@@ -44,6 +48,7 @@ class CyberUtBotSymbolicEngine(
     dependencyPaths: String,
     mockStrategy: MockStrategy = MockStrategy.NO_MOCKS,
     chosenClassesToMockAlways: Set<ClassId>,
+    applicationContext: ApplicationContext,
     solverTimeoutInMillis: Int = UtSettings.checkSolverTimeoutMillis,
     cyberPathSelector: Boolean = false,
     findVulnerabilities: Boolean = true,
@@ -51,7 +56,7 @@ class CyberUtBotSymbolicEngine(
     private val statePublisher: StatePublisher = StatePublisher(),
     vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
     codeGen: CodeGen?
-) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis) {
+) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, applicationContext, solverTimeoutInMillis) {
     private val stateHolder = if (findVulnerabilities) StateHolder(codeGen) else null
 
     init {  // set our selector
@@ -66,7 +71,8 @@ class CyberUtBotSymbolicEngine(
                 classUnderTest,
                 hierarchy,
                 chosenClassesToMockAlways,
-                MockListenerController(controller)
+                MockListenerController(controller),
+                applicationContext = applicationContext
             )
             traverser = CyberTraverser(
                 methodUnderTest,
@@ -75,6 +81,7 @@ class CyberUtBotSymbolicEngine(
                 typeResolver,
                 globalGraph,
                 mocker,
+                applicationContext = applicationContext,
                 vulnerabilityChecksHolder = vulnerabilityChecksHolder,
                 stateHolder = stateHolder ?: throw CyberException("CyberUtBotSymbolicEngine init fail")
             )
@@ -173,7 +180,7 @@ class CyberUtBotSymbolicEngine(
                     logger.trace { "executing $state concretely..." }
 
 
-                    logger.debug().bracket("concolicStrategy<$methodUnderTest>: execute concretely") {
+                    logger.debug().measureTime({ "concolicStrategy<$methodUnderTest>: execute concretely"} ) {
                         val resolver = Resolver(
                             hierarchy,
                             state.memory,
@@ -191,11 +198,11 @@ class CyberUtBotSymbolicEngine(
 
                         try {
                             val concreteExecutionResult =
-                                concreteExecutor.executeConcretely(methodUnderTest, stateBefore, instrumentation)
+                                concreteExecutor.executeConcretely(methodUnderTest, stateBefore, instrumentation, UtSettings.concreteExecutionDefaultTimeoutInInstrumentedProcessMillis)
 
                             if (concreteExecutionResult.violatesUtMockAssumption()) {
                                 logger.debug { "Generated test case violates the UtMock assumption: $concreteExecutionResult" }
-                                return@bracket
+                                return@measureTime
                             }
 
                             @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, resolvedParameters, resolver)
@@ -216,7 +223,7 @@ class CyberUtBotSymbolicEngine(
                             logger.debug { "concolicStrategy<${methodUnderTest}>: returned $concreteUtExecution" }
                         } catch (e: CancellationException) {
                             logger.debug(e) { "Cancellation happened" }
-                        } catch (e: ConcreteExecutionFailureException) {
+                        } catch (e: InstrumentedProcessDeathException) {
                             @CyberModify("filter emit") if (!onlyVulnerabilities) {
                                 emitFailedConcreteExecutionResult(stateBefore, e)
                             }
@@ -357,16 +364,32 @@ class CyberUtBotSymbolicEngine(
             return
         }
 
+        if (checkStaticMethodsMock(symbolicUtExecution)) {
+            logger.debug {
+                buildString {
+                    append("processResult<${methodUnderTest}>: library static methods mock found ")
+                    append("(we do not support it in concrete execution yet), ")
+                    append("emit purely symbolic result $symbolicUtExecution")
+                }
+            }
+
+            @CyberModify("filter emit") if (!needEmit) return
+            emit(symbolicUtExecution)
+            return
+        }
+
+
         //It's possible that symbolic and concrete stateAfter/results are diverged.
         //So we trust concrete results more.
         try {
-            logger.debug().bracket("processResult<$methodUnderTest>: concrete execution") {
+            logger.debug().measureTime({ "processResult<$methodUnderTest>: concrete execution" } ) {
 
                 //this can throw CancellationException
                 val concreteExecutionResult = concreteExecutor.executeConcretely(
                     methodUnderTest,
                     stateBefore,
-                    instrumentation
+                    instrumentation,
+                    UtSettings.concreteExecutionDefaultTimeoutInInstrumentedProcessMillis
                 )
 
                 if (concreteExecutionResult.violatesUtMockAssumption()) {
@@ -384,9 +407,14 @@ class CyberUtBotSymbolicEngine(
                 emit(concolicUtExecution)
                 logger.debug { "processResult<${methodUnderTest}>: returned $concolicUtExecution" }
             }
-        } catch (e: ConcreteExecutionFailureException) {
+        } catch (e: InstrumentedProcessDeathException) {
             @CyberModify("filter emit") if (onlyVulnerabilities) return
             emitFailedConcreteExecutionResult(stateBefore, e)
+        } catch (e: CancellationException) {
+            logger.debug(e) { "Cancellation happened" }
+        } catch (e: Throwable) {
+            @CyberModify("filter emit") if (onlyVulnerabilities) return
+            emit(UtError("Default concrete execution failed", e));
         }
     }
 }

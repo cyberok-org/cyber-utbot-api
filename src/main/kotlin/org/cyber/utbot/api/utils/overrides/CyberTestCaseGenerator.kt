@@ -33,6 +33,7 @@ open class CyberTestCaseGenerator(
         method: ExecutableId,
         mockStrategyApi: MockStrategyApi,
         chosenClassesToMockAlways: Set<ClassId>,
+        applicationContext: ApplicationContext,
         executionTimeEstimator: ExecutionTimeEstimator
     ): UtBotSymbolicEngine {
         logger.debug("Starting symbolic execution for $method  --$mockStrategyApi--")
@@ -43,6 +44,7 @@ open class CyberTestCaseGenerator(
             dependencyPaths = dependencyPaths,
             mockStrategy = mockStrategyApi.toModel(),
             chosenClassesToMockAlways = chosenClassesToMockAlways,
+            applicationContext = applicationContext,
             solverTimeoutInMillis = executionTimeEstimator.updatedSolverCheckTimeoutMillis,
             cyberPathSelector,
             findVulnerabilities,

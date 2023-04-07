@@ -13,13 +13,10 @@ import org.utbot.common.PathUtil.toURL
 import org.utbot.common.toPath
 import org.utbot.framework.UtSettings
 import org.utbot.framework.codegen.*
-import org.utbot.framework.codegen.domain.ForceStaticMocking
-import org.utbot.framework.codegen.domain.NoStaticMocking
-import org.utbot.framework.codegen.domain.StaticsMocking
-import org.utbot.framework.codegen.domain.TestFramework
+import org.utbot.framework.codegen.domain.*
 import org.utbot.framework.plugin.api.*
 import org.utbot.framework.plugin.services.JdkInfoDefaultProvider
-import org.utbot.summary.summarize
+import org.utbot.summary.summarizeAll
 import java.io.File
 import java.net.URLClassLoader
 import java.nio.file.Files
@@ -106,6 +103,7 @@ abstract class AbstractTestGenerator {
             forceStaticMocking == ForceStaticMocking.FORCE && staticsMocking is NoStaticMocking
         return CyberCodeGenerator(
             testFramework = testFramework,
+            projectType = ProjectType.PureJvm,  // mb customizable later
             classUnderTest = classUnderTest,
             codegenLanguage = codegenLanguage,
             staticsMocking = staticsMocking,
@@ -127,8 +125,8 @@ abstract class AbstractTestGenerator {
             mockStrategy,
             chosenClassesToMockAlways,
             generationTimeout
-        ).map {
-            if (sourceCodeFile != null) it.summarize(searchDirectory, sourceCodeFile.toFile()) else it
+        ).let {
+            if (sourceCodeFile != null) it.summarizeAll(searchDirectory, sourceCodeFile.toFile()) else it
         }
 
     protected open fun generateTest(

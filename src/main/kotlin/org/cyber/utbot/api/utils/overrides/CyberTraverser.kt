@@ -19,6 +19,7 @@ import org.utbot.engine.state.StateLabel
 import org.utbot.engine.state.withLabel
 import org.utbot.engine.symbolic.asHardConstraint
 import org.utbot.engine.types.*
+import org.utbot.framework.plugin.api.ApplicationContext
 import org.utbot.framework.plugin.api.ExecutableId
 import org.utbot.framework.util.executableId
 import soot.*
@@ -35,9 +36,10 @@ class CyberTraverser(
     typeResolver: TypeResolver,
     globalGraph: InterProceduralUnitGraph,
     mocker: Mocker,
+    applicationContext: ApplicationContext,
     private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
     private val stateHolder: StateHolder
-) : Traverser(methodUnderTest, typeRegistry, hierarchy, typeResolver, globalGraph, mocker) {
+) : Traverser(methodUnderTest, typeRegistry, hierarchy, typeResolver, globalGraph, mocker, applicationContext) {
     @CyberNew("smth to override")
     private val rememberedParams = mutableSetOf<List<SymbolicValue>>()
     private val objectValueToParams = mutableMapOf<ObjectValue, List<SymbolicValue>>()
