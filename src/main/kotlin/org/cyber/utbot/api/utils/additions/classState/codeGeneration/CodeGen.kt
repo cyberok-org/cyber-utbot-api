@@ -1,10 +1,7 @@
 package org.cyber.utbot.api.utils.additions.classState.codeGeneration
 
-import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.additions.classState.AnyState
-import org.utbot.framework.codegen.domain.models.CgDeclaration
-import org.utbot.framework.codegen.domain.models.CgStatement
-import org.utbot.framework.codegen.domain.models.CgValue
+import org.utbot.framework.codegen.domain.models.*
 import org.utbot.framework.plugin.api.EnvironmentModels
 import org.utbot.framework.plugin.api.UtModel
 
@@ -15,25 +12,63 @@ class CodeGen {
         generators[stateBefore] = codeGens
     }
 
-    fun generate(stateBefore: EnvironmentModels, statements: List<CgStatement>, getOrCreateVariable: (model: UtModel, name: String?) -> CgValue): List<CgStatement> {    // FIXME !!
-        val codeGens = generators[stateBefore] ?: throw CyberException("CodeGen fail")
-        var codeGenI = 0
-        while (codeGens.size > codeGenI && codeGens[codeGenI] == null) { codeGenI++ }
+    // TODO test it, improve
+    private fun updateStatements(statements: List<CgStatement>, newStatements: MutableList<CgStatement>, codeGens: List<AnyCodeGen<AnyState<UtModel>>?>, codeGenI: Int, getOrCreateVariable: (model: UtModel, name: String?) -> CgValue): Int {
+        fun mainUpdatePart(statements: List<CgStatement>, codeGenI: Int): Pair<List<CgStatement>, Int> {
+            val newSubStatements = mutableListOf<CgStatement>()
+            return newSubStatements to updateStatements(statements, newSubStatements, codeGens, codeGenI, getOrCreateVariable)
+        }
 
-        val newStatements = mutableListOf<CgStatement>()
-        statements.forEach { statement ->
-            if (statement is CgDeclaration) {
-                if (codeGens.size > codeGenI && codeGens[codeGenI]!!.classId == statement.variableType) {
-                    newStatements.addAll(codeGens[codeGenI]!!.generate(statement, getOrCreateVariable))
-                    codeGenI++
-                    while (codeGens.size > codeGenI && codeGens[codeGenI] == null) { codeGenI++ }
+        var newCodeGenI = codeGenI
+        statements.forEach { statement -> when (statement) {
+            is CgDeclaration -> {
+                if (newCodeGenI < codeGens.size && codeGens[newCodeGenI]!!.classId == statement.variableType) {
+                    newStatements.addAll(codeGens[newCodeGenI]!!.generate(statement, getOrCreateVariable))
+                    newCodeGenI++
+                    while (codeGens.size > newCodeGenI && codeGens[newCodeGenI] == null) newCodeGenI++
                 } else {
                     newStatements.add(statement)
                 }
-            } else {
+            }
+            is CgInnerBlock -> {
+                mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
+                    statement.statements = newStatementsMain
+                    newCodeGenI = newCodeGenIMain
+                }
                 newStatements.add(statement)
             }
-        }
+            is CgTryCatch -> {  // only for try statements
+                mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
+                    statement.statements = newStatementsMain
+                    newCodeGenI = newCodeGenIMain
+                }
+                newStatements.add(statement)
+            }
+            is CgLoop -> {  // CgForLoop, CgWhileLoop, CgDoWhileLoop, CgForEachLoop
+                mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
+                    statement.statements = newStatementsMain
+                    newCodeGenI = newCodeGenIMain
+                }
+                newStatements.add(statement)
+            }
+            is CgSwitchCaseLabel -> {
+                mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
+                    statement.statements = newStatementsMain
+                    newCodeGenI = newCodeGenIMain
+                }
+                newStatements.add(statement)
+            }
+            else -> newStatements.add(statement)
+        }}
+        return newCodeGenI
+    }
+
+    fun generate(stateBefore: EnvironmentModels, statements: List<CgStatement>, getOrCreateVariable: (model: UtModel, name: String?) -> CgValue): List<CgStatement> {    // FIXME !!
+        val codeGens = generators[stateBefore] ?: return statements
+        var codeGenI = 0
+        while (codeGens.size > codeGenI && codeGens[codeGenI] == null) { codeGenI++ }
+        val newStatements = mutableListOf<CgStatement>()
+        updateStatements(statements, newStatements, codeGens, codeGenI, getOrCreateVariable)
         return newStatements
     }
 

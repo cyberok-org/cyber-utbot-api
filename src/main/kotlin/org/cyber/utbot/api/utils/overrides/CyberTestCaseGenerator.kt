@@ -1,6 +1,7 @@
 package org.cyber.utbot.api.utils.overrides
 import mu.KLogger
 import mu.KotlinLogging
+import org.cyber.utbot.api.utils.additions.classState.StateHolder
 import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.viewers.StatePublisher
@@ -26,6 +27,7 @@ open class CyberTestCaseGenerator(
     private val codeGen: CodeGen?
 ) : TestCaseGenerator(buildDirs, classpath, dependencyPaths, jdkInfo) {
     private val logger: KLogger = KotlinLogging.logger {}
+    private val stateHolder = if (findVulnerabilities) StateHolder(codeGen) else null
 
     @CyberModify("org/utbot/framework/plugin/api/TestCaseGenerator.kt", "CyberUtBotSymbolicEngine instead of UtBotSymbolicEngine")
     override fun createSymbolicEngine(
@@ -34,7 +36,7 @@ open class CyberTestCaseGenerator(
         mockStrategyApi: MockStrategyApi,
         chosenClassesToMockAlways: Set<ClassId>,
         applicationContext: ApplicationContext,
-        executionTimeEstimator: ExecutionTimeEstimator
+        executionTimeEstimator: ExecutionTimeEstimator,
     ): UtBotSymbolicEngine {
         logger.debug("Starting symbolic execution for $method  --$mockStrategyApi--")
         return CyberUtBotSymbolicEngine(
@@ -51,7 +53,7 @@ open class CyberTestCaseGenerator(
             onlyVulnerabilities,
             statePublisher = statePublisher,
             vulnerabilityChecksHolder = vulnerabilityChecksHolder,
-            codeGen = codeGen
+            stateHolder = stateHolder,
         )
     }
 }

@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.flow
 import mu.KotlinLogging
 import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.additions.classState.StateHolder
-import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
@@ -55,10 +54,8 @@ class CyberUtBotSymbolicEngine(
     private var onlyVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
     vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
-    codeGen: CodeGen?
+    private val stateHolder: StateHolder?,
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, applicationContext, solverTimeoutInMillis) {
-    private val stateHolder = if (findVulnerabilities) StateHolder(codeGen) else null
-
     init {  // set our selector
         if (cyberPathSelector) {
             pathSelector = cyberPathSelector(globalGraph, StrategyOption.DISTANCE) {
@@ -319,7 +316,7 @@ class CyberUtBotSymbolicEngine(
 
         val symbolicExecutionResult = resolver.resolveResult(symbolicResult)
 
-        @CyberNew("filter emit flag") val needEmit = !onlyVulnerabilities || isVulnerability(symbolicExecutionResult)
+        @CyberNew("filter emit flag") val needEmit = !onlyVulnerabilities || isVulnerability(state.path)
 
         val stateBefore = modelsBefore.constructStateForMethod(methodUnderTest)
         val stateAfter = modelsAfter.constructStateForMethod(methodUnderTest)

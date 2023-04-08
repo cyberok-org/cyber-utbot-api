@@ -4,13 +4,9 @@ import org.cyber.utbot.api.CYBER_MOCK_ALWAYS_DEFAULT
 import org.cyber.utbot.api.GenerateTestsSettings
 import org.cyber.utbot.api.MOCK_ALWAYS_DEFAULT
 import org.cyber.utbot.api.TestGenerator
-import org.cyber.utbot.api.abstraction.BenchInfo
 import org.cyber.utbot.api.utils.UTBOT_DIR
-import org.cyber.utbot.api.utils.printJson
-import org.cyber.utbot.api.utils.readCsvFile
 import org.cyber.utbot.api.utils.toTestUnits
 import org.cyber.utbot.api.utils.viewers.UTBotViewers
-import org.utbot.common.PathUtil.toPath
 import org.utbot.framework.TestSelectionStrategyType
 import org.utbot.framework.UtSettings.testMinimizationStrategyType
 import org.utbot.framework.UtSettings.useDebugVisualization
@@ -44,16 +40,4 @@ fun main() {
 //    }
 
 //    printJson(info[UTBotViewers.TERMINAL_STATISTIC_VIEWER] as String)
-}
-
-fun main2() {
-    val bench = readCsvFile<BenchInfo>("$UTBOT_DIR/cyber-utbot-api/src/test/resources/want.csv").associate {
-        it.target to it.source
-    }.toTestUnits()
-        .drop(14).take(1)
-
-    val extraMocks = listOf<String>() //, extraMocks=listOf("org.owasp.esapi.ESAPI"))
-    val classpath = "/home/andrew/BenchmarkJava/target/classes:/home/andrew/jars/javax.servlet-api-3.1.0.jar" // :/home/andrew/jars/javanet-1.0.jar"
-    val reportCreator = ReportCreator(classpath, listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"), category = "pathtraver", extraMocks=extraMocks)
-    reportCreator.create(bench, benchmark="OWASP-Benchmark")
 }
