@@ -1,5 +1,6 @@
 package org.cyber.utbot
 
+import org.cyber.utbot.api.CYBER_MOCK_ALWAYS_DEFAULT
 import org.cyber.utbot.api.GenerateTestsSettings
 import org.cyber.utbot.api.MOCK_ALWAYS_DEFAULT
 import org.cyber.utbot.api.TestGenerator
@@ -18,7 +19,6 @@ import org.utbot.framework.UtSettings.useDebugVisualization
 import org.utbot.framework.UtSettings.useFuzzing
 import org.utbot.framework.plugin.api.CodegenLanguage
 import org.utbot.framework.plugin.api.MockStrategyApi
-import java.nio.file.Files
 
 fun main() {
 //        val (tests, info) = generator.run(mapOf("org.testcases.taint.FileSystemUsage" to "src/main/java/org/testcases/taint/FileSystemUsage").toTestUnits())
@@ -31,23 +31,35 @@ fun main() {
 //    val classpath = "$UTBOT_DIR/cyber-utbot-exploit-base/build/classes/java/main"
 //    val classpath = "build/classes/java/main"
     val classpath = "C:/Users/lesya/BenchmarkJava/target/classes"
-
+//    val classpath = "build/classes/java/main:/home/andrew/.jdks/openjdk-17.0.2/bin/javax.servlet-api-3.1.0.jar"
+////    val classpath = "/home/andrew/ex/build/classes/java/main:/home/andrew/.jdks/openjdk-17.0.2/bin/javax.servlet-api-3.1.0.jar"
     val otherMocks = emptyList<String>()
-
-    val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
-        withUtSettings = { useFuzzing = false; useDebugVisualization = true; },
-        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER)) //, vulnerabilityCheckDirectories=listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"))
+////    val otherMocks = listOf<String>()
+//    val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
+//        withUtSettings = { useFuzzing = false; useDebugVisualization = true; },
+//        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER)) //, vulnerabilityCheckDirectories=listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"))
+//    val generator = TestGenerator(settings)
+//    val (tests, info) = generator.run(mapOf("org.testcases.taint.Example" to "src/main/java/org/testcases/taint/Example").toTestUnits())
+//
+////    val (tests, info) = generator.run(mapOf("org.owasp.benchmark.testcode3.BenchmarkTest00133" to "C:/Users/lesya/BenchmarkJava/src/main/java/org/owasp/benchmark/testcode3/BenchmarkTest00133.java").toTestUnits())
+//    tests.forEach { nameAndTest ->
+//        Files.write(
+//            "src/test/java/org/example/taint/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(),
+//            listOf(nameAndTest.value)
+//        )
+////        println("name=${nameAndTest.key}\n\n${nameAndTest.value}\n")
+//    }
+    val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + CYBER_MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
+        withUtSettings = { useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY; },
+        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckDirectories=listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"))
     val generator = TestGenerator(settings)
-    val (tests, info) = generator.run(mapOf("org.testcases.taint.Example" to "src/main/java/org/testcases/taint/Example").toTestUnits())
-
-//    val (tests, info) = generator.run(mapOf("org.owasp.benchmark.testcode3.BenchmarkTest00133" to "C:/Users/lesya/BenchmarkJava/src/main/java/org/owasp/benchmark/testcode3/BenchmarkTest00133.java").toTestUnits())
-    tests.forEach { nameAndTest ->
-        Files.write(
-            "src/test/java/org/example/taint/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(),
-            listOf(nameAndTest.value)
-        )
-//        println("name=${nameAndTest.key}\n\n${nameAndTest.value}\n")
-    }
+//    val (tests, info) = generator.run(mapOf("org.example.Loop" to "src/main/java/org/example/Loop.java").toTestUnits())
+    val (tests, info) = generator.run(mapOf("org.example.checks.Example" to "src/main/java/org/example/checks/Example.java").toTestUnits())
+//        val (tests, info) = generator.run(mapOf("org.testcases.taint.Example" to "src/main/java/org/testcases/taint/Example").toTestUnits())
+//    println(tests)
+//    tests.forEach { nameAndTest ->
+//        Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
+//    }
 
 //    val (tests, info) = generator.run(mapOf("org.example.base.ArbitraryFileCreation" to "$UTBOT_DIR/cyber-utbot-exploit-base/src/main/java/org/example/base/ArbitraryFileCreation.java").toTestUnits())
 //    tests.forEach { nameAndTest ->
@@ -60,10 +72,10 @@ fun main2() {
     val bench = readCsvFile<BenchInfo>("$UTBOT_DIR/cyber-utbot-api/src/test/resources/want.csv").associate {
         it.target to it.source
     }.toTestUnits()
-        .drop(0).take(1)
+        .drop(14).take(1)
 
-    val extraMocks = listOf<String>() //, extraMocks=listOf("javax.servlet.http.HttpServletResponse"))
-    val reportCreator = ReportCreator("/home/andrew/BenchmarkJava/target/classes", listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"),
-        category = "pathtraver", extraMocks=extraMocks)
+    val extraMocks = listOf<String>() //, extraMocks=listOf("org.owasp.esapi.ESAPI"))
+    val classpath = "/home/andrew/BenchmarkJava/target/classes:/home/andrew/jars/javax.servlet-api-3.1.0.jar" // :/home/andrew/jars/javanet-1.0.jar"
+    val reportCreator = ReportCreator(classpath, listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"), category = "pathtraver", extraMocks=extraMocks)
     reportCreator.create(bench, benchmark="OWASP-Benchmark")
 }

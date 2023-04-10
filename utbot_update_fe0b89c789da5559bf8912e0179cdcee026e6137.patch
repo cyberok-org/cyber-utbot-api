@@ -1,8 +1,8 @@
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 3480b63c..bd2a2884 100644
+index c80a375f..23132bd1 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -48,6 +48,8 @@ if (includeRiderInBuild.toBoolean()) {
+@@ -51,6 +51,8 @@ if (includeRiderInBuild.toBoolean()) {
  
  include("utbot-ui-commons")
  
@@ -60,36 +60,53 @@ index 67a5e89e..53116595 100644
  /**
   * Creates synthetic method with static initializer invocation and returns its graph.
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt
-index 231d31c1..23635d99 100644
+index 4b16c57d..62cea574 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Mocks.kt
-@@ -131,7 +131,7 @@ data class UtStaticMethodMockInfo(
+@@ -162,12 +162,12 @@ class UnexpectedMock(objectValue: ObjectValue): MockedObjectInfo() {
  /**
   * Service to mock things. Knows mock strategy, class under test and class hierarchy.
   */
 -class Mocker(
+-    private val strategy: MockStrategy,
 +open class Mocker(
-     private val strategy: MockStrategy,
++    protected val strategy: MockStrategy,
      private val classUnderTest: ClassId,
      private val hierarchy: Hierarchy,
-@@ -144,14 +144,14 @@ class Mocker(
+     chosenClassesToMockAlways: Set<ClassId>,
+-    internal val mockListenerController: MockListenerController? = null,
++    val mockListenerController: MockListenerController? = null,
+     private val applicationContext: ApplicationContext,
+ ) {
+     private val mocksAreDesired: Boolean = strategy != MockStrategy.NO_MOCKS
+@@ -178,7 +178,7 @@ class Mocker(
       *
       * @see shouldMock
       */
--    fun mock(type: RefType, mockInfo: UtMockInfo): ObjectValue? =
-+    open fun mock(type: RefType, mockInfo: UtMockInfo): ObjectValue? =
-         if (shouldMock(type, mockInfo)) createMockObject(type, mockInfo) else null
- 
+-    fun mock(type: RefType, mockInfo: UtMockInfo): MockedObjectInfo {
++    open fun mock(type: RefType, mockInfo: UtMockInfo): MockedObjectInfo {
+         val objectValue = if (shouldMock(type, mockInfo)) createMockObject(type, mockInfo) else null
+         return construct(objectValue, mockInfo)
+     }
+@@ -186,7 +186,7 @@ class Mocker(
      /**
-      * Creates mocked instance of the [type] using mock info. Unlike to [mock], it does not
-      * check anything and always returns the constructed mock.
+      * Unlike to [mock], unconditionally creates a mocked instance of the [type] using [mockInfo].
       */
--    fun forceMock(type: RefType, mockInfo: UtMockInfo): ObjectValue = createMockObject(type, mockInfo)
-+    open fun forceMock(type: RefType, mockInfo: UtMockInfo): ObjectValue = createMockObject(type, mockInfo)
+-    fun forceMock(type: RefType, mockInfo: UtMockInfo): MockedObjectInfo {
++    open fun forceMock(type: RefType, mockInfo: UtMockInfo): MockedObjectInfo {
+         mockListenerController?.onShouldMock(strategy, mockInfo)
  
+         val objectValue = createMockObject(type, mockInfo)
+@@ -220,7 +220,7 @@ class Mocker(
      /**
-      * Checks if Engine should mock objects of particular type with current mock strategy and mock type.
-@@ -295,10 +295,10 @@ private fun createMockObject(type: RefType, mockInfo: UtMockInfo) =
+      * Constructs [MockedObjectInfo]: enriches given [mockedValue] with an information if mocking is expected or not.
+      */
+-    private fun construct(mockedValue: ObjectValue?, mockInfo: UtMockInfo): MockedObjectInfo {
++    protected fun construct(mockedValue: ObjectValue?, mockInfo: UtMockInfo): MockedObjectInfo {
+         if (mockedValue == null) {
+             return NoMock
+         }
+@@ -359,10 +359,10 @@ private fun createMockObject(type: RefType, mockInfo: UtMockInfo) =
      objectValue(type, mockInfo.addr, UtMockWrapper(type, mockInfo))
  
  private val mockCounter = AtomicInteger(0)
@@ -103,7 +120,7 @@ index 231d31c1..23635d99 100644
      val type: RefType,
      private val mockInfo: UtMockInfo
  ) : WrapperInterface {
-@@ -347,13 +347,13 @@ class UtMockWrapper(
+@@ -411,13 +411,13 @@ class UtMockWrapper(
  internal val utMockClass: SootClass
      get() = Scene.v().getSootClass(UtMock::class.qualifiedName)
  
@@ -158,10 +175,10 @@ index 83e20e7f..bc202ddc 100644
  
  internal fun wrapper(type: RefType, addr: UtAddrExpression): ObjectValue? =
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
-index 280006fd..25a42c15 100644
+index 3aa92d57..d8ee1fab 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Resolver.kt
-@@ -210,7 +210,7 @@ class Resolver(
+@@ -216,7 +216,7 @@ class Resolver(
          state: MemoryState,
      ): UtArrayExpressionBase = memory.findArray(chunkDescriptor, state, staticFieldUnderResolving)
  
@@ -170,7 +187,7 @@ index 280006fd..25a42c15 100644
          var instrumentation: List<UtInstrumentation> = emptyList()
  
          val staticsBefore = memory.staticFields().map { (fieldId, states) -> fieldId to states.stateBefore }
-@@ -1153,7 +1153,7 @@ private data class ArrayExtractionDetails(
+@@ -1159,7 +1159,7 @@ private data class ArrayExtractionDetails(
      val oneDimensionalArray: UtArrayExpressionBase
  )
  
@@ -180,34 +197,58 @@ index 280006fd..25a42c15 100644
  
  fun SymbolicValue.isNullObject() =
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
-index 3ae7ca31..488603ad 100644
+index 4e58b65b..02bf2d41 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/Traverser.kt
-@@ -225,9 +225,9 @@ import java.lang.reflect.WildcardType
- 
+@@ -235,12 +235,12 @@ import java.lang.reflect.WildcardType
  private val CAUGHT_EXCEPTION = LocalVariable("@caughtexception")
+ private val logger = KotlinLogging.logger {}
  
 -class Traverser(
-+open class Traverser(
-     private val methodUnderTest: ExecutableId,
+-    private val methodUnderTest: ExecutableId,
 -    internal val typeRegistry: TypeRegistry,
+-    internal val hierarchy: Hierarchy,
++open class Traverser(
++    protected val methodUnderTest: ExecutableId,
 +    val typeRegistry: TypeRegistry,
-     internal val hierarchy: Hierarchy,
++    val hierarchy: Hierarchy,
      // TODO HACK violation of encapsulation
-     internal val typeResolver: TypeResolver,
-@@ -265,9 +265,9 @@ class Traverser(
+-    internal val typeResolver: TypeResolver,
++    val typeResolver: TypeResolver,
+     private val globalGraph: InterProceduralUnitGraph,
+     private val mocker: Mocker,
+     private val applicationContext: ApplicationContext,
+@@ -253,7 +253,7 @@ class Traverser(
+ 
+     // TODO: move this and other mutable fields to [TraversalContext]
+     lateinit var environment: Environment
+-    private val solver: UtSolver
++    protected val solver: UtSolver
+         get() = environment.state.solver
+ 
+     // TODO HACK violation of encapsulation
+@@ -264,7 +264,7 @@ class Traverser(
+         get() = environment.state.localVariableMemory
+ 
+     //HACK (long strings)
+-    internal var softMaxArraySize = 40
++    var softMaxArraySize = 40
+ 
+     /**
+      * Contains information about the generic types used in the parameters of the method under test.
+@@ -276,9 +276,9 @@ class Traverser(
  
      private val preferredCexInstanceCache = mutableMapOf<ObjectValue, MutableSet<SootField>>()
  
 -    private var queuedSymbolicStateUpdates = SymbolicStateUpdate()
-+    protected var queuedSymbolicStateUpdates = SymbolicStateUpdate()
++    var queuedSymbolicStateUpdates = SymbolicStateUpdate()
  
 -    internal val objectCounter = ObjectCounter(TypeRegistry.objectCounterInitialValue)
 +    val objectCounter = ObjectCounter(TypeRegistry.objectCounterInitialValue)
  
      private fun findNewAddr(insideStaticInitializer: Boolean): UtAddrExpression {
          val newAddr = objectCounter.createNewAddr()
-@@ -278,13 +278,13 @@ class Traverser(
+@@ -289,13 +289,13 @@ class Traverser(
          val signedAddr = if (insideStaticInitializer) -newAddr else newAddr
          return UtAddrExpression(signedAddr)
      }
@@ -224,7 +265,7 @@ index 3ae7ca31..488603ad 100644
  
      // A counter for objects created as native method call result.
      private var unboundedConstCounter = 0
-@@ -1106,7 +1106,7 @@ class Traverser(
+@@ -1119,7 +1119,7 @@ class Traverser(
          return UtMockInfoGenerator { mockAddr -> UtObjectMockInfo(type.id, mockAddr) }
      }
  
@@ -233,7 +274,7 @@ index 3ae7ca31..488603ad 100644
          val type = extractParameterizedType(method, parameterIndex) as? ParameterizedType ?: return
  
          updateGenericTypeInfo(type, value)
-@@ -1616,7 +1616,7 @@ class Traverser(
+@@ -1721,7 +1721,7 @@ class Traverser(
              else -> TODO("$expr")
          }
  
@@ -242,7 +283,7 @@ index 3ae7ca31..488603ad 100644
          val typeStorage = TypeStorage.constructTypeStorageWithSingleType(utStringClass.type)
  
          queuedSymbolicStateUpdates += objectUpdate(
-@@ -1930,7 +1930,7 @@ class Traverser(
+@@ -2047,7 +2047,7 @@ class Traverser(
      // Type is needed for null values: we should know, which null do we require.
      // If valueType is NullType, return typelessNullObject. It can happen in a situation,
      // where we cannot find the type, for example in condition (null == null)
@@ -251,7 +292,7 @@ index 3ae7ca31..488603ad 100644
          value: Value,
          valueType: Type = value.type
      ): SymbolicValue = when (value) {
-@@ -2491,7 +2491,7 @@ class Traverser(
+@@ -2598,7 +2598,7 @@ class Traverser(
       * @see Mocker.shouldMock
       * @see UtStaticMethodMockInfo
       */
@@ -260,7 +301,7 @@ index 3ae7ca31..488603ad 100644
          val methodId = method.executableId as MethodId
          val declaringClassType = method.declaringClass.type
  
-@@ -2527,7 +2527,7 @@ class Traverser(
+@@ -2634,7 +2634,7 @@ class Traverser(
          }
      }
  
@@ -269,7 +310,7 @@ index 3ae7ca31..488603ad 100644
          method.parameterTypes.any { paramType ->
              (paramType.baseType as? RefType)?.let {
                  it.sootClass.isPrivate || it.sootClass.isProtected
-@@ -2578,7 +2578,7 @@ class Traverser(
+@@ -2685,7 +2685,7 @@ class Traverser(
          )
      }
  
@@ -278,7 +319,7 @@ index 3ae7ca31..488603ad 100644
          val parameters = resolveParameters(invokeExpr.args, invokeExpr.method.parameterTypes)
          val result = mockMakeSymbolic(invokeExpr) ?: mockStaticMethod(invokeExpr.method, parameters)
  
-@@ -2594,7 +2594,7 @@ class Traverser(
+@@ -2701,7 +2701,7 @@ class Traverser(
       * Each target defines/reduces object type to set of concrete (not abstract, not interface)
       * classes with particular method implementation.
       */
@@ -287,7 +328,7 @@ index 3ae7ca31..488603ad 100644
          base: Value,
          methodRef: SootMethodRef,
          parameters: List<Value>
-@@ -2623,7 +2623,7 @@ class Traverser(
+@@ -2730,7 +2730,7 @@ class Traverser(
       *
       * Note: for some well known classes returns hardcoded choices.
       */
@@ -296,7 +337,7 @@ index 3ae7ca31..488603ad 100644
          instance: ObjectValue,
          methodSubSignature: String
      ): List<InvocationTarget> {
-@@ -2742,7 +2742,7 @@ class Traverser(
+@@ -2863,7 +2863,7 @@ class Traverser(
              .toList()
      }
  
@@ -305,7 +346,7 @@ index 3ae7ca31..488603ad 100644
          val instance = resolve(invokeExpr.base)
          if (instance !is ReferenceValue) error("We cannot run ${invokeExpr.methodRef} on $instance")
  
-@@ -2759,7 +2759,7 @@ class Traverser(
+@@ -2880,7 +2880,7 @@ class Traverser(
          return commonInvokePart(invocation)
      }
  
@@ -314,7 +355,7 @@ index 3ae7ca31..488603ad 100644
          val invocation = with(dynamicInvokeResolver) { resolveDynamicInvoke(invokeExpr) }
  
          if (invocation == null) {
-@@ -2780,7 +2780,7 @@ class Traverser(
+@@ -2901,7 +2901,7 @@ class Traverser(
       *
       * Returns results of native calls cause other calls push changes directly to path selector.
       */
@@ -323,7 +364,7 @@ index 3ae7ca31..488603ad 100644
          val method = invocation.method.executableId
  
          // This code is supposed to support generic information from signatures for nested methods.
-@@ -2898,7 +2898,7 @@ class Traverser(
+@@ -3019,7 +3019,7 @@ class Traverser(
          return overriddenResults + originResults
      }
  
@@ -332,7 +373,7 @@ index 3ae7ca31..488603ad 100644
          target: InvocationTarget,
          parameters: List<SymbolicValue>
      ): List<MethodResult> = with(target.method) {
-@@ -3128,7 +3128,7 @@ class Traverser(
+@@ -3265,7 +3265,7 @@ class Traverser(
       *
       * Proceeds overridden method as non-library.
       */
@@ -341,7 +382,7 @@ index 3ae7ca31..488603ad 100644
          // If we try to override invocation itself, the target is null, and we have to process
          // the instance from the invocation, otherwise take the one from the target
          val instance = if (target == null) invocation.instance else target.instance
-@@ -3223,7 +3223,7 @@ class Traverser(
+@@ -3360,7 +3360,7 @@ class Traverser(
          return OverrideResult(success = false)
      }
  
@@ -350,7 +391,7 @@ index 3ae7ca31..488603ad 100644
          val addr = findNewAddr()
  
          val type = array.type
-@@ -3257,7 +3257,7 @@ class Traverser(
+@@ -3394,7 +3394,7 @@ class Traverser(
          return MethodResult(clone, constraints.asHardConstraint(), memoryUpdates = memoryUpdate)
      }
  
@@ -359,7 +400,7 @@ index 3ae7ca31..488603ad 100644
          val src = parameters[0] as ArrayValue
          nullPointerExceptionCheck(src.addr)
  
-@@ -3269,7 +3269,7 @@ class Traverser(
+@@ -3406,7 +3406,7 @@ class Traverser(
          return createArrayCopyWithSpecifiedLength(parameters)
      }
  
@@ -368,7 +409,7 @@ index 3ae7ca31..488603ad 100644
          val original = parameters[0] as ArrayValue
          nullPointerExceptionCheck(original.addr)
  
-@@ -3321,7 +3321,7 @@ class Traverser(
+@@ -3458,7 +3458,7 @@ class Traverser(
      private fun processNativeMethod(target: InvocationTarget): List<MethodResult> =
          listOf(unboundedVariable(name = "nativeConst", target.method))
  
@@ -377,7 +418,7 @@ index 3ae7ca31..488603ad 100644
          val value = when (val returnType = method.returnType) {
              is RefType -> createObject(findNewAddr(), returnType, useConcreteType = true)
              is ArrayType -> createArray(findNewAddr(), returnType, useConcreteType = true)
-@@ -3347,7 +3347,7 @@ class Traverser(
+@@ -3484,7 +3484,7 @@ class Traverser(
              .firstOrNull { it.canRetrieveBody() || it.isNative }
      }
  
@@ -386,7 +427,7 @@ index 3ae7ca31..488603ad 100644
          graph: ExceptionalUnitGraph,
          caller: ReferenceValue?,
          callParameters: List<SymbolicValue>,
-@@ -3512,7 +3512,7 @@ class Traverser(
+@@ -3649,7 +3649,7 @@ class Traverser(
          return if (negate) mkNot(eq) else eq
      }
  
@@ -395,7 +436,7 @@ index 3ae7ca31..488603ad 100644
          val canBeNull = addrEq(addr, nullObjectAddr)
          val canNotBeNull = mkNot(canBeNull)
          val notMarked = mkEq(memory.isSpeculativelyNotNull(addr), mkFalse())
-@@ -3838,7 +3838,7 @@ class Traverser(
+@@ -3994,7 +3994,7 @@ class Traverser(
          )
      }
  
@@ -404,7 +445,7 @@ index 3ae7ca31..488603ad 100644
          val resolvedParameters = environment.state.parameters.map { it.value }
  
          //choose types that have biggest priority
-@@ -3983,7 +3983,7 @@ class Traverser(
+@@ -4139,7 +4139,7 @@ class Traverser(
          )
      }
  
@@ -415,10 +456,10 @@ index 3ae7ca31..488603ad 100644
  }
 \ No newline at end of file
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
-index 10a9138a..ea595b54 100644
+index 87c54616..917c7a12 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/UtBotSymbolicEngine.kt
-@@ -62,7 +62,7 @@ class EngineController {
+@@ -63,7 +63,7 @@ class EngineController {
  }
  
  //for debugging purpose only
@@ -427,7 +468,7 @@ index 10a9138a..ea595b54 100644
  
  private val defaultIdGenerator = ReferencePreservingIntIdGenerator()
  
-@@ -97,32 +97,32 @@ private fun pathSelector(graph: InterProceduralUnitGraph, typeRegistry: TypeRegi
+@@ -98,33 +98,33 @@ private fun pathSelector(graph: InterProceduralUnitGraph, typeRegistry: TypeRegi
          }
      }
  
@@ -441,6 +482,7 @@ index 10a9138a..ea595b54 100644
      dependencyPaths: String,
      val mockStrategy: MockStrategy = NO_MOCKS,
      chosenClassesToMockAlways: Set<ClassId>,
+     applicationContext: ApplicationContext,
 -    private val solverTimeoutInMillis: Int = checkSolverTimeoutMillis
 +    protected val solverTimeoutInMillis: Int = checkSolverTimeoutMillis
  ) : UtContextInitializer() {
@@ -472,7 +514,7 @@ index 10a9138a..ea595b54 100644
          mockStrategy,
          classUnderTest,
          hierarchy,
-@@ -134,9 +134,9 @@ class UtBotSymbolicEngine(
+@@ -137,9 +137,9 @@ class UtBotSymbolicEngine(
  
      fun detachMockListener(mockListener: MockListener) = mocker.mockListenerController?.detach(mockListener)
  
@@ -484,7 +526,7 @@ index 10a9138a..ea595b54 100644
          methodUnderTest,
          typeRegistry,
          hierarchy,
-@@ -146,9 +146,9 @@ class UtBotSymbolicEngine(
+@@ -150,9 +150,9 @@ class UtBotSymbolicEngine(
      )
  
      //HACK (long strings)
@@ -496,7 +538,7 @@ index 10a9138a..ea595b54 100644
          ConcreteExecutor(
              UtExecutionInstrumentation,
              classpath,
-@@ -158,7 +158,7 @@ class UtBotSymbolicEngine(
+@@ -162,7 +162,7 @@ class UtBotSymbolicEngine(
          if (enableFeatureProcess) EngineAnalyticsContext.featureProcessorFactory(globalGraph) else null
  
  
@@ -505,7 +547,7 @@ index 10a9138a..ea595b54 100644
  
      private fun postTraverse() {
          for (r in trackableResources)
-@@ -182,7 +182,7 @@ class UtBotSymbolicEngine(
+@@ -186,7 +186,7 @@ class UtBotSymbolicEngine(
          .onStart { preTraverse() }
          .onCompletion { postTraverse() }
  
@@ -514,16 +556,16 @@ index 10a9138a..ea595b54 100644
  
          require(trackableResources.isEmpty())
  
-@@ -416,7 +416,7 @@ class UtBotSymbolicEngine(
+@@ -434,7 +434,7 @@ class UtBotSymbolicEngine(
          }
      }
  
 -    private suspend fun FlowCollector<UtResult>.emitFailedConcreteExecutionResult(
 +    protected suspend fun FlowCollector<UtResult>.emitFailedConcreteExecutionResult(
          stateBefore: EnvironmentModels,
-         e: ConcreteExecutionFailureException
+         e: InstrumentedProcessDeathException
      ) {
-@@ -428,7 +428,7 @@ class UtBotSymbolicEngine(
+@@ -446,7 +446,7 @@ class UtBotSymbolicEngine(
          emit(failedConcreteExecution)
      }
  
@@ -532,7 +574,7 @@ index 10a9138a..ea595b54 100644
          state: ExecutionState,
      ) {
          // some checks to be sure the state is correct
-@@ -534,7 +534,7 @@ class UtBotSymbolicEngine(
+@@ -571,7 +571,7 @@ class UtBotSymbolicEngine(
       * Collects entry method statement path for ML. Eliminates duplicated statements, e.g. assignment with invocation
       * in right part.
       */
@@ -541,7 +583,7 @@ index 10a9138a..ea595b54 100644
          val entryPath = mutableListOf<Step>()
          state.fullPath().forEach { step ->
              // TODO: replace step.stmt in methodUnderAnalysisStmts with step.depth == 0
-@@ -547,7 +547,7 @@ class UtBotSymbolicEngine(
+@@ -584,7 +584,7 @@ class UtBotSymbolicEngine(
      }
  }
  
@@ -550,7 +592,7 @@ index 10a9138a..ea595b54 100644
      val (thisInstanceBefore, paramsBefore) = when {
          methodUnderTest.isStatic -> null to parameters
          methodUnderTest.isConstructor -> null to parameters.drop(1)
-@@ -556,7 +556,7 @@ private fun ResolvedModels.constructStateForMethod(methodUnderTest: ExecutableId
+@@ -593,7 +593,7 @@ private fun ResolvedModels.constructStateForMethod(methodUnderTest: ExecutableId
      return EnvironmentModels(thisInstanceBefore, paramsBefore, statics)
  }
  
@@ -558,8 +600,8 @@ index 10a9138a..ea595b54 100644
 +suspend fun ConcreteExecutor<UtConcreteExecutionResult, UtExecutionInstrumentation>.executeConcretely(
      methodUnderTest: ExecutableId,
      stateBefore: EnvironmentModels,
-     instrumentation: List<UtInstrumentation>
-@@ -576,7 +576,7 @@ private suspend fun ConcreteExecutor<UtConcreteExecutionResult, UtExecutionInstr
+     instrumentation: List<UtInstrumentation>,
+@@ -615,7 +615,7 @@ private suspend fun ConcreteExecutor<UtConcreteExecutionResult, UtExecutionInstr
   * For example, not fully visited map can contain duplicate keys that leads to incorrect behaviour.
   * To prevent it, we need to add visited constraint for each MUT parameter-wrapper in state.
   */
@@ -568,7 +610,7 @@ index 10a9138a..ea595b54 100644
      val visitedConstraints = mutableSetOf<UtBoolExpression>()
      val methodUnderTestWrapperParameters = methodUnderTestParameters.filterNot { it.asWrapperOrNull == null }
      val methodUnderTestWrapperParametersAddresses = methodUnderTestWrapperParameters.map { it.addr }.toSet()
-@@ -616,7 +616,7 @@ private fun makeWrapperConsistencyCheck(
+@@ -655,7 +655,7 @@ private fun makeWrapperConsistencyCheck(
      visitedConstraints += mkEq(visitedSelectExpression, mkInt(1))
  }
  
@@ -577,8 +619,16 @@ index 10a9138a..ea595b54 100644
      // We should compare FQNs instead of `if (... is UtMockAssumptionViolatedException)`
      // because the exception from the `concreteExecutionResult` is loaded by user's ClassLoader,
      // but the `UtMockAssumptionViolatedException` is loaded by the current ClassLoader,
+@@ -663,5 +663,5 @@ private fun UtConcreteExecutionResult.violatesUtMockAssumption(): Boolean {
+     return result.exceptionOrNull()?.javaClass?.name == UtMockAssumptionViolatedException::class.java.name
+ }
+ 
+-private fun checkStaticMethodsMock(execution: UtSymbolicExecution) =
++fun checkStaticMethodsMock(execution: UtSymbolicExecution) =
+     execution.instrumentation.any { it is UtStaticMethodInstrumentation}
+\ No newline at end of file
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/engine/pc/UtSolver.kt b/utbot-framework/src/main/kotlin/org/utbot/engine/pc/UtSolver.kt
-index 12976361..e008a8db 100644
+index 7d98030f..66b3b87c 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/engine/pc/UtSolver.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/engine/pc/UtSolver.kt
 @@ -302,6 +302,7 @@ data class UtSolver constructor(
@@ -666,10 +716,10 @@ index e7c5e47d..f151da13 100644
          .getSootClass(Object::class.java.canonicalName)
          .getMethodByName(Object::equals.name)
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/CodeGenerator.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/CodeGenerator.kt
-index 1ac8de60..be6d5490 100644
+index 72cbd385..3646ba60 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/CodeGenerator.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/CodeGenerator.kt
-@@ -41,7 +41,7 @@ open class CodeGenerator(
+@@ -47,7 +47,7 @@ open class CodeGenerator(
      testClassPackageName: String = classUnderTest.packageName,
  ) {
  
@@ -678,24 +728,41 @@ index 1ac8de60..be6d5490 100644
  
      open var context: CgContext = CgContext(
          classUnderTest = classUnderTest,
-@@ -66,7 +66,7 @@ open class CodeGenerator(
-         generateAsStringWithTestReport(testSets, testClassCustomName).generatedCode
+@@ -88,7 +88,7 @@ open class CodeGenerator(
+         }
+     }
  
-     //TODO: we support custom test class name only in utbot-online, probably support them in plugin as well
--    fun generateAsStringWithTestReport(
-+    open fun generateAsStringWithTestReport(
-         testSets: Collection<UtMethodTestSet>,
-         testClassCustomName: String? = null,
-     ): CodeGeneratorResult {
+-    private fun generateForSimpleClass(testSets: List<CgMethodTestSet>): CodeGeneratorResult {
++    protected open fun generateForSimpleClass(testSets: List<CgMethodTestSet>): CodeGeneratorResult {
+         val astConstructor = CgSimpleTestClassConstructor(context)
+         val testClassModel = SimpleTestClassModelBuilder(context).createTestClassModel(classUnderTest, testSets)
+ 
+@@ -122,7 +122,7 @@ open class CodeGenerator(
+         )
+     }
+ 
+-    private fun renderToString(testClassFile: CgClassFile): String {
++    protected fun renderToString(testClassFile: CgClassFile): String {
+         logger.info { "Rendering phase started at ${now()}" }
+         val renderer = CgAbstractRenderer.makeRenderer(context)
+         testClassFile.accept(renderer)
+@@ -131,7 +131,7 @@ open class CodeGenerator(
+         return renderer.toString()
+     }
+ 
+-    private fun now() = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"))
++    protected fun now() = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"))
+ 
+     /**
+      * Wrapper function that configures context as needed for utbot-online:
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/Domain.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/Domain.kt
-index 98579b5d..20be8d1a 100644
+index 8a3b48e9..14211081 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/Domain.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/Domain.kt
-@@ -662,3 +662,10 @@ enum class ParametrizedTestSource(
-         override val allItems: List<ParametrizedTestSource> = values().toList()
+@@ -793,3 +793,9 @@ data class ModelId private constructor(
      }
  }
-+
+ 
 +object CyberOk {    // TODO(replace)
 +    val vulnerability = BuiltinClassId(
 +        canonicalName = "org.cyber.utils.VulnerabilityInfo",
@@ -703,28 +770,54 @@ index 98579b5d..20be8d1a 100644
 +    )
 +}
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
-index 602aedd1..93d1a93e 100644
+index 894db6db..b9dabbe7 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
-@@ -265,7 +265,7 @@ sealed class CgMethod(open val isStatic: Boolean) : CgElement {
+@@ -283,9 +283,9 @@ sealed class CgMethod(open val isStatic: Boolean) : CgElement {
+     abstract val name: String
+     abstract val returnType: ClassId
      abstract val parameters: List<CgParameterDeclaration>
-     abstract val statements: List<CgStatement>
+-    abstract val statements: List<CgStatement>
++    abstract var statements: List<CgStatement>
      abstract val exceptions: Set<ClassId>
 -    abstract val annotations: List<CgAnnotation>
 +    abstract var annotations: List<CgAnnotation>
      abstract val documentation: CgDocumentationComment
      abstract val requiredFields: List<CgParameterDeclaration>
- }
-@@ -276,7 +276,7 @@ class CgTestMethod(
+     abstract val visibility: VisibilityModifier
+@@ -295,9 +295,9 @@ class CgTestMethod(
+     override val name: String,
+     override val returnType: ClassId,
      override val parameters: List<CgParameterDeclaration>,
-     override val statements: List<CgStatement>,
+-    override val statements: List<CgStatement>,
++    override var statements: List<CgStatement>,
      override val exceptions: Set<ClassId>,
 -    override val annotations: List<CgAnnotation>,
 +    override var annotations: List<CgAnnotation>,
+     override val visibility: VisibilityModifier = VisibilityModifier.PUBLIC,
      val type: CgTestMethodType,
      override val documentation: CgDocumentationComment = CgDocumentationComment(emptyList()),
-     override val requiredFields: List<CgParameterDeclaration> = emptyList(),
-@@ -290,7 +290,7 @@ class CgErrorTestMethod(
+@@ -306,9 +306,9 @@ class CgTestMethod(
+ 
+ class CgFrameworkUtilMethod(
+     override val name: String,
+-    override val statements: List<CgStatement>,
++    override var statements: List<CgStatement>,
+     override val exceptions: Set<ClassId>,
+-    override val annotations: List<CgAnnotation>,
++    override var annotations: List<CgAnnotation>,
+     override val visibility: VisibilityModifier = VisibilityModifier.PUBLIC,
+ ) : CgMethod(isStatic = false) {
+     override val returnType: ClassId = voidClassId
+@@ -319,22 +319,22 @@ class CgFrameworkUtilMethod(
+ 
+ class CgErrorTestMethod(
+     override val name: String,
+-    override val statements: List<CgStatement>,
++    override var statements: List<CgStatement>,
+     override val documentation: CgDocumentationComment = CgDocumentationComment(emptyList()),
+     override val visibility: VisibilityModifier = VisibilityModifier.PUBLIC,
+ ) : CgMethod(isStatic = false) {
      override val exceptions: Set<ClassId> = emptySet()
      override val returnType: ClassId = voidClassId
      override val parameters: List<CgParameterDeclaration> = emptyList()
@@ -733,15 +826,25 @@ index 602aedd1..93d1a93e 100644
      override val requiredFields: List<CgParameterDeclaration> = emptyList()
  }
  
-@@ -298,7 +298,7 @@ class CgParameterizedTestDataProviderMethod(
+ class CgParameterizedTestDataProviderMethod(
      override val name: String,
-     override val statements: List<CgStatement>,
+-    override val statements: List<CgStatement>,
++    override var statements: List<CgStatement>,
      override val returnType: ClassId,
 -    override val annotations: List<CgAnnotation>,
 +    override var annotations: List<CgAnnotation>,
      override val exceptions: Set<ClassId>,
+     override val visibility: VisibilityModifier = VisibilityModifier.PUBLIC,
  ) : CgMethod(isStatic = true) {
-     override val parameters: List<CgParameterDeclaration> = emptyList()
+@@ -618,7 +618,7 @@ object CgContinueStatement : CgStatement
+ 
+ class CgDeclaration(
+     val variableType: ClassId,
+-    val variableName: String,
++    var variableName: String,
+     val initializer: CgExpression?,
+     val isMutable: Boolean = false,
+ ) : CgStatement {
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt
 index 6df90f71..7b318f96 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt
@@ -756,7 +859,7 @@ index 6df90f71..7b318f96 100644
              if (!context.mockFrameworkUsed) {
                  return RegularUtUtils(context.codegenLanguage)
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
-index c86c96e2..20d0fd5e 100644
+index a7346a26..e40e3900 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/framework/plugin/api/TestCaseGenerator.kt
 @@ -56,7 +56,7 @@ import kotlin.math.min
@@ -768,7 +871,7 @@ index c86c96e2..20d0fd5e 100644
      private val jdkInfo: JdkInfo,
      val engineActions: MutableList<(UtBotSymbolicEngine) -> Unit> = mutableListOf(),
      val isCanceled: () -> Boolean = { false },
-@@ -65,7 +65,7 @@ open class TestCaseGenerator(
+@@ -66,7 +66,7 @@ open class TestCaseGenerator(
      private val logger: KLogger = KotlinLogging.logger {}
      private val timeoutLogger: KLogger = KotlinLogging.logger(logger.name + ".timeout")
  
@@ -777,7 +880,7 @@ index c86c96e2..20d0fd5e 100644
          get() = (buildDirs + listOfNotNull(classpath)).joinToString(File.pathSeparator)
  
      init {
-@@ -240,7 +240,7 @@ open class TestCaseGenerator(
+@@ -252,7 +252,7 @@ open class TestCaseGenerator(
          }
      }
  
@@ -787,10 +890,10 @@ index c86c96e2..20d0fd5e 100644
          method: ExecutableId,
          mockStrategyApi: MockStrategyApi,
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/util/SootUtils.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/util/SootUtils.kt
-index e95e76f5..5cf33d5c 100644
+index f8feddc7..d3f33703 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/util/SootUtils.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/framework/util/SootUtils.kt
-@@ -138,7 +138,7 @@ private fun addBasicClasses(vararg classes: Class<*>) {
+@@ -137,7 +137,7 @@ private fun addBasicClasses(vararg classes: Class<*>) {
      }
  }
  

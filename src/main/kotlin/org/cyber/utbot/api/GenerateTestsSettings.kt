@@ -13,6 +13,18 @@ import org.utbot.framework.plugin.api.TreatOverflowAsError
 
 private const val LONG_GENERATION_TIMEOUT = 1_200_000L
 val MOCK_ALWAYS_DEFAULT = Mocker.defaultSuperClassesToMockAlwaysNames.toList()
+val CYBER_MOCK_ALWAYS_DEFAULT = listOf(         // TODO(division by packages)
+    "java.net.URL",
+    "java.io.FileInputStream",
+    "java.net.URI",
+    "java.io.FileOutputStream",
+    "java.io.File",
+    "javax.servlet.http.HttpServletRequest",
+    "javax.servlet.http.Cookie",
+    "javax.servlet.RequestDispatcher",
+    "javax.servlet.http.HttpServletResponse",
+    "java.io.PrintWriter",
+)
 
 enum class TestFrameworkGen {
     JUNIT4,
@@ -65,7 +77,7 @@ class GenerateTestsSettings(
     /**
      * Classes fully qualified name to force mocking theirs static methods and constructors (you can use it multiple times to provide few classes)
      */
-    val mockAlways: Iterable<String> = MOCK_ALWAYS_DEFAULT,
+    val mockAlways: Iterable<String> = MOCK_ALWAYS_DEFAULT + CYBER_MOCK_ALWAYS_DEFAULT,
 
     /**
      * Specifies the maximum time in milliseconds used to generate tests
@@ -103,7 +115,7 @@ class GenerateTestsSettings(
     /**
      * ignore utbot pathSelectors parameters, use our
      */
-    val cyberPathSelector: Boolean = true,
+    val cyberPathSelector: Boolean = false,
 
     /**
      * if false - just run utbot without extra analyze   // TODO(remove later)
@@ -163,7 +175,7 @@ class GenerateTestsSettings(
         }
         assert(generationTimeout > 0) { "GenerateTestsSettings.generationTimeout should be more then 0" }
         UtSettings.checkSolverTimeoutMillis = 0   // disabled z3 timeout
-        UtSettings.runInstrumentedProcessWithDebug = true   // java.lang.NoClassDefFoundError without that (with true instrumentation failed before producing 'NoClassDefFoundError')
+        UtSettings.runInstrumentedProcessWithDebug = false   // java.lang.NoClassDefFoundError without that (with true instrumentation failed before producing 'NoClassDefFoundError')
         withUtSettings(UtSettings)
     }
 }

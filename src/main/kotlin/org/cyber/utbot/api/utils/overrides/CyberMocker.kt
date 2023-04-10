@@ -5,6 +5,7 @@ import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNotModify
 import org.utbot.engine.*
 import org.utbot.engine.util.mockListeners.MockListenerController
+import org.utbot.framework.plugin.api.ApplicationContext
 import org.utbot.framework.plugin.api.ClassId
 import org.utbot.framework.plugin.api.id
 import org.utbot.framework.util.executableId
@@ -16,14 +17,22 @@ class CyberMocker(
     classUnderTest: ClassId,
     hierarchy: Hierarchy,
     chosenClassesToMockAlways: Set<ClassId>,
-    mockListenerController: MockListenerController? = null
-) : Mocker(strategy, classUnderTest, hierarchy, chosenClassesToMockAlways, mockListenerController) {
+    mockListenerController: MockListenerController? = null,
+    applicationContext: ApplicationContext,
+) : Mocker(strategy, classUnderTest, hierarchy, chosenClassesToMockAlways, mockListenerController, applicationContext) {
     @CyberModify("org/utbot/engine/Mocks.kt", "create own CyberUtMockWrapper")
-    override fun mock(type: RefType, mockInfo: UtMockInfo): ObjectValue? =
-        if (shouldMock(type, mockInfo)) createMockObject(type, mockInfo) else null
+    override fun mock(type: RefType, mockInfo: UtMockInfo): MockedObjectInfo {
+        val objectValue = if (shouldMock(type, mockInfo)) createMockObject(type, mockInfo) else null
+        return construct(objectValue, mockInfo)
+    }
 
     @CyberModify("org/utbot/engine/Mocks.kt", "create own CyberUtMockWrapper")
-    override fun forceMock(type: RefType, mockInfo: UtMockInfo): ObjectValue = createMockObject(type, mockInfo)
+    override fun forceMock(type: RefType, mockInfo: UtMockInfo): MockedObjectInfo {
+        mockListenerController?.onShouldMock(strategy, mockInfo)
+
+        val objectValue = createMockObject(type, mockInfo)
+        return construct(objectValue, mockInfo)
+    }
 }
 
 @CyberNotModify("org/utbot/engine/Mocks.kt", "improve later")

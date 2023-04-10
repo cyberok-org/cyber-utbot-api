@@ -1,6 +1,6 @@
 package org.cyber.utbot.api.utils.annotations
 
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.SOURCE)
 annotation class CyberNotModify(val ref: String, val reason: String = "")
 

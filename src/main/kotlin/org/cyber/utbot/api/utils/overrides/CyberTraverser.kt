@@ -2,8 +2,9 @@ package org.cyber.utbot.api.utils.overrides
 
 import org.cyber.utbot.api.utils.CHECK_METHOD_PREFIX
 import org.cyber.utbot.api.utils.VULNERABILITY_CHECKS_CLASS_NAME
+import org.cyber.utbot.api.utils.additions.MethodSubstitution
+import org.cyber.utbot.api.utils.additions.classState.StateHolder
 import org.cyber.utbot.api.utils.additions.vulnerability.decorateVulnerabilityFunction
-import org.cyber.utbot.api.utils.additions.wrappers.PathWrapper
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.annotations.CyberNote
@@ -18,6 +19,7 @@ import org.utbot.engine.state.StateLabel
 import org.utbot.engine.state.withLabel
 import org.utbot.engine.symbolic.asHardConstraint
 import org.utbot.engine.types.*
+import org.utbot.framework.plugin.api.ApplicationContext
 import org.utbot.framework.plugin.api.ExecutableId
 import org.utbot.framework.util.executableId
 import proguard.analysis.cpa.jvm.domain.memory.BamLocationDependentJvmMemoryLocation
@@ -29,7 +31,7 @@ import soot.jimple.internal.JInvokeStmt
 import soot.jimple.internal.JSpecialInvokeExpr
 
 
-@CyberNote("decorate invokes")
+@CyberNote("decorate invokes, add overrides")
 class CyberTraverser(
     methodUnderTest: ExecutableId,
     typeRegistry: TypeRegistry,
@@ -37,21 +39,15 @@ class CyberTraverser(
     typeResolver: TypeResolver,
     globalGraph: InterProceduralUnitGraph,
     mocker: Mocker,
-    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?
-) : Traverser(methodUnderTest, typeRegistry, hierarchy, typeResolver, globalGraph, mocker) {
+    applicationContext: ApplicationContext,
+    private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
+    private val stateHolder: StateHolder
+) : Traverser(methodUnderTest, typeRegistry, hierarchy, typeResolver, globalGraph, mocker, applicationContext) {
     @CyberNew("smth to override")
     private val rememberedParams = mutableSetOf<List<SymbolicValue>>()
     private val objectValueToParams = mutableMapOf<ObjectValue, List<SymbolicValue>>()
     private val stmtToParams = mutableMapOf<Stmt, List<SymbolicValue>>()
-    private val classFqnToOverrideStaticInvokes = mutableMapOf(
-        // add all statics fun overrides here!!!
-        "java.nio.file.Path" to { method: SootMethod, parameters: List<SymbolicValue> -> PathWrapper.staticInvoke(method, parameters) },
-//        "java.nio.file.Files" to { method: SootMethod, parameters: List<SymbolicValue> -> FilesWrapper.staticInvoke(method, parameters) }
-    )
     val taintEndPoints: MutableMap<BamLocationDependentJvmMemoryLocation<*>, List<JvmTaintSink>> = mutableMapOf()
-
-    @CyberNew("smth to override")
-    fun getParams(objectValue: ObjectValue) = objectValueToParams[objectValue]
 
     @CyberNew("decorate target invoke")
     private fun decorateTarget(target: InvocationTarget): InvocationTarget {
@@ -65,6 +61,21 @@ class CyberTraverser(
         } ?: target
     }
 
+    @CyberNew("resolver instance for stateHolder if needed")
+    private fun createResolver(): Resolver {
+        val holder = solver.check(respectSoft = false)
+        return Resolver(
+            hierarchy,
+            memory,
+            typeRegistry,
+            typeResolver,
+            holder as UtSolverStatusSAT,    // TODO is ok?
+            methodUnderTest,
+            softMaxArraySize,
+            objectCounter
+        )
+    }
+
     @CyberModify("org/utbot/engine/Traverser.kt", "added update objectValueToParams")
     override fun TraversalContext.specialInvoke(invokeExpr: JSpecialInvokeExpr): List<MethodResult> {
         val instance = resolve(invokeExpr.base)
@@ -76,7 +87,7 @@ class CyberTraverser(
 
         @CyberNew("update objectValueToParams") run {
             if (instance is ObjectValue) {
-                stmtToParams[environment.state.stmt]?.let { params ->
+                stmtToParams.remove(environment.state.stmt)?.let { params ->
                     objectValueToParams[instance] = params
                 }
             }
@@ -160,7 +171,7 @@ class CyberTraverser(
                 val target = InvocationTarget(invocation.instance, invocation.method)
                 val newTarget = decorateTarget(target)
                 if (target != newTarget) {
-                    return invoke(target, invocation.parameters)
+                    return invoke(newTarget, invocation.parameters)
                 }
             }
             if (artificialMethodOverride.results.size > 1) {
@@ -184,6 +195,7 @@ class CyberTraverser(
                                     result.graph.stmts.find { it is JInvokeStmt && it.invokeExprBox.value is JSpecialInvokeExpr }
                                         ?.run {
                                             stmtToParams[this] = invocation.parameters
+                                            rememberedParams.remove(invocation.parameters)
                                         }
                                 }
                             }
@@ -262,17 +274,7 @@ class CyberTraverser(
         return overriddenResults + originResults
     }
 
-    @CyberNew("additional invokes override")
-    private fun staticInvokeOverride(method: SootMethod, parameters: List<SymbolicValue>): List<InvokeResult>? =
-        classFqnToOverrideStaticInvokes[method.declaringClass.name]?.let { func ->
-            val (results, remember) = func(method, parameters)
-            if (remember) {
-                rememberedParams.add(parameters)
-            }
-            results
-        }
-
-    @CyberModify("org/utbot/engine/Traverser.kt", "added override static invokes")
+    @CyberModify("org/utbot/engine/Traverser.kt", "added overrides")
     override fun TraversalContext.overrideInvocation(invocation: Invocation, target: InvocationTarget?): OverrideResult {
         // If we try to override invocation itself, the target is null, and we have to process
         // the instance from the invocation, otherwise take the one from the target
@@ -349,6 +351,20 @@ class CyberTraverser(
             return OverrideResult(success = true, copyOfRange(invocation.parameters))
         }
 
+        @CyberNew("add overrides related to save params") stateHolder.run {
+            val parameters = if (invocation.method.name == "<init>" && instance != null) {      // TODO(not only init)
+                objectValueToParams[instance] ?: invocation.parameters      // TODO(objectValueToParams.remove(instance))
+            } else invocation.parameters
+            overrideInvoke(instance as? ObjectValue, invocation.method, parameters) { createResolver() } ?: run {
+                if (instance == null && saveArgs(invocation.method)) rememberedParams.add(invocation.parameters)
+                null
+            }
+        }?.run { return OverrideResult(success = true, this) }
+
+        @CyberNew("add overrides") MethodSubstitution.run {
+            overrideInvoke(instance as? ObjectValue, invocation.method, invocation.parameters)
+        }?.run { return OverrideResult(success = true, this) }
+
         instanceAsWrapperOrNull?.run {
             // For methods with concrete implementation (for example, RangeModifiableUnlimitedArray.toCastedArray)
             // we should not return successful override result.
@@ -364,9 +380,6 @@ class CyberTraverser(
             }
             return OverrideResult(success = true, results)
         }
-
-        @CyberNew("add static override") if (instance == null)
-            staticInvokeOverride(invocation.method, invocation.parameters)?.run { return OverrideResult(success = true, this) }
 
         return OverrideResult(success = false)
     }

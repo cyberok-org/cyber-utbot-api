@@ -15,4 +15,3 @@ public class Example {
         sink(source); // dangerous!
     }
 }
-

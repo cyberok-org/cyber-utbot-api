@@ -1,6 +1,7 @@
 package org.cyber.utbot.api.utils.overrides
 import mu.KLogger
 import mu.KotlinLogging
+import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.viewers.StatePublisher
 import org.cyber.utbot.api.utils.vulnerability.VulnerabilityChecksHolder
@@ -23,7 +24,8 @@ open class CyberTestCaseGenerator(
     private val statePublisher: StatePublisher,
     private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
     private val analysedJar: String,
-    private val cyberDefaultSelector: Boolean
+    private val cyberDefaultSelector: Boolean,
+    private val codeGen: CodeGen?
 ) : TestCaseGenerator(buildDirs, classpath, dependencyPaths, jdkInfo) {
     private val logger: KLogger = KotlinLogging.logger {}
 
@@ -33,6 +35,7 @@ open class CyberTestCaseGenerator(
         method: ExecutableId,
         mockStrategyApi: MockStrategyApi,
         chosenClassesToMockAlways: Set<ClassId>,
+        applicationContext: ApplicationContext,
         executionTimeEstimator: ExecutionTimeEstimator
     ): UtBotSymbolicEngine {
         logger.debug("Starting symbolic execution for $method  --$mockStrategyApi--")
@@ -43,6 +46,7 @@ open class CyberTestCaseGenerator(
             dependencyPaths = dependencyPaths,
             mockStrategy = mockStrategyApi.toModel(),
             chosenClassesToMockAlways = chosenClassesToMockAlways,
+            applicationContext = applicationContext,
             solverTimeoutInMillis = executionTimeEstimator.updatedSolverCheckTimeoutMillis,
             cyberPathSelector,
             findVulnerabilities,
@@ -50,7 +54,8 @@ open class CyberTestCaseGenerator(
             statePublisher = statePublisher,
             vulnerabilityChecksHolder = vulnerabilityChecksHolder,
             analysedJar,
-            cyberDefaultSelector
+            cyberDefaultSelector,
+            codeGen = codeGen
         )
     }
 }

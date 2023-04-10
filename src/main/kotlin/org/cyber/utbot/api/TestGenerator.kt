@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import org.cyber.utbot.api.abstraction.extraChecks.ExtraVulnerabilityCheck
 import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.*
+import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.viewers.stateViewers.TerminalStatisticViewer
 import org.cyber.utbot.api.utils.viewers.UTBotViewers
 import org.cyber.utbot.api.utils.viewers.stateViewers.EndNotTerminalStatisticViewer
@@ -49,6 +50,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val testsIgnoreEmpty: Boolean = settings.testsIgnoreEmpty
     override val analysedJar: String = settings.analysedJar
     override val cyberDefaultSelector: Boolean = settings.cyberDefaultSelector
+    override val codeGen: CodeGen = CodeGen()
 
     private val logger = KotlinLogging.logger {}
 
