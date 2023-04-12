@@ -37,10 +37,10 @@ class ProguardExecutor(private val jarName: String) {
             .setMaxCallStackDepth(-1)
             .build()
         traces = cpaRun.extractLinearTraces()
-//        traces.forEach { t ->
-//            println("\nNEW\n")
-//            t.forEach { println(it.toString()) }
-//        }
+        traces.forEach { t ->
+            println("\nNEW\n")
+            t.forEach { println(it.toString()) }
+        }
     }
 
     private fun setHeadMethodSignature(method: SootMethod) {

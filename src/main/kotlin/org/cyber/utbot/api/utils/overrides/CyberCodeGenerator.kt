@@ -75,27 +75,27 @@ class CyberCodeGenerator(
         val testClassFile = astConstructor.construct(testClassModel).run { @CyberNew("add annotations") addAnnotations(this, testSets) }
         logger.info { "Code generation phase finished at ${now()}" }
 
-        @CyberNew("additional generation") codeGen?.run {
-            val variableConstructor = CgComponents.getVariableConstructorBy(context) // FIXME
-
-            val stateBeforeToName = mutableMapOf<String, EnvironmentModels>()
-
-            testSets.forEach { methods ->
-                methods.executions.forEach {
-                    stateBeforeToName[it.testMethodName!!] = it.stateBefore // FIXME !!
-                }
-            }
-
-            testClassFile.declaredClass.body.methodRegions.forEach { cluster ->
-                cluster.content.forEach { region ->
-                    region.content.forEach { method ->
-                        method.statements = generate(stateBeforeToName[method.name]!!, method.statements) { model: UtModel, name: String? ->    // FIXME !!
-                            variableConstructor.getOrCreateVariable(model, name)
-                        }
-                    }
-                }
-            }
-        }
+//        @CyberNew("additional generation") codeGen?.run {
+//            val variableConstructor = CgComponents.getVariableConstructorBy(context) // FIXME
+//
+//            val stateBeforeToName = mutableMapOf<String, EnvironmentModels>()
+//
+//            testSets.forEach { methods ->
+//                methods.executions.forEach {
+//                    stateBeforeToName[it.testMethodName!!] = it.stateBefore // FIXME !!
+//                }
+//            }
+//
+//            testClassFile.declaredClass.body.methodRegions.forEach { cluster ->
+//                cluster.content.forEach { region ->
+//                    region.content.forEach { method ->
+//                        method.statements = generate(stateBeforeToName[method.name]!!, method.statements) { model: UtModel, name: String? ->    // FIXME !!
+//                            variableConstructor.getOrCreateVariable(model, name)
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         val generatedCode = renderToString(testClassFile)
 

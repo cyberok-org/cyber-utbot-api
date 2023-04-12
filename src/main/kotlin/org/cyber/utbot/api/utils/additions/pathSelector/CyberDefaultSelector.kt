@@ -1,10 +1,12 @@
 package org.cyber.utbot.api.utils.additions.pathSelector
 
+import org.utbot.engine.InterProceduralUnitGraph
+import org.utbot.engine.jimpleBody
 import org.utbot.engine.state.ExecutionState
 import org.utbot.framework.UtSettings
 import kotlin.random.Random
 
-internal class CyberDefaultSelector {
+internal class CyberDefaultSelector(private val graph: InterProceduralUnitGraph) {
 
     private val random = Random( UtSettings.seedInPathSelector ?: 42)
 
@@ -16,6 +18,7 @@ internal class CyberDefaultSelector {
         if (tmpCurrentIndex == -1) {
             tmpCurrentIndex = random.nextInt(executionStates.size)
         }
+        println("peeks state: ${Thread.currentThread()} ${executionStates[tmpCurrentIndex].stmt} method ${graph.method(executionStates[tmpCurrentIndex].stmt).jimpleBody().method.name}")
         return executionStates[tmpCurrentIndex] to tmpCurrentIndex
     }
 
@@ -29,6 +32,7 @@ internal class CyberDefaultSelector {
         }
         val state = executionStates[tmpCurrentIndex]
         executionStates.removeAt(tmpCurrentIndex)
+        println("polles state: ${Thread.currentThread()} ${state.stmt} method ${graph.method(state.stmt).jimpleBody().method.name}")
         return state
     }
 }

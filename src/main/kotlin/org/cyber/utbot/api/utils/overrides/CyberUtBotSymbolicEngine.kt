@@ -9,7 +9,6 @@ import org.cyber.utbot.api.utils.additions.pathSelector.CyberSelector
 import mu.KotlinLogging
 import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.additions.classState.StateHolder
-import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
@@ -48,7 +47,7 @@ class CyberUtBotSymbolicEngine(
     methodUnderTest: ExecutableId,
     classpath: String,
     dependencyPaths: String,
-    mockStrategy: MockStrategy = MockStrategy.OTHER_PACKAGES,
+    mockStrategy: MockStrategy = MockStrategy.NO_MOCKS,
     chosenClassesToMockAlways: Set<ClassId>,
     applicationContext: ApplicationContext,
     solverTimeoutInMillis: Int = UtSettings.checkSolverTimeoutMillis,
@@ -59,9 +58,8 @@ class CyberUtBotSymbolicEngine(
     vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
     analysedJar: String,
     cyberDefaultSelector: Boolean,
-    codeGen: CodeGen?
+    private val stateHolder: StateHolder?,
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis, applicationContext) {
-    private val stateHolder = if (findVulnerabilities) StateHolder(codeGen) else null
     init {  // set our selector
         pathSelector = if (cyberPathSelector) {
             cyberPathSelector(globalGraph, StrategyOption.DISTANCE, analysedJar, cyberDefaultSelector) {
@@ -130,12 +128,12 @@ class CyberUtBotSymbolicEngine(
         }
     }
 
-    @CyberNew("update CodeGen info")
-    private fun updateCodeGenInfo(stateBefore: EnvironmentModels, parameters: List<SymbolicValue>, resolver: Resolver) {
-        val params = if (stateBefore.parameters.size == parameters.size) parameters else parameters.drop(1)
-        require(stateBefore.parameters.size == params.size) { "update CodeGen info fail" }
-        stateHolder?.updateCodeGenInfo(stateBefore, params.map { it.addr }) { value -> resolver.resolveModel(value) }
-    }
+//    @CyberNew("update CodeGen info")
+//    private fun updateCodeGenInfo(stateBefore: EnvironmentModels, parameters: List<SymbolicValue>, resolver: Resolver) {
+//        val params = if (stateBefore.parameters.size == parameters.size) parameters else parameters.drop(1)
+//        require(stateBefore.parameters.size == params.size) { "update CodeGen info fail" }
+//        stateHolder?.updateCodeGenInfo(stateBefore, params.map { it.addr }) { value -> resolver.resolveModel(value) }
+//    }
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "add StateViewer")
     override fun traverseImpl(): Flow<UtResult> = flow {
@@ -215,7 +213,7 @@ class CyberUtBotSymbolicEngine(
                                 return@measureTime
                             }
 
-                            @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, resolvedParameters, resolver)
+//                            @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, resolvedParameters, resolver)
 
                             val concreteUtExecution = UtSymbolicExecution(
                                 stateBefore,
@@ -282,13 +280,14 @@ class CyberUtBotSymbolicEngine(
                                 StateLabel.CONCRETE -> statesForConcreteExecution.add(newState)
                                 StateLabel.TERMINAL -> {
                                     @CyberNew("ignore terminal state if the trace was not found yet")
-                                    if (pathSelector is CyberSelector && !(pathSelector as CyberSelector).defaultSelection) {
-                                        if (!(pathSelector as CyberSelector).traceFound()) {
-                                            continue
-                                        }
-
-                                    }
-                                    println("TERMINAL: ${newState.stmt}, from ${state.stmt}, method: ${newState}")
+//                                    if (pathSelector is CyberSelector && !(pathSelector as CyberSelector).defaultSelection) {
+//                                        if (!(pathSelector as CyberSelector).traceFound()) {
+//                                            println("continued(((")
+//                                            continue
+//                                        }
+//
+//                                    }
+                                    println("TERMINAL: ${newState.stmt}, from ${state.stmt}, method: ${graph.body}")
                                     consumeTerminalState(newState)
                                 }
                             }
@@ -337,23 +336,20 @@ class CyberUtBotSymbolicEngine(
 
         val symbolicExecutionResult = resolver.resolveResult(symbolicResult)
 
-        @CyberNew("filter emit flag")
-        val needEmit = !onlyVulnerabilities || isVulnerability(symbolicExecutionResult)
-
+        @CyberNew("filter emit flag") val needEmit = !onlyVulnerabilities || isVulnerability(state.path)
 
         val stateBefore = modelsBefore.constructStateForMethod(methodUnderTest)
         val stateAfter = modelsAfter.constructStateForMethod(methodUnderTest)
         require(stateBefore.parameters.size == stateAfter.parameters.size)
 
-        val path = entryMethodPath(state)
-        @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, parameters, resolver)
+//        @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, parameters, resolver)
 
         val symbolicUtExecution = UtSymbolicExecution(
             stateBefore = stateBefore,
             stateAfter = stateAfter,
             result = symbolicExecutionResult,
             instrumentation = instrumentation,
-            path = path,
+            path = entryMethodPath(state),
             fullPath = state.fullPath()
         )
 

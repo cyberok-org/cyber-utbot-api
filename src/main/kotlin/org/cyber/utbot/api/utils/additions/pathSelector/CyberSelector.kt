@@ -31,7 +31,7 @@ class CyberSelector(
     private val traceMapper = TraceMapper()
     private val classPool: ClassPool = ClassPool.getDefault()
     private var traceFound = false
-    private val defaultSelector = CyberDefaultSelector()
+    private val defaultSelector = CyberDefaultSelector(graph)
     private val container = StatesContainer()
     private var peekTraceFound = false
     // stack of inner calls
@@ -45,6 +45,7 @@ class CyberSelector(
     fun traceFound() = traceFound
 
     override fun offerImpl(state: ExecutionState) {
+//        println("offer!")
         executionStates += state
         currentIndex = -1
     }
@@ -54,6 +55,7 @@ class CyberSelector(
      * If no state leads to a trace returns a state from the default selector.
      */
     override fun peekImpl(): ExecutionState? {
+//        println("peek!")
         if (defaultSelection || cyberDefaultSelector) {
             val (state, idx) = defaultSelector.peekImpl(executionStates, currentIndex)
             currentIndex = idx
@@ -66,7 +68,7 @@ class CyberSelector(
             if (mapState(state)) {
                 peekTraceFound = true
                 currentIndex = i
-//                if (state.stmt.toString().contains("taint")) println("peeked1 ${state.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+                if (state.stmt.toString().contains("Example")) println("peeked1 ${state.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                 return state
             }
         }
@@ -74,7 +76,7 @@ class CyberSelector(
         // random state peek
         val (state, idx) = defaultSelector.peekImpl(executionStates, currentIndex)
         currentIndex = idx
-//        if (state.stmt.toString().contains("taint")) println("peeked2 ${state.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+        if (state?.stmt.toString().contains("Example")) println("peeked2 ${state?.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
         return state
     }
 
@@ -84,11 +86,12 @@ class CyberSelector(
      * If no state leads to a trace returns a state from the default selector.
      */
     override fun pollImpl(): ExecutionState? {
+//        println("poll!")
         if (defaultSelection || cyberDefaultSelector) {
             return defaultSelector.pollImpl(executionStates, currentIndex)
         }
         if (executionStates.size == 0) {
-//            println("polled0, }, traceFound = $traceFound, currentIndex = $currentIndex")
+            println("polled0, }, traceFound = $traceFound, currentIndex = $currentIndex")
             return null
         }
         if (currentIndex == -1) {
@@ -101,13 +104,13 @@ class CyberSelector(
                             it
                         )
                     }
-//                    if (state.stmt.toString().contains("taint"))println("polled1 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+                    if (state.stmt.toString().contains("Example"))println("polled1 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
                 if (mapState(state)) {
                     executionStates.removeAt(i)
                     currentIndex = -1
-//                    if (state.stmt.toString().contains("taint"))println("polled2 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+                    if (state.stmt.toString().contains("Example"))println("polled2 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
             }
@@ -120,7 +123,7 @@ class CyberSelector(
         }
         val state = defaultSelector.pollImpl(executionStates, currentIndex)
         currentIndex = -1
-//        if (state.stmt.toString().contains("taint")) println("polled3 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+        if (state?.stmt.toString().contains("Example")) println("polled3 ${state?.stmt},label = ${state?.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
         return state
     }
 
@@ -178,22 +181,22 @@ class CyberSelector(
             }
         }
         if (container[state.stmt]?.isNotEmpty() == true) {
-//            if (state.stmt.toString().contains("taint")) println("mapped successfully1 ${state.stmt}, tracefound = $traceFound")
+            if (state.stmt.toString().contains("Example")) println("mapped successfully1 ${state.stmt}, tracefound = $traceFound")
             traceFound = true
             return true
         } else if (isInvocation(ancestor.toString(), jimpleBody)) {
             innerCallDestination.addFirst(ancestor to jimpleBody)
             container[ancestor]?.let { container[state.stmt]?.addAll(it) } // plus putifabsent
-//            if (state.stmt.toString().contains("taint"))println("mapped successfully2 ${state.stmt}, parent = $ancestor")
+            if (state.stmt.toString().contains("Example"))println("mapped successfully2 ${state.stmt}, parent = $ancestor")
             return true
         } else if (innerCallDestination.isNotEmpty() && innerCallDestination.first().first != null
             && jimpleBody.method.name.equals(innerCallDestination.first().second?.method?.name)
         ) {
             container[ancestor]?.let { container[state.stmt]?.addAll(it) }
-//            if (state.stmt.toString().contains("taint"))println("mapped successfully3 ${state.stmt}, parent = $ancestor, method name = ${jimpleBody.method.name}")
+            if (state.stmt.toString().contains("Example"))println("mapped successfully3 ${state.stmt}, parent = $ancestor, method name = ${jimpleBody.method.name}")
             return true
         }
-//        if (state.stmt.toString().contains("taint")) println("map failed ${state.stmt}")
+        if (state.stmt.toString().contains("Example")) println("map failed ${state.stmt}")
         return false
     }
 

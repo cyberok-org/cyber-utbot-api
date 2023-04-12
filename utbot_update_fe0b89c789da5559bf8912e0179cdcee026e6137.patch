@@ -770,7 +770,7 @@ index 8a3b48e9..14211081 100644
 +    )
 +}
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
-index 894db6db..b9dabbe7 100644
+index 894db6db..35df1670 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
 +++ b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/domain/models/CgElement.kt
 @@ -283,9 +283,9 @@ sealed class CgMethod(open val isStatic: Boolean) : CgElement {
@@ -836,6 +836,60 @@ index 894db6db..b9dabbe7 100644
      override val exceptions: Set<ClassId>,
      override val visibility: VisibilityModifier = VisibilityModifier.PUBLIC,
  ) : CgMethod(isStatic = true) {
+@@ -552,13 +552,13 @@ data class CgDecrement(val variable: CgVariable) : CgStatement
+ 
+ // Inner block in method (keeps parent method fields visible)
+ 
+-data class CgInnerBlock(val statements: List<CgStatement>) : CgStatement
++data class CgInnerBlock(var statements: List<CgStatement>) : CgStatement
+ 
+ // Try-catch
+ 
+ // for now finally clause is not supported
+ data class CgTryCatch(
+-    val statements: List<CgStatement>,
++    var statements: List<CgStatement>,
+     val handlers: List<CgExceptionHandler>,
+     val finally: List<CgStatement>?,
+     val resources: List<CgDeclaration>? = null
+@@ -578,24 +578,24 @@ data class CgErrorWrapper(
+ 
+ sealed class CgLoop : CgStatement {
+     abstract val condition: CgExpression // TODO: how to represent conditions
+-    abstract val statements: List<CgStatement>
++    abstract var statements: List<CgStatement>
+ }
+ 
+ data class CgForLoop(
+     val initialization: CgDeclaration,
+     override val condition: CgExpression,
+     val update: CgStatement,
+-    override val statements: List<CgStatement>
++    override var statements: List<CgStatement>
+ ) : CgLoop()
+ 
+ data class CgWhileLoop(
+     override val condition: CgExpression,
+-    override val statements: List<CgStatement>
++    override var statements: List<CgStatement>
+ ) : CgLoop()
+ 
+ data class CgDoWhileLoop(
+     override val condition: CgExpression,
+-    override val statements: List<CgStatement>
++    override var statements: List<CgStatement>
+ ) : CgLoop()
+ 
+ /**
+@@ -605,7 +605,7 @@ data class CgDoWhileLoop(
+  */
+ data class CgForEachLoop(
+     override val condition: CgExpression,
+-    override val statements: List<CgStatement>,
++    override var statements: List<CgStatement>,
+     val iterable: CgReferenceExpression,
+ ) : CgLoop()
+ 
 @@ -618,7 +618,7 @@ object CgContinueStatement : CgStatement
  
  class CgDeclaration(
@@ -845,6 +899,15 @@ index 894db6db..b9dabbe7 100644
      val initializer: CgExpression?,
      val isMutable: Boolean = false,
  ) : CgStatement {
+@@ -899,7 +899,7 @@ data class CgIfStatement(
+ 
+ data class CgSwitchCaseLabel(
+     val label: CgLiteral? = null, // have to be compile time constant (null for default label)
+-    val statements: List<CgStatement>,
++    var statements: List<CgStatement>,
+     val addBreakStatementToEnd: Boolean = true // do not set this field to "true" value if you manually added "break" to statements
+ ) : CgStatement
+ 
 diff --git a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt b/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt
 index 6df90f71..7b318f96 100644
 --- a/utbot-framework/src/main/kotlin/org/utbot/framework/codegen/tree/ututils/UtilClassKind.kt
