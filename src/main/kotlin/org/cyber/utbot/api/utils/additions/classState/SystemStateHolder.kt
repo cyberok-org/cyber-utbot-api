@@ -8,7 +8,7 @@ import org.utbot.engine.types.STRING_TYPE
 import org.utbot.framework.plugin.api.UtModel
 import soot.*
 
-class SystemState<T>: AnyState<T> {
+class SystemState<T> : AnyState<T> {
     object Values: AnyState<SymbolicValue> {
         var properties = mutableMapOf<SymbolicValue, SymbolicValue>()
         var propertiesConcreteKey = mutableMapOf<String, SymbolicValue>()
@@ -20,13 +20,15 @@ class SystemState<T>: AnyState<T> {
     }
 }
 
-class SystemStateHolder(registerStateHolder: (UtAddrExpression, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit):
-    CodeGenStateHolder<SystemState<SymbolicValue>, SystemState<UtModel>>(registerStateHolder) {
+class SystemStateHolder(addActionByAddr: (UtAddrExpression, (ObjectValue, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit) -> Unit, registerStateHolder: (UtAddrExpression, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit):
+    CodeGenStateHolder<SystemState<SymbolicValue>, SystemState<UtModel>>(addActionByAddr, registerStateHolder) {
     override val state = SystemState<SymbolicValue>()
     override val codeGenerator
         get() = null
 
-    override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mutableMapOf()
+    override val signatureToSetFunResults = mapOf<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> Unit>()
+
+    override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mapOf()
 
     companion object: ArgsSaveHolder() {
         private val kclass = java.lang.System::class
@@ -45,7 +47,7 @@ class SystemStateHolder(registerStateHolder: (UtAddrExpression, CodeGenStateHold
                     listOf(MethodResult(value))
                 }
             }
-            val funIfConcrete = { key: String? ->
+            val funIfConcrete = { _: SymbolicValue, key: String? ->
                 key?.run {
                     SystemState.Values.propertiesConcreteKey[this]?.run { listOf(MethodResult(this)) } ?: run {
                         val value = createObject(findNewAddr(), STRING_TYPE, false)
@@ -63,7 +65,9 @@ class SystemStateHolder(registerStateHolder: (UtAddrExpression, CodeGenStateHold
             }
         }
 
-        override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mutableMapOf(
+        override val signatureToSetFunResults = mapOf<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> Unit>()
+
+        override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mapOf(
             getProperty1Signature to { params, createResolver ->
                 getStoreValue(params[0], createResolver)
             },

@@ -13,20 +13,25 @@ class HttpServletRequestCodeGen private constructor(state: HttpServletRequestSta
     override fun generate(declaration: CgDeclaration, getOrCreateVariable: (model: UtModel, name: String?) -> CgValue): List<CgStatement> {
         return mutableListOf<CgStatement>().also { l ->
             l.add(declaration)
-            state.headers.forEach {
-                val cgGetHeader = cgMethodCallFromDeclaration(declaration, "getHeader", it.key.asString())
-                val givenCall = unsafeCgMethodCall(null, org.mockito.Mockito::class.id, "when", cgGetHeader)
-                val willReturnCall = unsafeCgMethodCallArgsLiteral(givenCall, org.mockito.stubbing.OngoingStubbing::class.id, "thenReturn", it.value.asString())
-                l.add(CgStatementExecutableCall(willReturnCall))
-            }
-            state.headersConcreteKey.forEach {
-                state.headersConcreteKeyToKeys[it.key]?.forEach { key ->
-                    val cgGetHeader = cgMethodCallFromDeclaration(declaration, "getHeader", key)
+            state.indexToKey.forEach { key -> when(key) {
+                is UtModel -> {
+                    val value = state.headers[key]!!
+                    val cgGetHeader = cgMethodCallFromDeclaration(declaration, "getHeader", key.asString())
                     val givenCall = unsafeCgMethodCall(null, org.mockito.Mockito::class.id, "when", cgGetHeader)
-                    val willReturnCall = unsafeCgMethodCallArgsLiteral(givenCall, org.mockito.stubbing.OngoingStubbing::class.id, "thenReturn", it.value.asString())
+                    val willReturnCall = unsafeCgMethodCallArgsLiteral(givenCall, org.mockito.stubbing.OngoingStubbing::class.id, "thenReturn", value.asString())
                     l.add(CgStatementExecutableCall(willReturnCall))
-                } ?: throw CyberException("HttpServletRequestCodeGen internal error: headersConcreteKeyToKeys should exist")
-            }
+                }
+                is String -> {
+                    val value = state.headersConcreteKey[key]!!
+                    state.headersConcreteKeyToKeys[key]?.forEach {
+                        val cgGetHeader = cgMethodCallFromDeclaration(declaration, "getHeader", it)
+                        val givenCall = unsafeCgMethodCall(null, org.mockito.Mockito::class.id, "when", cgGetHeader)
+                        val willReturnCall = unsafeCgMethodCallArgsLiteral(givenCall, org.mockito.stubbing.OngoingStubbing::class.id, "thenReturn", value.asString())
+                        l.add(CgStatementExecutableCall(willReturnCall))
+                    } ?: throw CyberException("HttpServletRequestCodeGen fail")
+                }
+                else -> throw CyberException("HttpServletRequestCodeGen fail")
+            }}
         }
     }
 
@@ -37,6 +42,15 @@ class HttpServletRequestCodeGen private constructor(state: HttpServletRequestSta
                 it.headers = headers.resolve(resolveModel)
                 it.headersConcreteKey = headersConcreteKey.resolveConcreteKey(resolveModel)
                 it.headersConcreteKeyToKeys = headersConcreteKeyToKeys
+
+                cookies.forEach { index, value ->   // TODO generate in test
+                    println("$index, ${value.state.name?.let { cookieName -> resolveModel(cookieName).asString() }}")
+                }
+
+                val valueToModel = (headers.keys zip it.headers.keys).toMap()
+                it.indexToKey = indexToKey.map { key ->
+                    valueToModel[key] ?: concreteKeyToValue[key]
+                }.toMutableList()
             })
         }
     }

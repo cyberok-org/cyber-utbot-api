@@ -1,6 +1,8 @@
 package org.example.checks;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 
 public class Example {
     public boolean example(HttpServletRequest request) {
@@ -18,6 +20,71 @@ public class Example {
         }
         return false;
     }
+
+//    public boolean example(HttpServletRequest request) {
+//        Cookie[] cookie = request.getCookies();
+//        if (cookie != null) {
+//            Cookie cook = cookie[5];
+//            if (cook.getName().equals("cook")) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+//    public boolean example(HttpServletRequest request) {
+//        for (Enumeration<?> values = request.getHeaders("name"); values.hasMoreElements();) {
+//            if (values.nextElement().equals("value")) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+//    public boolean example(HttpServletRequest request, String s) {
+//        if (request.getHeader("header").equals("header")) {
+//            if (request.getHeader(s).equals("s")) {
+//                for (Enumeration<?> keys = request.getHeaderNames(); keys.hasMoreElements();) {
+//                    if (keys.nextElement().equals("key")) {
+//                        if (keys.hasMoreElements() && keys.nextElement().equals("key2")) {
+//                            return true;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
+
+//    public boolean example(HttpServletRequest request) {
+//        Enumeration<?> keys = request.getHeaderNames();
+//        if (keys.hasMoreElements() && keys.nextElement().equals("key")) {
+//            if (keys.hasMoreElements() && keys.nextElement().equals("key2")) {
+//                if (keys.hasMoreElements() && keys.nextElement().equals("key3")) {
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
+//    }
+
+//    public boolean example(String[] l) {
+//        if (l[0].equals("key")) {
+//            return true;
+//        }
+//        return false;
+//    }
+
+//    public boolean example(String s) {
+//        return File.separator.equals(s);
+//    }
+
+//    public boolean example(String s, String s2, String s3, String s4) {
+//        if ((s + s2).equals(s3 + "." + s4)) {
+//            return true;
+//        }
+//        return false;
+//    }
 
 //    public boolean example(HttpServletRequest request) {
 //        if (request.getHeader("header").equals("abc")) {

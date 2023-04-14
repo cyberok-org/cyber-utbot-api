@@ -145,7 +145,7 @@ class GenerateTestsSettings(
     /**
      * generate tests only for vulnerabilities if true
      */
-    val onlyVulnerabilities: Boolean = true,
+    val onlyVulnerabilities: Boolean = false,
 
     /**
      * whether to ignore classes to pass non-generated tests

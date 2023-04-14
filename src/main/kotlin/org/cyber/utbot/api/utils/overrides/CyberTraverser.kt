@@ -341,6 +341,10 @@ class CyberTraverser(
                 offerState(environment.state.withLabel(StateLabel.CONCRETE))
                 queuedSymbolicStateUpdates += UtFalse.asHardConstraint()
             }
+            @CyberNew("state holder set invoke result") stateHolder.run {
+                setInvokeResults(instance as? ObjectValue, invocation.method,
+                    results.mapNotNull { ((it as? MethodResult)?.symbolicResult as? SymbolicSuccess)?.value }) { createResolver() }
+            }
             return OverrideResult(success = true, results)
         }
 
