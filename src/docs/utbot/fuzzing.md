@@ -32,7 +32,7 @@
 ## Where
 
 - Mutators: [seeds](../../../../utbot-fuzzing/src/main/kotlin/org/utbot/fuzzing/seeds) - базовые, [mutators](../../../../utbot-fuzzers/src/main/kotlin/org/utbot/fuzzer/mutators) - другие
-- Providers [providers](../../../../utbot-fuzzers/src/main/kotlin/org/utbot/fuzzing/providers) - базовые,  [mutators](../../../../utbot-fuzzers/src/main/kotlin/org/utbot/fuzzer/providers) - другие
+- Providers [providers](../../../../utbot-fuzzers/src/main/kotlin/org/utbot/fuzzing/providers) - базовые,  [providers](../../../../utbot-fuzzers/src/main/kotlin/org/utbot/fuzzer/providers) - другие
 
 ## Other
 
