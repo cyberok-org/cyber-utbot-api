@@ -5,21 +5,51 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 
 public class Example {
-    public boolean example(HttpServletRequest request) {
-        String param = "";
-        request.getHeader("benchmarkTEST00133");
-        String s = "BenchmarkTest00133";
-        if (request.getHeader(s) != null) {
-            param = request.getHeader(s);
-        }
-        if (param.equals("test")) {
+//    public boolean example(HttpServletRequest request) {
+//        String param = "";
+//        request.getHeader("benchmarkTEST00133");
+//        String s = "BenchmarkTest00133";
+//        if (request.getHeader(s) != null) {
 //            param = request.getHeader(s);
-//            if (param.equals("test2")) {
+//        }
+//        if (param.equals("test")) {
+////            param = request.getHeader(s);
+////            if (param.equals("test2")) {
+//                return true;
+////            }
+//        }
+//        return false;
+//    }
+
+    public boolean example(String s, int a, int b) {
+        if ((s + "/").equals("qwerty/")) {
+            if (a == 123456789 + b) {
                 return true;
-//            }
+            }
         }
         return false;
     }
+
+//    public boolean example(int a, int b) {
+//        if (a - 2500 == b + 10000) {
+//            return true;
+//        }
+//        return false;
+//    }
+
+//    public boolean example(String s) {
+//        if (s.matches("\\w*(\\.\\.\\/){1,10}etc/passwd")) {
+//            return true;
+//        }
+//        return false;
+//    }
+
+//    public boolean example(String s) {
+//        if (s.subSequence(10, s.length()).equals("/../etc/passwd")) {
+//            return true;
+//        }
+//        return false;
+//    }
 
 //    public boolean example(HttpServletRequest request) {
 //        Cookie[] cookie = request.getCookies();
@@ -46,9 +76,9 @@ public class Example {
 //            if (request.getHeader(s).equals("s")) {
 //                for (Enumeration<?> keys = request.getHeaderNames(); keys.hasMoreElements();) {
 //                    if (keys.nextElement().equals("key")) {
-//                        if (keys.hasMoreElements() && keys.nextElement().equals("key2")) {
+////                        if (keys.hasMoreElements() && keys.nextElement().equals("key2")) {
 //                            return true;
-//                        }
+////                        }
 //                    }
 //                }
 //            }

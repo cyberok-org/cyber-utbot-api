@@ -90,8 +90,10 @@ class CyberCodeGenerator(
             testClassFile.declaredClass.body.methodRegions.forEach { cluster ->
                 cluster.content.forEach { region ->
                     region.content.forEach { method ->
-                        method.statements = generate(stateBeforeToName[method.name]!!, method.statements) { model: UtModel, name: String? ->    // FIXME !!
-                            variableConstructor.getOrCreateVariable(model, name)
+                        stateBeforeToName[method.name]?.let {
+                            method.statements = generate(it, method.statements) { model: UtModel, name: String? ->
+                                variableConstructor.getOrCreateVariable(model, name)
+                            }
                         }
                     }
                 }

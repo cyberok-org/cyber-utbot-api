@@ -112,9 +112,9 @@ class HttpServletRequestStateHolder(addActionByAddr: (UtAddrExpression, (ObjectV
             )))
             listOf(MethodResult(createObject(addr, cyberEnumerationType, useConcreteType = false)))
         },
-        getCookiesSignature to { params, createResolver ->
-            null
-        },
+//        getCookiesSignature to { params, createResolver ->
+//            null
+//        },
 //        getQueryStringSignature to { _, _ ->
 //            null
 //        },

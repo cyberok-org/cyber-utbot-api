@@ -126,7 +126,7 @@ class CyberUtBotSymbolicEngine(
     private fun updateCodeGenInfo(stateBefore: EnvironmentModels, parameters: List<SymbolicValue>, resolver: Resolver) {
         val params = if (stateBefore.parameters.size == parameters.size) parameters else parameters.drop(1)
         require(stateBefore.parameters.size == params.size) { "update CodeGen info fail" }
-        stateHolder?.updateCodeGenInfo(stateBefore, params.map { it.addr }) { value -> resolver.resolveModel(value) }
+        stateHolder?.updateCodeGenInfo(stateBefore, params.map { (it as? ReferenceValue)?.addr }) { value -> resolver.resolveModel(value) }
     }
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "add StateViewer")

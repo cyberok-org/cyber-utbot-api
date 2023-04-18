@@ -97,11 +97,13 @@ class StateHolder(private val codeGen: CodeGen? = null) {
     fun saveArgs(method: SootMethod): Boolean =
         findHolderObj(method.declaringClass.name)?.saveArgs(method) ?: false
 
-    fun updateCodeGenInfo(stateBefore: EnvironmentModels, parametersAddresses: List<UtAddrExpression>, resolveModel: (value: SymbolicValue) -> UtModel) {
+    fun updateCodeGenInfo(stateBefore: EnvironmentModels, parametersAddresses: List<UtAddrExpression?>, resolveModel: (value: SymbolicValue) -> UtModel) {
         codeGen?.run {
             register(stateBefore, parametersAddresses.map {
-                addrToHolder[it]?.run {
-                    codeGenerator?.resolve(state, resolveModel)
+                it?.let {
+                    addrToHolder[it]?.run {
+                        codeGenerator?.resolve(state, resolveModel)
+                    }
                 }
             })
         }
