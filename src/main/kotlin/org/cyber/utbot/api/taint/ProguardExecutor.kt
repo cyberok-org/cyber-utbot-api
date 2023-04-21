@@ -2,6 +2,7 @@ package org.cyber.utbot.api.taint
 
 import org.cyber.utbot.api.taint.parse.parseSinks
 import org.cyber.utbot.api.taint.parse.parseSources
+import org.cyber.utbot.api.utils.UTBOT_DIR
 import proguard.analysis.cpa.jvm.domain.memory.BamLocationDependentJvmMemoryLocation
 import proguard.analysis.cpa.jvm.domain.taint.JvmInvokeTaintSink
 import proguard.analysis.cpa.jvm.domain.taint.JvmTaintMemoryLocationBamCpaRun
@@ -28,8 +29,8 @@ class ProguardExecutor(private val jarName: String) {
         setHeadMethodSignature(jimpleBody.method)
         val programClassPool: ClassPool = JarUtil.readJar(jarName, "**", false)
         val cfa = CfaUtil.createInterproceduralCfa(programClassPool)
-        sources.addAll(parseSources("src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sources")) // todo change to remote db
-        sinks.addAll(parseSinks("src\\main\\resources\\org\\cyber\\utbot\\api\\taint\\sinks"))
+        sources.addAll(parseSources("$UTBOT_DIR/cyber-utbot-exploit-base/src/taint/base/sources"))
+        sinks.addAll(parseSinks("$UTBOT_DIR/cyber-utbot-exploit-base/src/taint/base/sinks"))
         cpaRun = JvmTaintMemoryLocationBamCpaRun.Builder().setCfa(cfa)
             .setMainSignature(MethodSignature(headMethod?.clazz, headMethod?.method, headMethod?.descriptor))
             .setTaintSources(sources)

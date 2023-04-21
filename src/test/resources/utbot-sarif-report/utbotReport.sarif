@@ -7,6 +7,16 @@
         "name" : "UnitTestBot",
         "organization" : "utbot.org",
         "version" : "1.0",
+        "rules" : [ ]
+      }
+    },
+    "results" : [ ]
+  }, {
+    "tool" : {
+      "driver" : {
+        "name" : "UnitTestBot",
+        "organization" : "utbot.org",
+        "version" : "1.0",
         "rules" : [ {
           "id" : "utbot.exception.NullPointerException",
           "name" : "NullPointerException",

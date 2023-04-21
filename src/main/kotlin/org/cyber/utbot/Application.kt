@@ -25,7 +25,8 @@ fun main() {
 //    val (tests, info) = generator.run(mapOf("org.example.Interprocedural" to "src/main/java/org/example/Interprocedural.java").toTestUnits())
 //    val (tests, info) = generator.runBunch("build/classes/java/main", "org.example.dir")
 //    val classpath = "/home/andrew/UTBotJava/cyber-utbot-exploit-base/build/classes/java/main"
-    val classpath = "$UTBOT_DIR/cyber-utbot-exploit-base/build/classes/java/main"
+//    val classpath = "C:/Users/lesya/uni2/UTBotJava/cyber-utbot-api/build/classes/java/main"
+    val classpath = "C:/Users/lesya/Downloads/jars/javax.servlet-api-3.1.0.jar"
 //    val classpath = "build/classes/java/main"
 //    val classpath = "C:/Users/lesya/BenchmarkJava/target/classes"
 //    val classpath = "build/classes/java/main:/home/andrew/.jdks/openjdk-17.0.2/bin/javax.servlet-api-3.1.0.jar"
@@ -52,7 +53,7 @@ fun main() {
     val generator = TestGenerator(settings)
 //    val (tests, info) = generator.run(mapOf("org.example.Loop" to "src/main/java/org/example/Loop.java").toTestUnits())
 //    val (tests, info) = generator.run(mapOf("org.example.checks.Example" to "src/main/java/org/example/checks/Example.java").toTestUnits())
-    val (tests, info) = generator.run(mapOf("org.testcases.taint.Example" to "src/main/java/org/testcases/taint/Example").toTestUnits())
+    val (tests, info) = generator.run(mapOf("org.example.BenchmarkCheck" to "src/main/java/org/example/BenchmarkCheck").toTestUnits())
 //    println(tests)
     tests.forEach { nameAndTest ->
         Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))

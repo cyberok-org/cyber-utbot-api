@@ -55,7 +55,7 @@ fun main() {
         .drop(14).take(1)
 
     val extraMocks=listOf("org.owasp.esapi.ESAPI", "org.owasp.esapi.Encoder")
-    val classpath = "/home/andrew/BenchmarkJava/target/classes:/home/andrew/jars/javax.servlet-api-3.1.0.jar:/home/andrew/jars/esapi-2.5.1.0.jar"
+    val classpath = "C:/Users/lesya/Downloads/jars/javax.servlet-api-3.1.0.jar"
     val reportCreator = ReportCreator(classpath, listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"), category = "pathtraver", extraMocks=extraMocks)
     reportCreator.create(bench, benchmark="OWASP-Benchmark", testsSavePath="/home/andrew/BenchmarkJava/src/test/java/org/owasp/benchmark/testcode")    // testsSavePath should exist
 }
