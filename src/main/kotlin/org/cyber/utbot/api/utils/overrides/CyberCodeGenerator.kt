@@ -83,7 +83,9 @@ class CyberCodeGenerator(
 
             testSets.forEach { methods ->
                 methods.executions.forEach {
-                    stateBeforeToName[it.testMethodName!!] = it.stateBefore // FIXME !!
+                    it.testMethodName?.run {
+                        stateBeforeToName[this] = it.stateBefore
+                    }
                 }
             }
 

@@ -20,46 +20,49 @@ class CodeGen {
         }
 
         var newCodeGenI = codeGenI
-        statements.forEach { statement -> when (statement) {
-            is CgDeclaration -> {
-                if (newCodeGenI < codeGens.size && codeGens[newCodeGenI]!!.classId == statement.variableType) {
-                    newStatements.addAll(codeGens[newCodeGenI]!!.generate(statement, getOrCreateVariable))
-                    newCodeGenI++
-                    while (codeGens.size > newCodeGenI && codeGens[newCodeGenI] == null) newCodeGenI++
-                } else {
-                    newStatements.add(statement)
+        var statementPos = 0
+        var statementsBuffer = statements.toMutableList()
+        while (statementsBuffer.size > statementPos) {
+            when (val statement = statementsBuffer[statementPos]) {
+                is CgDeclaration -> {
+                    if (newCodeGenI < codeGens.size && codeGens[newCodeGenI]!!.classId == statement.variableType) {
+                        val (updatedStatementsBuffer, pos) = codeGens[newCodeGenI]!!.generate(statementsBuffer, statementPos, getOrCreateVariable)
+                        statementsBuffer = updatedStatementsBuffer.toMutableList()
+                        statementPos = pos
+                        newCodeGenI++
+                        while (codeGens.size > newCodeGenI && codeGens[newCodeGenI] == null) newCodeGenI++
+                        continue
+                    }
                 }
-            }
-            is CgInnerBlock -> {
-                mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
-                    statement.statements = newStatementsMain
-                    newCodeGenI = newCodeGenIMain
+                is CgInnerBlock -> {
+                    mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
+                        statement.statements = newStatementsMain
+                        newCodeGenI = newCodeGenIMain
+                    }
                 }
-                newStatements.add(statement)
-            }
-            is CgTryCatch -> {  // only for try statements
-                mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
-                    statement.statements = newStatementsMain
-                    newCodeGenI = newCodeGenIMain
+                is CgTryCatch -> {  // only for try statements
+                    mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
+                        statement.statements = newStatementsMain
+                        newCodeGenI = newCodeGenIMain
+                    }
                 }
-                newStatements.add(statement)
-            }
-            is CgLoop -> {  // CgForLoop, CgWhileLoop, CgDoWhileLoop, CgForEachLoop
-                mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
-                    statement.statements = newStatementsMain
-                    newCodeGenI = newCodeGenIMain
+                is CgLoop -> {  // CgForLoop, CgWhileLoop, CgDoWhileLoop, CgForEachLoop
+                    mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
+                        statement.statements = newStatementsMain
+                        newCodeGenI = newCodeGenIMain
+                    }
                 }
-                newStatements.add(statement)
-            }
-            is CgSwitchCaseLabel -> {
-                mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
-                    statement.statements = newStatementsMain
-                    newCodeGenI = newCodeGenIMain
+                is CgSwitchCaseLabel -> {
+                    mainUpdatePart(statement.statements, newCodeGenI).also { (newStatementsMain, newCodeGenIMain) ->
+                        statement.statements = newStatementsMain
+                        newCodeGenI = newCodeGenIMain
+                    }
                 }
-                newStatements.add(statement)
+                else -> {}
             }
-            else -> newStatements.add(statement)
-        }}
+            statementPos++
+        }
+        newStatements.addAll(statementsBuffer)
         return newCodeGenI
     }
 

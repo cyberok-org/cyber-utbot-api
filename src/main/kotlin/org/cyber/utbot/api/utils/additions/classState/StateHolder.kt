@@ -27,6 +27,7 @@ class StateHolder(private val codeGen: CodeGen? = null) {
             org.cyber.utils.overrides.CyberPath::class.qualifiedName to { x, y -> PathStateHolder(x, y) },
             javax.servlet.http.Cookie::class.qualifiedName to { x, y -> CookieStateHolder(x, y) },
             javax.servlet.http.HttpServletRequest::class.qualifiedName to { x, y -> HttpServletRequestStateHolder(x, y) },
+            javax.servlet.ServletRequest::class.qualifiedName to { x, y -> HttpServletRequestStateHolder(x, y) },   // TODO is it ok?
             javax.servlet.http.HttpServletResponse::class.qualifiedName to { x, y -> HttpServletResponseStateHolder(x, y) },
             java.lang.System::class.qualifiedName to { x, y -> SystemStateHolder(x, y) },
             org.cyber.utils.overrides.CyberEnumeration::class.qualifiedName to { x, y -> CyberEnumerationStateHolder(x, y) },
@@ -38,6 +39,7 @@ class StateHolder(private val codeGen: CodeGen? = null) {
             org.cyber.utils.overrides.CyberPath::class.qualifiedName to PathStateHolder,
             javax.servlet.http.Cookie::class.qualifiedName to CookieStateHolder,
             javax.servlet.http.HttpServletRequest::class.qualifiedName to HttpServletRequestStateHolder,
+            javax.servlet.ServletRequest::class.qualifiedName to HttpServletRequestStateHolder,
             javax.servlet.http.HttpServletResponse::class.qualifiedName to HttpServletResponseStateHolder,
             java.lang.System::class.qualifiedName to SystemStateHolder,
             org.cyber.utils.overrides.CyberEnumeration::class.qualifiedName to CyberEnumerationStateHolder,

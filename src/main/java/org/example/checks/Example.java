@@ -21,14 +21,14 @@ public class Example {
 //        return false;
 //    }
 
-    public boolean example(String s, int a, int b) {
-        if ((s + "/").equals("qwerty/")) {
-            if (a == 123456789 + b) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    public boolean example(String s, int a, int b) {
+//        if ((s + "/").equals("qwerty/")) {
+//            if (a == 123456789 + b) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
 //    public boolean example(int a, int b) {
 //        if (a - 2500 == b + 10000) {
@@ -51,16 +51,19 @@ public class Example {
 //        return false;
 //    }
 
-//    public boolean example(HttpServletRequest request) {
-//        Cookie[] cookie = request.getCookies();
-//        if (cookie != null) {
-//            Cookie cook = cookie[5];
-//            if (cook.getName().equals("cook")) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+    public boolean example(HttpServletRequest request) {
+        Cookie[] cookie = request.getCookies();
+        if (cookie != null) {
+            Cookie cook = cookie[5];
+            if (cook.getName().equals("cook")) {
+                if (cook.getValue().equals("value")) {
+                    return true;
+                }
+            }
+        }
+        request.getParameter("name");
+        return false;
+    }
 
 //    public boolean example(HttpServletRequest request) {
 //        for (Enumeration<?> values = request.getHeaders("name"); values.hasMoreElements();) {

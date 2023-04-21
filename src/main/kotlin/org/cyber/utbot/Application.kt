@@ -19,17 +19,19 @@ fun main() {
 //    val classpath = "$UTBOT_DIR/cyber-utbot-exploit-base/build/classes/java/main"
     val classpath = "build/classes/java/main:/home/andrew/.jdks/openjdk-17.0.2/bin/javax.servlet-api-3.1.0.jar"
 //    val classpath = "/home/andrew/ex/build/classes/java/main:/home/andrew/.jdks/openjdk-17.0.2/bin/javax.servlet-api-3.1.0.jar"
+//    val classpath = "/home/andrew/securibench-micro-2/build/classes/java/main:/home/andrew/.jdks/openjdk-17.0.2/bin/javax.servlet-api-3.1.0.jar"
 
     val otherMocks = emptyList<String>()
 //    val otherMocks = listOf<String>()
 
-    //generationTimeout = 10_000,
-    val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + CYBER_MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
+    val settings = GenerateTestsSettings(classpath, generationTimeout=120_000, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + CYBER_MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
         withUtSettings = { useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY; },
         utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckDirectories=listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"))
     val generator = TestGenerator(settings)
 //    val (tests, info) = generator.run(mapOf("org.example.Loop" to "src/main/java/org/example/Loop.java").toTestUnits())
     val (tests, info) = generator.run(mapOf("org.example.checks.Example" to "src/main/java/org/example/checks/Example.java").toTestUnits())
+//    val num = 1
+//    val (tests, info) = generator.run(mapOf("org.micro.basic.Basic$num" to "/home/andrew/securibench-micro-2/build/classes/java/main/org/micro/basic/Basic$num.class").toTestUnits())
     println(tests)
 //    tests.forEach { nameAndTest ->
 //        Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))

@@ -10,5 +10,5 @@ import org.utbot.framework.plugin.api.UtModel
 abstract class AnyCodeGen<out T: AnyState<UtModel>>(protected val state: T) {
     abstract val classId: ClassId
 
-    abstract fun generate(declaration: CgDeclaration, getOrCreateVariable: (model: UtModel, name: String?) -> CgValue): List<CgStatement>
+    abstract fun generate(statementsBufferAndDeclaration: List<CgStatement>, statementPos: Int, getOrCreateVariable: (model: UtModel, name: String?) -> CgValue): Pair<List<CgStatement>, Int>
 }

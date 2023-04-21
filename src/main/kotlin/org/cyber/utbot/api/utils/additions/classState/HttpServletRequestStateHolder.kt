@@ -16,7 +16,13 @@ class HttpServletRequestState<T> : AnyState<T> {
     var indexToKey = mutableListOf<Any?>()      // 1) T = SymbolicValue, 2) T = UtModel | String
     var concreteKeyToValue = mutableMapOf<T, String>()
     var headersConcreteKeyToKeys = mutableMapOf<String, MutableSet<String>>()    // because of lowercase
-    var cookies = mutableMapOf<Int, CookieStateHolder>()
+
+    var parameters = mutableMapOf<T, T>()
+    var parametersConcreteKey = mutableMapOf<String, T>()
+    var parametersIndexToKey = mutableListOf<Any?>()      // 1) T = SymbolicValue, 2) T = UtModel | String
+    var parametersConcreteKeyToValue = mutableMapOf<T, String>()
+
+    var cookies = mutableMapOf<Int, Any?>()  // CookieStateHolder or CookieState<UtModel>
 }
 
 class HttpServletRequestStateHolder(addActionByAddr: (UtAddrExpression, (ObjectValue, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit) -> Unit, registerStateHolder: (UtAddrExpression, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit):
@@ -61,6 +67,45 @@ class HttpServletRequestStateHolder(addActionByAddr: (UtAddrExpression, (ObjectV
 
         val param = params[0]
         return if (state.headers.containsKey(param)) {
+            funIfSymbolic(param)
+        } else {
+            val resolver = createResolver()
+            overrideFunHelper(param, resolver, funIfConcrete, funIfSymbolic)
+        }
+    }
+
+    private fun CyberTraverser.getParameterImpl(params: List<SymbolicValue>, createResolver: () -> Resolver): List<InvokeResult>? { // FIXME copypaste
+        val funIfSymbolic = { key: SymbolicValue ->     // ignore lowercase condition
+            state.parameters[key]?.run { listOf(MethodResult(this)) } ?: run {
+                if (maxParameters != null && maxParameters <= state.parametersIndexToKey.size) {
+                    null
+                } else {
+                    val value = createObject(findNewAddr(), STRING_TYPE, false)
+                    state.parameters[key] = value
+                    state.parametersIndexToKey.add(key)
+                    listOf(MethodResult(value))
+                }
+            }
+        }
+        val funIfConcrete = { param: SymbolicValue, key: String? ->
+            key?.lowercase()?.run {
+                state.parametersConcreteKey[this]?.run { listOf(MethodResult(this)) } ?: run {
+                    if (maxParameters != null && maxParameters <= state.parametersIndexToKey.size) {
+                        null    // not support parameters after it
+                    } else {
+                        val addr = findNewAddr()
+                        val value = createObject(addr, STRING_TYPE, false)
+                        state.parametersConcreteKey[this] = value
+                        state.parametersConcreteKeyToValue[param] = this
+                        state.parametersIndexToKey.add(param)
+                        listOf(MethodResult(value))
+                    }
+                }
+            }
+        }
+
+        val param = params[0]
+        return if (state.parameters.containsKey(param)) {
             funIfSymbolic(param)
         } else {
             val resolver = createResolver()
@@ -156,6 +201,9 @@ class HttpServletRequestStateHolder(addActionByAddr: (UtAddrExpression, (ObjectV
             )))
             listOf(MethodResult(createObject(addr, cyberEnumerationType, useConcreteType = false)))
         },
+        getParameterSignature to { params, createResolver ->
+            getParameterImpl(params, createResolver)
+        },
     )
 
     companion object: ArgsSaveHolder() {
@@ -169,6 +217,12 @@ class HttpServletRequestStateHolder(addActionByAddr: (UtAddrExpression, (ObjectV
         private val getCookiesSignature by lazy { sootClass.getMethodByName("getCookies").subSignature }
         private val getQueryStringSignature by lazy { sootClass.getMethodByName("getQueryString").subSignature }
         private val getHeaderNamesSignature by lazy { sootClass.getMethodByName("getHeaderNames").subSignature }
+
+        //
+        private val kclassServletRequest = javax.servlet.ServletRequest::class
+        private val sootClassServletRequest by lazy { Scene.v().getSootClass(kclassServletRequest.qualifiedName) }
+
+        private val getParameterSignature by lazy { sootClassServletRequest.getMethodByName("getParameter").subSignature }
 
         //
 
@@ -197,7 +251,8 @@ class HttpServletRequestStateHolder(addActionByAddr: (UtAddrExpression, (ObjectV
         override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mapOf()
         override val signatureToSetFunResults = mapOf<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> Unit>()
 
-        private val maxHeaders: Int? = 8;
+        private val maxHeaders: Int? = 8
+        private val maxParameters: Int? = 8
         private const val produceHeaders = true;
     }
 }
