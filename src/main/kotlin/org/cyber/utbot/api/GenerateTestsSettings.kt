@@ -23,7 +23,7 @@ val CYBER_MOCK_ALWAYS_DEFAULT = listOf(         // TODO(division by packages)
     "javax.servlet.http.Cookie",
     "javax.servlet.RequestDispatcher",
     "javax.servlet.http.HttpServletResponse",
-    "javax.servlet.ServletConfig",
+//    "javax.servlet.ServletConfig",    // TODO not work custom classes if mock it (interface)???
     "java.io.PrintWriter",
     "java.io.FileWriter",
     "java.util.BitSet",
