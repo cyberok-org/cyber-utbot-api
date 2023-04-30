@@ -1,11 +1,10 @@
 package org.cyber.utbot.api.utils.additions.classState
 
+import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.additions.classState.codeGeneration.HttpServletRequestCodeGen
 import org.cyber.utbot.api.utils.overrides.CyberTraverser
 import org.utbot.engine.*
-import org.utbot.engine.pc.UtAddrExpression
-import org.utbot.engine.pc.UtArraySelectExpression
-import org.utbot.engine.pc.UtBvLiteral
+import org.utbot.engine.pc.*
 import org.utbot.engine.types.STRING_TYPE
 import org.utbot.framework.plugin.api.UtModel
 import soot.*
@@ -116,8 +115,17 @@ class HttpServletRequestStateHolder(addActionByAddr: (UtAddrExpression, (ObjectV
     override val signatureToSetFunResults: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> Unit> = mapOf(
         getCookiesSignature to { params, createResolver ->
             addActionByAddr(((params as ArrayList<*>)[0] as ArrayValue).addr) { wrapper, stateHolder ->
-                val index = (((wrapper.addr.internal as UtArraySelectExpression).index as UtBvLiteral).value as Int)
-                state.cookies[index] = stateHolder as CookieStateHolder
+                val indexExpr = (wrapper.addr.internal as UtArraySelectExpression).index
+                val index = when(indexExpr) {
+                    is UtOpExpression -> simplificator.visit(indexExpr) as UtBvLiteral
+                    is UtBvLiteral -> indexExpr
+                    else -> throw CyberException("wrong addr expr: $indexExpr")
+                }.value as Int
+                if (index !in state.cookies) {
+                    state.cookies[index] = stateHolder as CookieStateHolder
+                } else {
+                    (stateHolder as CookieStateHolder).state = (state.cookies[index] as CookieStateHolder).state
+                }
             }
         },
     )
@@ -235,6 +243,8 @@ class HttpServletRequestStateHolder(addActionByAddr: (UtAddrExpression, (ObjectV
 
         val cyberEnumerationType: RefType
             get() = Scene.v().getSootClass(org.cyber.utils.overrides.CyberEnumeration::class.java.canonicalName).type
+
+
 
 //        private val arrayKclass = org.cyber.utils.overrides.CyberArray::class
 //        private val arraySootClass by lazy { Scene.v().getSootClass(arrayKclass.qualifiedName) }

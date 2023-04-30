@@ -5,21 +5,21 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 
 public class Example {
-//    public boolean example(HttpServletRequest request) {
-//        String param = "";
-//        request.getHeader("benchmarkTEST00133");
-//        String s = "BenchmarkTest00133";
-//        if (request.getHeader(s) != null) {
+    public boolean example(HttpServletRequest request) {
+        String param = "";
+        request.getHeader("benchmarkTEST00133");
+        String s = "BenchmarkTest00133";
+        if (request.getHeader(s) != null) {
+            param = request.getHeader(s);
+        }
+        if (param.equals("test")) {
 //            param = request.getHeader(s);
-//        }
-//        if (param.equals("test")) {
-////            param = request.getHeader(s);
-////            if (param.equals("test2")) {
-//                return true;
-////            }
-//        }
-//        return false;
-//    }
+//            if (param.equals("test2")) {
+                return true;
+//            }
+        }
+        return false;
+    }
 
 //    public boolean example(String s, int a, int b) {
 //        if ((s + "/").equals("qwerty/")) {
@@ -51,19 +51,38 @@ public class Example {
 //        return false;
 //    }
 
-    public boolean example(HttpServletRequest request) {
-        Cookie[] cookie = request.getCookies();
-        if (cookie != null) {
-            Cookie cook = cookie[5];
-            if (cook.getName().equals("cook")) {
-                if (cook.getValue().equals("value")) {
-                    return true;
-                }
-            }
-        }
-        request.getParameter("name");
-        return false;
-    }
+//    public boolean example(HttpServletRequest request) {
+//        Cookie[] cookie = request.getCookies();
+//        if (cookie != null) {
+//            Cookie cook = cookie[5];
+//            if (cook.getName().equals("cook")) {
+//                if (cook.getValue().equals("value")) {
+//                    return true;
+//                }
+//            }
+//        }
+//        request.getParameter("name");
+//        return false;
+//    }
+
+//    public boolean example(HttpServletRequest request) {
+//        javax.servlet.http.Cookie[] theCookies = request.getCookies();
+//        for (javax.servlet.http.Cookie theCookie : theCookies) {
+//            if (theCookie.getName().equals("BenchmarkTest00002")) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+//    public boolean example(String[] strings) {
+//        for (String str: strings) {
+//            if (str.equals("ex")) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
 //    public boolean example(HttpServletRequest request) {
 //        for (Enumeration<?> values = request.getHeaders("name"); values.hasMoreElements();) {

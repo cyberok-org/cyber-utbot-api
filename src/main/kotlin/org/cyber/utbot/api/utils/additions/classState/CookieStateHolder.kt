@@ -18,7 +18,7 @@ class CookieState<T> : AnyState<T> {
 
 class CookieStateHolder(addActionByAddr: (UtAddrExpression, (ObjectValue, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit) -> Unit, registerStateHolder: (UtAddrExpression, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit):
     CodeGenStateHolder<CookieState<SymbolicValue>, CookieState<UtModel>>(addActionByAddr, registerStateHolder) {
-    override val state = CookieState<SymbolicValue>()
+    override var state = CookieState<SymbolicValue>()
     override val codeGenerator
         get() = null
 

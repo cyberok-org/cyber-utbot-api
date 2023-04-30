@@ -6,12 +6,15 @@ import org.utbot.engine.InvokeResult
 import org.utbot.engine.ObjectValue
 import org.utbot.engine.Resolver
 import org.utbot.engine.SymbolicValue
+import org.utbot.engine.pc.Simplificator
 import org.utbot.engine.pc.UtAddrExpression
 import org.utbot.engine.pc.UtArraySelectExpression
 import org.utbot.framework.plugin.api.EnvironmentModels
 import org.utbot.framework.plugin.api.UtModel
 import soot.SootMethod
 
+
+internal val simplificator = Simplificator()
 
 class StateHolder(private val codeGen: CodeGen? = null) {
     init {
