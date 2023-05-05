@@ -13,6 +13,8 @@ class HttpServletRequestCodeGen private constructor(state: HttpServletRequestSta
     override val classId = ClassId("javax.servlet.http.HttpServletRequest")
 
     override fun generate(statementsBufferAndDeclaration: List<CgStatement>, statementPos: Int, getOrCreateVariable: (model: UtModel, name: String?) -> CgValue): Pair<List<CgStatement>, Int> {
+        var firstCookieMock = true  // FIXME (create state for generate, problem with subgenerate)
+
         val l = mutableListOf<CgStatement>()
         l.addAll(statementsBufferAndDeclaration.take(statementPos))
 
@@ -53,38 +55,52 @@ class HttpServletRequestCodeGen private constructor(state: HttpServletRequestSta
 
         var pos = statementPos + 1
         while (statementsBufferAndDeclaration.size > pos) {
-            val statement = statementsBufferAndDeclaration[pos]
+            var statement = statementsBufferAndDeclaration[pos]
             if (statement is CgAssignment && statement.lValue.type == javax.servlet.http.Cookie::class.id) {
                 (((statement.lValue as? CgArrayElementAccess)?.index as CgLiteral?)?.value as? Int)?.let { index ->
+                    lateinit var updatedStatement: CgAssignment
+                    if (!firstCookieMock) {
+                        val name = "cookieMock_$index"
+                        val cookieMock = CgDeclaration(javax.servlet.http.Cookie::class.id, name, unsafeCgMethodCall(null, org.mockito.Mockito::class.id, "mock", CgGetJavaClass(classId=javax.servlet.http.Cookie::class.id)))
+                        l.add(cookieMock)
+
+                        val typeCastedVariable = CgTypeCast(javax.servlet.http.Cookie::class.id, CgVariable(name, javax.servlet.http.Cookie::class.id))
+                        updatedStatement = CgAssignment(statement.lValue, typeCastedVariable)
+                    } else {
+                        updatedStatement = statement
+                        firstCookieMock = false
+                    }
                     (state.cookies.remove(index) as? CookieState<UtModel>)?.let { value ->  // TODO to cookie codeGen
                         value.name?.run {
-                            val cgGetName = cgMethodCallFromVariable(statement.rValue.toVariable(), "getName")
+                            val cgGetName = cgMethodCallFromVariable(updatedStatement.rValue.toVariable(), "getName")
                             l.add(mockitoWhenThenReturn(cgGetName, asString()))
                         }
                         value.value?.run {
-                            val cgValueName = cgMethodCallFromVariable(statement.rValue.toVariable(), "getValue")
+                            val cgValueName = cgMethodCallFromVariable(updatedStatement.rValue.toVariable(), "getValue")
                             l.add(mockitoWhenThenReturn(cgValueName, asString()))
                         }
                         value.path?.run {
-                            val cgGetPath = cgMethodCallFromVariable(statement.rValue.toVariable(), "getPath")
+                            val cgGetPath = cgMethodCallFromVariable(updatedStatement.rValue.toVariable(), "getPath")
                             l.add(mockitoWhenThenReturn(cgGetPath, asString()))
                         }
                         value.secure?.run {
-                            val cgGetSecure = cgMethodCallFromVariable(statement.rValue.toVariable(), "getSecure")
+                            val cgGetSecure = cgMethodCallFromVariable(updatedStatement.rValue.toVariable(), "getSecure")
                             l.add(mockitoWhenThenReturn(cgGetSecure, asPrimitive()))
                         }
                         value.maxAge?.run {
-                            val cgGetMaxAge = cgMethodCallFromVariable(statement.rValue.toVariable(), "getMaxAge")
+                            val cgGetMaxAge = cgMethodCallFromVariable(updatedStatement.rValue.toVariable(), "getMaxAge")
                             l.add(mockitoWhenThenReturn(cgGetMaxAge, asPrimitive()))
                         }
                         value.domain?.run {
-                            val cgGetDomain = cgMethodCallFromVariable(statement.rValue.toVariable(), "getDomain")
+                            val cgGetDomain = cgMethodCallFromVariable(updatedStatement.rValue.toVariable(), "getDomain")
                             l.add(mockitoWhenThenReturn(cgGetDomain, asString()))
                         }
                     }
-                }
+                    l.add(updatedStatement)
+                } ?: l.add(statement)
+            } else {
+                l.add(statement)
             }
-            l.add(statement)
             pos++
         }
         return l to newStatePos

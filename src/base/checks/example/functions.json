@@ -1,0 +1,10 @@
+[
+  {
+    "fullyQualified": "org.cyber.base.Example",
+    "function": "fun1"
+  },
+  {
+    "fullyQualified": "org.cyber.base.Example",
+    "function": "fun3"
+  }
+]

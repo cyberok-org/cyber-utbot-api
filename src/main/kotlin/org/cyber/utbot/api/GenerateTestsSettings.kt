@@ -128,7 +128,7 @@ class GenerateTestsSettings(
     /**
      * list of directories with files of the form VulnerabilityStandard for the description of analyzed vulnerabilities
      */
-    val vulnerabilityCheckDirectories: List<String> = listOf("src/exploitBase"),
+    val vulnerabilityCheckDirectories: List<String> = listOf("src/base"),
 
     /**
      * *$vulnerabilityCheckDirectory/$vulnerabilityCheckFuncsSuffix* - path to functions checks descriptions directory

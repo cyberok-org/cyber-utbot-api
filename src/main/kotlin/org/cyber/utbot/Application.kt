@@ -34,7 +34,7 @@ fun main() {
 //    val (tests, info) = generator.run(mapOf("org.micro.basic.Basic$num" to "/home/andrew/securibench-micro-2/build/classes/java/main/org/micro/basic/Basic$num.class").toTestUnits())
     println(tests)
 //    tests.forEach { nameAndTest ->
-//        Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
+//        Files.write("src/test/java/org/example/checks/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))
 //    }
 
 //    val (tests, info) = generator.run(mapOf("org.example.base.ArbitraryFileCreation" to "$UTBOT_DIR/cyber-utbot-exploit-base/src/main/java/org/example/base/ArbitraryFileCreation.java").toTestUnits())

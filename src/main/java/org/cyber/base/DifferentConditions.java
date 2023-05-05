@@ -1,4 +1,4 @@
-package org.cyber.exploitBase;
+package org.cyber.base;
 
 import java.util.Arrays;
 

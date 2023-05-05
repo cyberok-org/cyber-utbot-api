@@ -1,7 +1,7 @@
 package org.example;
 
 
-public class Loop {
+public class Example {
     public boolean fun(String s, int x) {
 //        return fun2(x);
 //        return fun3(s);

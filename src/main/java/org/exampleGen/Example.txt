@@ -2,8 +2,8 @@ package org.example;
 
 // базовый пример utbot
 
-public class Loop {
-    public int whileLoop(int k) {
+public class Example {
+    public int whileExample(int k) {
         int i = 0;
         int sum = 0;
 
@@ -17,13 +17,13 @@ public class Loop {
 }
 
 ----------------------------------------------------------------------------------------------------
-path: r0 := @this: org.example.Loop,
+path: r0 := @this: org.example.Example,
 	i0 := @parameter0: int,
 	i1 = 0,
 	i2 = 0,
 	if i1 >= i0 goto return i2
 assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
-	(or (is addr: (BVInt32 p_this) org.example.Loop), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.example.Example), (eq addr: (BVInt32 p_this) addr: Int32 0)),
 	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
 	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4457)),
 	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
@@ -38,7 +38,7 @@ assumption:
 lastStatus: SAT
 
 ----------------------------------------------------------------------------------------------------
-path: r0 := @this: org.example.Loop,
+path: r0 := @this: org.example.Example,
 	i0 := @parameter0: int,
 	i1 = 0,
 	i2 = 0,
@@ -48,7 +48,7 @@ path: r0 := @this: org.example.Loop,
 	goto [?= (branch)],
 	if i1 >= i0 goto return i2
 assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
-	(or (is addr: (BVInt32 p_this) org.example.Loop), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.example.Example), (eq addr: (BVInt32 p_this) addr: Int32 0)),
 	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
 	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4457)),
 	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
@@ -63,13 +63,13 @@ assumption:
 lastStatus: SAT
 
 ----------------------------------------------------------------------------------------------------
-path: r0 := @this: org.example.Loop2,
+path: r0 := @this: org.example.Example2,
 	i0 := @parameter0: int,
 	i1 = 0,
 	i2 = 0,
 	if i1 >= i0 goto return i2
 assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
-	(or (is addr: (BVInt32 p_this) org.example.Loop2), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.example.Example2), (eq addr: (BVInt32 p_this) addr: Int32 0)),
 	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
 	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4453)),
 	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
@@ -84,7 +84,7 @@ assumption:
 lastStatus: SAT
 
 ----------------------------------------------------------------------------------------------------
-path: r0 := @this: org.example.Loop2,
+path: r0 := @this: org.example.Example2,
 	i0 := @parameter0: int,
 	i1 = 0,
 	i2 = 0,
@@ -94,7 +94,7 @@ path: r0 := @this: org.example.Loop2,
 	goto [?= (branch)],
 	if i1 >= i0 goto return i2
 assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
-	(or (is addr: (BVInt32 p_this) org.example.Loop2), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.example.Example2), (eq addr: (BVInt32 p_this) addr: Int32 0)),
 	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
 	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4453)),
 	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),

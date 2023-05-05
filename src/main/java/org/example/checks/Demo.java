@@ -22,6 +22,7 @@ public class Demo {
 
         java.io.File fileTarget = new java.io.File(path);
 
+//        System.out.println(path);
         response.getWriter().println("file: " + fileTarget);
     }
 }
