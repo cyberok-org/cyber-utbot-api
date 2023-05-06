@@ -21,6 +21,17 @@ public class Example {
         return false;
     }
 
+//    private void internal(String s, int x) {
+//    }
+//
+//    public boolean example(String s, int x) {
+//        if (s.length() > 3 && x > 100) {
+//            internal(s, x);
+//            return true;
+//        }
+//        return false;
+//    }
+
 //    public boolean example(String s, int a, int b) {
 //        if ((s + "/").equals("qwerty/")) {
 //            if (a == 123456789 + b) {

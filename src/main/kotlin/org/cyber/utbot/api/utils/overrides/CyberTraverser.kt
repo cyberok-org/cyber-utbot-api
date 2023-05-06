@@ -1,14 +1,19 @@
 package org.cyber.utbot.api.utils.overrides
 
+import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.CHECK_METHOD_PREFIX
 import org.cyber.utbot.api.utils.VULNERABILITY_CHECKS_CLASS_NAME
 import org.cyber.utbot.api.utils.additions.MethodSubstitution
 import org.cyber.utbot.api.utils.additions.classState.StateHolder
+import org.cyber.utbot.api.utils.additions.constraints.ConstraintParser
+import org.cyber.utbot.api.utils.additions.fuzzing.ExampleVulnerabilityChecksFuzzer
+import org.cyber.utbot.api.utils.additions.fuzzing.VulnerabilityChecksFuzzer
 import org.cyber.utbot.api.utils.additions.vulnerability.decorateVulnerabilityFunction
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.annotations.CyberNote
 import org.cyber.utbot.api.utils.vulnerability.VulnerabilityChecksHolder
+import org.cyber.utbot.api.utils.vulnerability.parsers.ArgumentsVulnerabilityChecksCreator
 import org.utbot.common.WorkaroundReason
 import org.utbot.common.unreachableBranch
 import org.utbot.common.workaround
@@ -20,7 +25,10 @@ import org.utbot.engine.state.withLabel
 import org.utbot.engine.symbolic.asHardConstraint
 import org.utbot.engine.types.*
 import org.utbot.framework.plugin.api.ApplicationContext
+import org.utbot.framework.plugin.api.ClassId
 import org.utbot.framework.plugin.api.ExecutableId
+import org.utbot.framework.plugin.api.classId
+import org.utbot.framework.plugin.api.util.methodId
 import org.utbot.framework.util.executableId
 import soot.*
 import soot.jimple.Stmt
@@ -44,15 +52,48 @@ class CyberTraverser(
     private val rememberedParams = mutableSetOf<List<SymbolicValue>>()
     private val objectValueToParams = mutableMapOf<ObjectValue, List<SymbolicValue>>()
     private val stmtToParams = mutableMapOf<Stmt, List<SymbolicValue>>()
+    private val vulnerabilityChecksFuzzer: VulnerabilityChecksFuzzer = ExampleVulnerabilityChecksFuzzer()
 
     @CyberNew("decorate target invoke")
-    private fun decorateTarget(target: InvocationTarget): InvocationTarget {
+    private fun decorateTarget(target: InvocationTarget, parameters: List<SymbolicValue>): InvocationTarget {
         val targetClassName = target.method.declaringClass.name
         val targetFunctionName = target.method.name
-        return vulnerabilityChecksHolder?.checks( targetClassName to targetFunctionName)?.run  {
+        return vulnerabilityChecksHolder?.checks( targetClassName to targetFunctionName)?.run {
             val methodName = "$CHECK_METHOD_PREFIX\$$targetClassName.$targetFunctionName"
             if (environment.method.name == methodName && environment.method.declaringClass.name == VULNERABILITY_CHECKS_CLASS_NAME) return target
-            val decorateFunction = decorateVulnerabilityFunction(target, methodName, checks = this)
+
+            val descriptions = mutableSetOf<String?>()
+            val methodId = methodId(ClassId(targetClassName), targetFunctionName, target.method.returnType.classId, *target.method.parameterTypes.map { it.classId }.toTypedArray())
+
+            val parametersInfo = null   // set it later
+
+            val parameterNames = parameters.map {
+                when(it) {
+                    is PrimitiveValue -> (it.expr as? UtBvConst)?.name ?: throw CyberException("unresolved expr name for $it")
+                    is ObjectValue -> (it.addr.internal as? UtBvConst)?.name ?: throw CyberException("unresolved addr name for $it")
+                    is ArrayValue -> (it.addr.internal as? UtBvConst)?.name ?: throw CyberException("unresolved addr name for $it")
+                    else -> throw CyberException("unresolved type for $it")
+                }
+            }.toSet()
+            val constraints = ConstraintParser.parse(parameterNames, environment.state.symbolicState.solver.assertions) //
+
+            val argumentChecks = map { it.description }.toSet().mapNotNull { description ->
+                if (description == null) {
+                    descriptions.add(null)
+                    null
+                } else {
+                    val argumentChecks = vulnerabilityChecksFuzzer.generate(methodId, parametersInfo, constraints, description)
+                    if (argumentChecks == null) descriptions.add(description)
+                    argumentChecks?.run { ArgumentsVulnerabilityChecksCreator.parseVulnerabilityCheck(this) }
+                }
+            }.toMutableList()
+
+            forEach {
+                if (it.description in descriptions) {
+                    argumentChecks.add(it)
+                }
+            }
+            val decorateFunction = decorateVulnerabilityFunction(target, methodName, checks = argumentChecks)
             InvocationTarget(instance = null, method = decorateFunction, target.constraints)
         } ?: target
     }
@@ -148,7 +189,7 @@ class CyberTraverser(
         if (artificialMethodOverride.success) {
             @CyberNew("decorate target") run {
                 val target = InvocationTarget(invocation.instance, invocation.method)
-                val newTarget = decorateTarget(target)
+                val newTarget = decorateTarget(target, invocation.parameters)
                 if (target != newTarget) {
                     return invoke(newTarget, invocation.parameters)
                 }
@@ -194,7 +235,7 @@ class CyberTraverser(
         // For example, Collection.size will produce two targets (ArrayList and HashSet)
         // that will override the invocation.
         val overrideResults = targets
-            .map { @CyberNew("decorate target") decorateTarget(it) }
+            .map { @CyberNew("decorate target") decorateTarget(it, invocation.parameters) }
             .map { it to overrideInvocation(invocation, it) }
 
         if (overrideResults.sumOf { (_, overriddenResult) -> overriddenResult.results.size } > 1) {
