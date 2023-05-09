@@ -18,12 +18,13 @@ git clone https://github.com/UnitTestBot/UTBotJava
 cd UTBotJava/
 git checkout fe0b89c789da5559bf8912e0179cdcee026e6137
 git clone https://github.com/cyberok-org/cyber-utbot-api
+cd cyber-utbot-api/
 ```
 
 После стоит открыть `ide` и попытаться собрать (`gradle build -x test` если не начнётся автоматически). Потом применить `patch` командной ниже и ещё раз собрать.
 
 ```bash
-cd cyber-utbot-api/scripts/
+cd scripts/
 bash patch_apply.sh
 ```
 
@@ -32,6 +33,8 @@ bash patch_apply.sh
 ```gradle
 gradle build -x test
 ```
+
+(Возможно нужно будет предварительно сконфигурировать проект (`load gradle changes`, если будет иконка справа сверху))
 
 ### Knowledge base
 
@@ -99,7 +102,7 @@ gradle build -x test
 
 [brief](src/docs/brief.md) - доки по всему. Там есть описания для:
 - `cyberok.api` - доки по настройкам, стандарту базы знаний и механизму проверки.
-- `cyberok.test` - доки по спецификации тестов (формат хранения), концепция приложения для сравнения разных инструментов/версий одного инструмента. 
+- `cyberok.test` - доки по спецификации тестов (формат хранения), концепция приложения для сравнения разных инструментов/версий одного инструмента.
 - `utbot` - внутренние доки по `utbot`, [utbot scheme](src/docs/utbot/Scheme.md) - схема работы `utbot`
 - `abstract` - что-то отдельное, не относящаяся к теме, но полезное при изучении.
 
