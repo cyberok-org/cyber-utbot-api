@@ -18,7 +18,7 @@ internal class CyberDefaultSelector(private val graph: InterProceduralUnitGraph)
         if (tmpCurrentIndex == -1) {
             tmpCurrentIndex = random.nextInt(executionStates.size)
         }
-        println("peeks state: ${Thread.currentThread()} ${executionStates[tmpCurrentIndex].stmt} method ${graph.method(executionStates[tmpCurrentIndex].stmt).jimpleBody().method.name}")
+//        println("peeks state: ${Thread.currentThread()} ${executionStates[tmpCurrentIndex].stmt} method ${graph.method(executionStates[tmpCurrentIndex].stmt).jimpleBody().method.name}")
         return executionStates[tmpCurrentIndex] to tmpCurrentIndex
     }
 
@@ -32,7 +32,7 @@ internal class CyberDefaultSelector(private val graph: InterProceduralUnitGraph)
         }
         val state = executionStates[tmpCurrentIndex]
         executionStates.removeAt(tmpCurrentIndex)
-        println("polles state: ${Thread.currentThread()} ${state.stmt} method ${graph.method(state.stmt).jimpleBody().method.name}")
+//        println("polles state: ${Thread.currentThread()} ${state.stmt} method ${graph.method(state.stmt).jimpleBody().method.name}")
         return state
     }
 }

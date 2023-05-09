@@ -50,13 +50,13 @@ class CyberTraverser(
     val taintEndPoints: MutableMap<BamLocationDependentJvmMemoryLocation<*>, List<JvmTaintSink>> = mutableMapOf()
 
     @CyberNew("decorate target invoke")
-    private fun decorateTarget(target: InvocationTarget): InvocationTarget {
+    private fun decorateTarget(target: InvocationTarget, taintedArgs: MutableSet<Pair<SymbolicValue, Int>>? = null): InvocationTarget {
         val targetClassName = target.method.declaringClass.name
         val targetFunctionName = target.method.name
         return vulnerabilityChecksHolder?.checks( targetClassName to targetFunctionName)?.run  {
             val methodName = "$CHECK_METHOD_PREFIX\$$targetClassName.$targetFunctionName"
             if (environment.method.name == methodName && environment.method.declaringClass.name == VULNERABILITY_CHECKS_CLASS_NAME) return target
-            val decorateFunction = decorateVulnerabilityFunction(target, methodName, checks = this)
+            val decorateFunction = decorateVulnerabilityFunction(target, methodName, checks = this, engine, taintedArgs)
             InvocationTarget(instance = null, method = decorateFunction, target.constraints)
         } ?: target
     }
@@ -151,25 +151,28 @@ class CyberTraverser(
         // If so, return the result of the override
         if (artificialMethodOverride.success) {
             @CyberNew("decorate target") run {
+                val taintedArgs = mutableSetOf<Pair<SymbolicValue, Int>>()
                 environment.state.stmt.apply {
-                    if (this is JInvokeStmt) {
-                        val args = invokeExpr.args.map { it.toString() }
-                        val params = invocation.parameters
+//                    if (this is JInvokeStmt) {
                         val matchedSinks = mutableListOf<JvmTaintSink?>()
                         taintEndPoints.values.forEach { v ->
                             matchedSinks.add(v.find {
                                 it.signature.fqn.contains(
-                                    "${invokeExpr.method.declaringClass.name.replace(".", "/")};${invokeExpr.method.name}"
+                                    "${invocation.method.declaringClass.name.replace(".", "/")};${invocation.method.name}"
                                 )
                             })
                         }
-                        if (taintEndPoints.isNotEmpty()) {
-
+                        val params = invocation.parameters
+                        if (matchedSinks.isNotEmpty()) {
+                            matchedSinks.filterIsInstance<JvmInvokeTaintSink>().forEach { sink ->
+                                val takesArgs = sink.takesArgs
+                                takesArgs.forEach { taintedArgs.add(Pair(params[it - 1], it - 1)) }
+                            }
                         }
-                    }
+//                    }
                 }
                 val target = InvocationTarget(invocation.instance, invocation.method)
-                val newTarget = decorateTarget(target)
+                val newTarget = decorateTarget(target, taintedArgs)
                 if (target != newTarget) {
                     return invoke(newTarget, invocation.parameters)
                 }
@@ -231,7 +234,7 @@ class CyberTraverser(
             }
         }
         val overrideResults = targets
-            .map { @CyberNew("decorate target") decorateTarget(it) }
+            .map { @CyberNew("decorate target") decorateTarget(it, taintedArgs) }
             .map { it to overrideInvocation(invocation, it) }
 
         if (overrideResults.sumOf { (_, overriddenResult) -> overriddenResult.results.size } > 1) {

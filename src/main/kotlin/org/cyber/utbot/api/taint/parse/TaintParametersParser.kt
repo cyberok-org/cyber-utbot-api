@@ -13,7 +13,10 @@ private val gson = Gson()
 internal fun parseSources(directory: String): MutableSet<JvmTaintSource> {
     val sources = mutableSetOf<JvmTaintSource>()
     File(directory).walk().forEach { file ->
-        if (file.isDirectory && file.path.toString().replace("/", "").replace("\\", "") != directory.replace("/", "").replace("\\", "")) {
+        if (file.isDirectory
+            && file.path.toString().replace("/", "").replace("\\", "")
+            != directory.replace("/", "").replace("\\", "")
+        ) {
             sources.addAll(parseSources(file.path.toString()))
             return@forEach
         } else if (file.isDirectory) return@forEach
@@ -37,7 +40,10 @@ internal fun parseSources(directory: String): MutableSet<JvmTaintSource> {
 internal fun parseSinks(directory: String): MutableSet<JvmInvokeTaintSink> {
     val sinks = mutableSetOf<JvmInvokeTaintSink>()
     File(directory).walk().forEach { file ->
-        if (file.isDirectory && file.path.toString().replace("/", "").replace("\\", "") != directory.replace("/", "").replace("\\", "")) {
+        if (file.isDirectory
+            && file.path.toString().replace("/", "").replace("\\", "")
+            != directory.replace("/", "").replace("\\", "")
+        ) {
             sinks.addAll(parseSinks(file.path.toString()))
             return@forEach
         } else if (file.isDirectory) return@forEach
@@ -46,7 +52,11 @@ internal fun parseSinks(directory: String): MutableSet<JvmInvokeTaintSink> {
             if (takesArgs.size <= 1) {
                 sinks.add(
                     JvmInvokeTaintSink(
-                        MethodSignature(containingClass, signature.substringBefore("("), "(" + signature.substringAfter("(")),
+                        MethodSignature(
+                            containingClass,
+                            signature.substringBefore("("),
+                            "(" + signature.substringAfter("(")
+                        ),
                         takesInstance, takesArgs, takesGlobals
                     ),
                 )
@@ -54,7 +64,11 @@ internal fun parseSinks(directory: String): MutableSet<JvmInvokeTaintSink> {
                 takesArgs.forEach {
                     sinks.add(
                         JvmInvokeTaintSink(
-                            MethodSignature(containingClass, signature.substringBefore("("), "(" + signature.substringAfter("(")),
+                            MethodSignature(
+                                containingClass,
+                                signature.substringBefore("("),
+                                "(" + signature.substringAfter("(")
+                            ),
                             takesInstance, setOf(it), takesGlobals
                         ),
                     )

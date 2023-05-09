@@ -11,15 +11,13 @@ import java.util.Random;
 
 public class BenchmarkCheck {
 
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String s = req.getParameter("param");
-
-        for(int i = 0; i < 100; i++) {
-            PrintWriter writer = resp.getWriter();
-            if(i > 5) {
-                writer.println(s);                    /* BAD */
-            }
-        }
+    public int example(String s1, String s2) {
+        String sss = s1 + s2 + "value1";
+        String s3 = "value2";
+        if (s1.equals(s3)) return 0;
+        else if (s1.equals("../etc/passwd")) return 2;
+        System.out.println(s1);
+        return 13;
     }
 
 }

@@ -59,7 +59,7 @@ class CyberSelector(
         if (defaultSelection || cyberDefaultSelector) {
             val (state, idx) = defaultSelector.peekImpl(executionStates, currentIndex)
             currentIndex = idx
-            return state
+            return null //state
         }
         if (executionStates.size == 0) {
             return null
@@ -86,9 +86,8 @@ class CyberSelector(
      * If no state leads to a trace returns a state from the default selector.
      */
     override fun pollImpl(): ExecutionState? {
-//        println("poll!")
         if (defaultSelection || cyberDefaultSelector) {
-            return defaultSelector.pollImpl(executionStates, currentIndex)
+            return null //defaultSelector.pollImpl(executionStates, currentIndex)
         }
         if (executionStates.size == 0) {
 //            println("polled0, }, traceFound = $traceFound, currentIndex = $currentIndex")

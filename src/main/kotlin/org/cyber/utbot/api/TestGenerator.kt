@@ -59,7 +59,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
      * @param classpath: the same parameter as in the [GenerateTestsSettings], if specified overrides the current launch
      * @return mapping from [TargetQualifiedName] to [GeneratedTests]
      */
-    fun run(testUnits: Iterable<TestUnit>, classpath: String? = null): Pair<MutableMap<TargetQualifiedName, GeneratedTests>, MutableMap<UTBotViewers, Any>> {
+    fun run(testUnits: Iterable<TestUnit>, classpath: String? = null, genMethods: List<String> = listOf()): Pair<MutableMap<TargetQualifiedName, GeneratedTests>, MutableMap<UTBotViewers, Any>> {
         assert(testUnits.all {
             (it.source.endsWith(".java") || it.source.endsWith(".kt")) && Files.exists(Paths.get(it.source))
         }) { "source should have suffix \".java\" or  \".kt\"" }
@@ -67,7 +67,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
         (classpath ?: settings.classpath)?.let{ updateClassLoader(it) } ?: throw Exception("classpath should be set")
         val targetToTests = mutableMapOf<TargetQualifiedName, GeneratedTests>()
         testUnits.forEach { testUnit ->
-            runInside(testUnit.target, testUnit.source, testUnit.output)?.let { tests -> targetToTests[testUnit.target] = tests }
+            runInside(testUnit.target, testUnit.source, testUnit.output, genMethods)?.let { tests -> targetToTests[testUnit.target] = tests }
         }
         return targetToTests to getViewersResult()
     }
@@ -98,7 +98,12 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
         return targetToTests to getViewersResult()
     }
 
-    private fun runInside(targetClassFqn: TargetQualifiedName, sourceCodeFile: SourceCodeFileName? = null, output: OutputFileName? = null): GeneratedTests? {
+    private fun runInside(
+        targetClassFqn: TargetQualifiedName,
+        sourceCodeFile: SourceCodeFileName? = null,
+        output: OutputFileName? = null,
+        genMethods: List<String> = listOf()
+    ): GeneratedTests? {
         var testClassBody: GeneratedTests? = null
         val started = now()
         val workingDirectory = getWorkingDirectory(targetClassFqn)
@@ -114,6 +119,10 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
                 val targetMethods = classIdUnderTest.targetMethods()
                     .filterWhen(UtSettings.skipTestGenerationForSyntheticAndImplicitlyDeclaredMethods) {
                         !it.isSynthetic && !it.isKnownImplicitlyDeclaredMethod
+                    }
+                    .filter {
+                        if (genMethods.isEmpty()) true
+                        else genMethods.contains(it.name)
                     }
                     .filterNot { it.isAbstract }
                 val testCaseGenerator = initializeGenerator(workingDirectory)

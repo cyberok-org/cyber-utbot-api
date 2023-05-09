@@ -155,12 +155,14 @@ class GenerateTestsSettings(
     /**
      * path to the jar of the program being analysed
      */
-    val analysedJar: String = "C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\taint\\jars\\TaintCheckJar.jar",
+    val analysedJar: String = "C:\\Users\\lesya\\IdeaProjects\\test-utbot\\out\\artifacts\\test_utbot_main_jar\\test-utbot.main.jar", // "C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\taint\\jars\\TaintCheckJar.jar",
 
     /**
      * whether to use default selector instead of cyber selector
      */
     var cyberDefaultSelector: Boolean = false,
+
+    var vulnerabilityType: String = "",
 
     /**
      * libraries that utbot will trust
