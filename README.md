@@ -3,13 +3,15 @@
 
 [UTBot](https://github.com/UnitTestBot/UTBotJava) - UnitTestBot is the tool for automated unit test generation and precise code analysis.
 
-`cyber-utbot-api` - обёртка над `utbot`, позволяющая запускать его из кода.
+*cyber-utbot-api* - обёртка над `utbot`, позволяющая запускать его из кода.
 
 Она работает по аналогии с `utbot-cli`, в ней отдельно вынесены настройки для `cli`, можно задать настройки самого `utbot` внутри.
 
 Основная функциональность: генерирует тесты для уязвимостей (какие именно зависит от базы знаний), работает аккуратнее и лучше в некоторых специфичных местах (например есть встроенная улучшенная поддержка `javax.servlet`)
 
 ## Build
+
+Следующее работало с версией **gradle 7.2**, с более старыми версиями не проверялось, может что-то не собраться.
 
 ```bash
 git clone https://github.com/UnitTestBot/UTBotJava
@@ -18,7 +20,7 @@ git checkout fe0b89c789da5559bf8912e0179cdcee026e6137
 git clone https://github.com/cyberok-org/cyber-utbot-api
 ```
 
-После стоит открыть `ide` и попытаться собрать. Потом приминить `patch` командной ниже и ещё раз собрать.
+После стоит открыть `ide` и попытаться собрать (`gradle build -x test` если не начнётся автоматически). Потом применить `patch` командной ниже и ещё раз собрать.
 
 ```bash
 cd cyber-utbot-api/scripts/

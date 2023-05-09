@@ -48,15 +48,50 @@ enum class ArgType {
 
     fun const(value: Any?): Constant = value?.let {
         when(this) {
-            BYTE -> IntConstant.v(((it as Int).toByte()).toInt())
-            SHORT -> IntConstant.v((it as Int).toShort().toInt())
-            CHAR -> IntConstant.v((it as Char).code)
-            INT -> IntConstant.v(it as Int)
-            LONG -> LongConstant.v((it as Int).toLong())
-            FLOAT -> FloatConstant.v((it as Double).toFloat())
-            DOUBLE -> DoubleConstant.v(it as Double)
-            BOOLEAN -> IntConstant.v(if (it as Boolean) 1 else 0)
-            STRING -> StringConstant.v(it as String)
+            BYTE -> when(it) {
+                is Byte -> IntConstant.v(it.toInt())
+                is Double -> IntConstant.v((it.toInt().toByte()).toInt())
+                else -> throw CyberException("wrong type: expected byte, found ${it.typeString()}")
+            }
+            SHORT -> when(it) {
+                is Short -> IntConstant.v(it.toInt())
+                is Double -> IntConstant.v(it.toInt().toShort().toInt())
+                else -> throw CyberException("wrong type: expected short, found ${it.typeString()}")
+            }
+            CHAR -> when(it) {
+                is Char -> IntConstant.v(it.code)
+                is Double -> IntConstant.v((it.toInt().toChar()).code)
+                else -> throw CyberException("wrong type: expected char, found ${it.typeString()}")
+            }
+            INT -> when(it) {
+                is Int -> IntConstant.v(it)
+                is Double -> IntConstant.v(it.toInt())
+                else -> throw CyberException("wrong type: expected int, found ${it.typeString()}")
+            }
+            LONG -> when(it) {
+                is Long -> LongConstant.v(it)
+                is Double -> LongConstant.v(it.toLong())
+                else -> throw CyberException("wrong type: expected long, found ${it.typeString()}")
+            }
+            FLOAT -> when(it) {
+                is Float -> FloatConstant.v(it)
+                is Double -> FloatConstant.v(it.toFloat())
+                else -> throw CyberException("wrong type: expected float, found ${it.typeString()}")
+            }
+            DOUBLE -> when(it) {
+                is Double -> DoubleConstant.v(it)
+                else -> throw CyberException("wrong type: expected double, found ${it.typeString()}")
+            }
+            BOOLEAN -> when(it) {
+                is Boolean -> IntConstant.v(if (it) 1 else 0)
+                else -> throw CyberException("wrong type: expected boolean, found ${it.typeString()}")
+            }
+            STRING -> when(it) {
+                is String -> StringConstant.v(it)
+                else -> throw CyberException("wrong type: expected string, found ${it.typeString()}")
+            }
         }
     } ?: NullConstant.v()
 }
+
+private fun Any.typeString() = this::class.java.typeName.toString()
