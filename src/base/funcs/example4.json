@@ -1,0 +1,8 @@
+{
+  "fullyQualified": "org.example.Example",
+  "function": "fun5",
+  "description": "example",
+  "arguments": [
+    "example/twoArgs.json"
+  ]
+}

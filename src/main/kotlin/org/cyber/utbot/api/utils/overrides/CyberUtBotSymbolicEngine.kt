@@ -136,12 +136,12 @@ class CyberUtBotSymbolicEngine(
         }
     }
 
-//    @CyberNew("update CodeGen info")
-//    private fun updateCodeGenInfo(stateBefore: EnvironmentModels, parameters: List<SymbolicValue>, resolver: Resolver) {
-//        val params = if (stateBefore.parameters.size == parameters.size) parameters else parameters.drop(1)
-//        require(stateBefore.parameters.size == params.size) { "update CodeGen info fail" }
-//        stateHolder?.updateCodeGenInfo(stateBefore, params.map { it.addr }) { value -> resolver.resolveModel(value) }
-//    }
+    @CyberNew("update CodeGen info")
+    private fun updateCodeGenInfo(stateBefore: EnvironmentModels, parameters: List<SymbolicValue>, resolver: Resolver) {
+        val params = if (stateBefore.parameters.size == parameters.size) parameters else parameters.drop(1)
+        require(stateBefore.parameters.size == params.size) { "update CodeGen info fail" }
+        stateHolder?.updateCodeGenInfo(stateBefore, params.map { (it as? ReferenceValue)?.addr }) { value -> resolver.resolveModel(value) }
+    } // here закомменить
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "add StateViewer")
     override fun traverseImpl(): Flow<UtResult> = flow {

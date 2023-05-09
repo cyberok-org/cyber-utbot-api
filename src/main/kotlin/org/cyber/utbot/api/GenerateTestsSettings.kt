@@ -23,7 +23,10 @@ val CYBER_MOCK_ALWAYS_DEFAULT = listOf(         // TODO(division by packages)
     "javax.servlet.http.Cookie",
     "javax.servlet.RequestDispatcher",
     "javax.servlet.http.HttpServletResponse",
+//    "javax.servlet.ServletConfig",    // TODO not work custom classes if mock it (interface)???
     "java.io.PrintWriter",
+    "java.io.FileWriter",
+    "java.util.BitSet",
 )
 
 enum class TestFrameworkGen {
@@ -115,7 +118,7 @@ class GenerateTestsSettings(
     /**
      * ignore utbot pathSelectors parameters, use our
      */
-    val cyberPathSelector: Boolean = true,
+    val cyberPathSelector: Boolean = false,
 
     /**
      * if false - just run utbot without extra analyze   // TODO(remove later)
@@ -125,7 +128,7 @@ class GenerateTestsSettings(
     /**
      * list of directories with files of the form VulnerabilityStandard for the description of analyzed vulnerabilities
      */
-    val vulnerabilityCheckDirectories: List<String> = listOf("src/exploitBase"),
+    val vulnerabilityCheckDirectories: List<String> = listOf("src/base"),
 
     /**
      * *$vulnerabilityCheckDirectory/$vulnerabilityCheckFuncsSuffix* - path to functions checks descriptions directory

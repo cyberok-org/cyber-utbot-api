@@ -46,13 +46,13 @@ enum class ArgType {
             STRING -> STRING_TYPE
         }
 
-    fun const(value: Any?): Constant = value?.let { // TODO (is it ok???)
+    fun const(value: Any?): Constant = value?.let {
         when(this) {
-            BYTE -> IntConstant.v(((it as Double).toInt().toByte()).toInt())
-            SHORT -> IntConstant.v(((it as Double).toInt().toShort()).toInt())
-            CHAR -> IntConstant.v(((it as Double).toInt().toChar()).code)
-            INT -> IntConstant.v((it as Double).toInt())
-            LONG -> LongConstant.v((it as Double).toLong())
+            BYTE -> IntConstant.v(((it as Int).toByte()).toInt())
+            SHORT -> IntConstant.v((it as Int).toShort().toInt())
+            CHAR -> IntConstant.v((it as Char).code)
+            INT -> IntConstant.v(it as Int)
+            LONG -> LongConstant.v((it as Int).toLong())
             FLOAT -> FloatConstant.v((it as Double).toFloat())
             DOUBLE -> DoubleConstant.v(it as Double)
             BOOLEAN -> IntConstant.v(if (it as Boolean) 1 else 0)

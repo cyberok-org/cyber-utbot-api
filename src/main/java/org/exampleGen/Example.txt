@@ -1,0 +1,109 @@
+package org.example;
+
+// базовый пример utbot
+
+public class Example {
+    public int whileExample(int k) {
+        int i = 0;
+        int sum = 0;
+
+        while (i < k) {
+            sum += i;
+            i += 1;
+        }
+
+        return sum;
+    }
+}
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.example.Example,
+	i0 := @parameter0: int,
+	i1 = 0,
+	i2 = 0,
+	if i1 >= i0 goto return i2
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.example.Example), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4457)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Le (int (BVInt32 p0)) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption: 
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.example.Example,
+	i0 := @parameter0: int,
+	i1 = 0,
+	i2 = 0,
+	if i1 >= i0 goto return i2,
+	i2 = i2 + i1,
+	i1 = i1 + 1,
+	goto [?= (branch)],
+	if i1 >= i0 goto return i2
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.example.Example), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4457)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Eq (int (BVInt32 p0)) (int Int32 1)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.example.Example2,
+	i0 := @parameter0: int,
+	i1 = 0,
+	i2 = 0,
+	if i1 >= i0 goto return i2
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.example.Example2), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4453)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Le (int (BVInt32 p0)) (int Int32 0)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT
+
+----------------------------------------------------------------------------------------------------
+path: r0 := @this: org.example.Example2,
+	i0 := @parameter0: int,
+	i1 = 0,
+	i2 = 0,
+	if i1 >= i0 goto return i2,
+	i2 = i2 + i1,
+	i1 = i1 + 1,
+	goto [?= (branch)],
+	if i1 >= i0 goto return i2
+assertions: (Le (int addr: (BVInt32 p_this)) (int addr: Int32 0)),
+	(or (is addr: (BVInt32 p_this) org.example.Example2), (eq addr: (BVInt32 p_this) addr: Int32 0)),
+	(Ge (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToTypeId : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4453)),
+	(Ge (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 0)),
+	(Le (int (select (array addrToNumDimensions : Int32 -> Int32) addr: (BVInt32 p_this))) (int Int32 4)),
+	(eq (select (array isMock : Int32 -> Bool) addr: (BVInt32 p_this)) false),
+	(not (Eq (int addr: (BVInt32 p_this)) (int addr: Int32 0))),
+	(Eq (int (BVInt32 p0)) (int Int32 1)),
+	(mkTermArray (array arraysLength : Int32 -> Int32)),
+	(mkTermArray (array addrToNumDimensions : Int32 -> Int32)),
+	(mkTermArray (array addrToTypeId : Int32 -> Int32))
+assumption:
+lastStatus: SAT

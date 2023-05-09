@@ -7,7 +7,7 @@ import org.utbot.engine.types.STRING_TYPE
 import org.utbot.framework.plugin.api.UtModel
 import soot.*
 
-class CookieState<T>: AnyState<T> {
+class CookieState<T> : AnyState<T> {
     var name: T? = null
     var value: T? = null
     var path: T? = null
@@ -16,19 +16,24 @@ class CookieState<T>: AnyState<T> {
     var domain: T? = null
 }
 
-class CookieStateHolder(registerStateHolder: (UtAddrExpression, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit):
-    CodeGenStateHolder<CookieState<SymbolicValue>, CookieState<UtModel>>(registerStateHolder) {
-    override val state = CookieState<SymbolicValue>()
+class CookieStateHolder(addActionByAddr: (UtAddrExpression, (ObjectValue, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit) -> Unit, registerStateHolder: (UtAddrExpression, CodeGenStateHolder<AnyState<SymbolicValue>, AnyState<UtModel>>) -> Unit):
+    CodeGenStateHolder<CookieState<SymbolicValue>, CookieState<UtModel>>(addActionByAddr, registerStateHolder) {
+    override var state = CookieState<SymbolicValue>()
     override val codeGenerator
         get() = null
 
-    override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mutableMapOf(
+    override val signatureToSetFunResults = mapOf<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> Unit>()
+
+    override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mapOf(
         initSignature to { params, _ ->
             state.name = params[0]
             state.value = params[1]
             null
         },
         getNameSignature to { _, _ ->
+            if (state.name == null) {
+                state.name = createObject(findNewAddr(), STRING_TYPE, false)
+            }
             listOf(MethodResult(state.name as ObjectValue))
         },
         setValueSignature to { params, _ ->
@@ -36,6 +41,9 @@ class CookieStateHolder(registerStateHolder: (UtAddrExpression, CodeGenStateHold
             null
         },
         getValueSignature to { _, _ ->
+            if (state.value == null) {
+                state.value = createObject(findNewAddr(), STRING_TYPE, false)
+            }
             listOf(MethodResult(state.value as ObjectValue))
         },
         setPathSignature to { params, _ ->
@@ -44,7 +52,7 @@ class CookieStateHolder(registerStateHolder: (UtAddrExpression, CodeGenStateHold
         },
         getPathSignature to { _, _ ->
             if (state.path == null) {
-                state.path = ObjectValue(TypeStorage.constructTypeStorageWithSingleType(STRING_TYPE), findNewAddr(), null)
+                state.path = createObject(findNewAddr(), STRING_TYPE, false)
             }
             listOf(MethodResult(state.path as ObjectValue))
         },
@@ -74,7 +82,7 @@ class CookieStateHolder(registerStateHolder: (UtAddrExpression, CodeGenStateHold
         },
         getDomainSignature to { _, _ ->
             if (state.domain == null) {
-                state.domain = ObjectValue(TypeStorage.constructTypeStorageWithSingleType(STRING_TYPE), findNewAddr(), null)
+                state.domain = createObject(findNewAddr(), STRING_TYPE, false)
             }
             listOf(MethodResult(state.domain as ObjectValue))
         },
@@ -99,6 +107,7 @@ class CookieStateHolder(registerStateHolder: (UtAddrExpression, CodeGenStateHold
 
         override val saveArgsSignatures = emptySet<String>()
 
-        override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mutableMapOf()
+        override val signatureToOverrideFun: Map<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> List<InvokeResult>?> = mapOf()
+        override val signatureToSetFunResults = mapOf<String, CyberTraverser.(List<SymbolicValue>, () -> Resolver) -> Unit>()
     }
 }

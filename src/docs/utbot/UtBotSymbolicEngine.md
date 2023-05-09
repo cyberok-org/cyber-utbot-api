@@ -24,5 +24,13 @@
     - запускает _traverse_ из [Traverser](Traverser.md), который возвращает _Collection< ExecutionState >_. 
     - каждое полученное значение соответствующе обрабатывается (добавляется для разбора в конкретные состояния, если это что-то конкретное, добавляется в [PathSelector](PathSelector.md), если промежуточное и сохраняется и делает дополнительные действия, если терминальное).
 
+про фазинг - [fuzzing](fuzzing.md)
+
 Этапы _fuzzing_:
-- TODO(дописать когда будет необходимо)
+- подготовка, проверка что можно в принципе фазить функцию, вытаскивание имён аргументов (их фазим), ...
+- инициализация фазера, подключение нужных `ModelProvider`, поиск констант - [FuzzerFunctions](../../../../utbot-framework/src/main/kotlin/org/utbot/fuzzer/FuzzerFunctions.kt) collectConstantsForFuzzer.
+- потом в цикле смотрим на полученные значения (ровно так и описано в комментарии)
+  1. serializing/deserializing it with kryo
+  2. sending over rd
+  3. concrete execution itself
+  4. analyzing concrete result

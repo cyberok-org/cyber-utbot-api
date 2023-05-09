@@ -52,7 +52,8 @@ fun main() {
     val bench = readCsvFile<BenchInfo>("$UTBOT_DIR/cyber-utbot-api/src/test/resources/want.csv").associate {
         it.target to it.source
     }.toTestUnits()
-        .drop(14).take(1)
+//        .drop(14).take(1)
+        .drop(28).take(1)
 
     val extraMocks=listOf("org.owasp.esapi.ESAPI", "org.owasp.esapi.Encoder")
     val classpath = "C:/Users/lesya/Downloads/jars/javax.servlet-api-3.1.0.jar"

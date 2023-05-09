@@ -173,8 +173,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
                 println("The path to the project root is required to generate a report. Please, specify \"projectRoot\" option in GenerateTestsSettings.")
             }
             else -> {
-                val sourceFinding =
-                    SourceFindingStrategyDefault(classFqn, sourceCodeFile, testsFilePath, settings.projectRoot)
+                val sourceFinding = SourceFindingStrategyDefault(classFqn, sourceCodeFile, testsFilePath, settings.projectRoot)
                 val report = SarifReport(testSets, testClassBody, sourceFinding).createReport().toJson()
                 saveToFile(report, settings.sarifReport)
                 println("The report was saved to \"${settings.sarifReport}\".")
