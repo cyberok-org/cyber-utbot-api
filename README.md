@@ -21,7 +21,7 @@ git clone https://github.com/cyberok-org/cyber-utbot-api
 cd cyber-utbot-api/
 ```
 
-После стоит открыть `ide` и попытаться собрать (`gradle build -x test` если не начнётся автоматически). Потом применить `patch` командной ниже и ещё раз собрать.
+После стоит открыть `ide` (на проекте **cyber-utbot-api**) и попытаться собрать (`gradle build -x test` если не начнётся автоматически). Потом применить `patch` командной ниже и ещё раз собрать.
 
 ```bash
 cd scripts/
