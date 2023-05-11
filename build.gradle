@@ -18,6 +18,7 @@ dependencies {
     implementation project(':utbot-framework')
 
     implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-cli', version: '0.3.5'
     implementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     // Without this dependency testng tests do not run.
     implementation group: 'com.beust', name: 'jcommander', version: '1.48'
@@ -69,10 +70,10 @@ classes {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'org.cyber.utbot.ApplicationKt'
+        attributes 'Main-Class': 'org.cyber.utbot.CliKt'
         attributes 'Bundle-SymbolicName': 'org.cyber.utbot'
         attributes 'Bundle-Version': "${project.version}"
-        attributes 'Implementation-Title': 'Cyber UtBot Java API'
+        attributes 'Implementation-Title': 'Cyber UtBot Java CLI'
         attributes 'JAR-Type': 'Fat JAR'
     }
 
