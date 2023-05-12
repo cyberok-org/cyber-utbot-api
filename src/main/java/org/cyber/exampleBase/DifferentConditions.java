@@ -1,4 +1,4 @@
-package org.cyber.base;
+package org.cyber.exampleBase;
 
 import java.util.Arrays;
 

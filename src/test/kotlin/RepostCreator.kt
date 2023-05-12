@@ -16,7 +16,7 @@ class RepostCreator {
         val classpath = "$UTBOT_DIR/cyber-utbot-exploit-base/build/classes/java/main"
         val settings = GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA, mockStrategy = MockStrategyApi.NO_MOCKS,
             withUtSettings = { UtSettings.useFuzzing = false; UtSettings.useDebugVisualization = true; UtSettings.testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },
-            utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckDirectories=listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"))
+            utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckBases = listOf("$UTBOT_DIR/cyber-utbot-exploit-base"))
         val generator = TestGenerator(settings)
         val (tests, info) = generator.run(mapOf("org.example.base.ArbitraryFileCreation" to "$UTBOT_DIR/cyber-utbot-exploit-base/src/main/java/org/example/base/ArbitraryFileCreation.java").toTestUnits())
         tests.forEach { (name, testsPart) ->

@@ -14,6 +14,7 @@ import org.utbot.framework.codegen.domain.ForceStaticMocking
 import org.utbot.framework.codegen.domain.MockitoStaticMocking
 import org.utbot.framework.codegen.domain.NoStaticMocking
 import org.utbot.framework.plugin.api.MockStrategyApi
+import java.io.File
 import java.nio.file.Files
 
 
@@ -41,9 +42,9 @@ private class GenerateCommandParser: Subcommand("generate", "generate tests") {
 
     val printTest by option(ArgType.Boolean, "print-test", "p", "Specifies whether a test should be printed out to StdOut").default(false)
 
-    private val mockAlways by option(ArgType.String, "mock-always", "ma", "Specifies path to \".txt\" file with names mocking fqn classes separated with \"\\n\"") // TODO
+    private val mockAlways by option(ArgType.String, "mock-always", "ma", "Specifies path to \".txt\" file with names mocking fqn classes separated with \"\\n\"")
 
-    private val vulnerabilityCheckDirectories by option(ArgType.String, "base-path", "b", "Specifies path to knowledge base").multiple()
+    private val vulnerabilityCheckBases by option(ArgType.String, "base-path", "b", "Specifies path to knowledge base").multiple()
 
     private val generationTimeout by option(ArgType.Int, "generation-timeout", "t", "Specifies the maximum time in milliseconds used to generate tests (1_200_000 by default)").default(1_200_000)
 
@@ -89,7 +90,11 @@ private class GenerateCommandParser: Subcommand("generate", "generate tests") {
             } else null
         }
 
-        val otherMocks = listOf<String>()   // do with mockAlways
+        val otherMocks = mockAlways?.run {
+            val file = File(this)
+            require (file.isFile) { "wrong mock-always path: $this" }
+            file.useLines { it.toList() }
+        } ?: listOf()
 
         val mockStrategy = mockStrategyChoice.toMockStrategyApi()
         val mockStatics = mockStaticOption.toMockStatics()
@@ -106,7 +111,7 @@ private class GenerateCommandParser: Subcommand("generate", "generate tests") {
             mockStatics = mockStatics,
             forceStaticMocking = forceStaticMocking,
             utbotViewers = setOf(),
-            vulnerabilityCheckDirectories=vulnerabilityCheckDirectories,
+            vulnerabilityCheckBases=vulnerabilityCheckBases,
             withUtSettings = {
                 UtSettings.useFuzzing = useFuzzing
                 UtSettings.useDebugVisualization = useDebugVisualization

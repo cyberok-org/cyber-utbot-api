@@ -102,9 +102,7 @@ gradle build -x test
 
 Так же можно собрать `cli` и использовать его. Это можно сделать командой `gradle jar`.
 
-Замечание 1: не стоит запускать на файлах, пути которых полностью совпадают с путями из этого репозитория. (баг)
-
-Замечание 2: для корректной работы следует скопировать папку `src/main/java/org/cyber` по такому же пути и собрать проект с ней (баг)
+Замечание: не стоит запускать на файлах, пути которых полностью совпадают с путями из этого репозитория (баг). Это выдаёт подобную ошибку `java.lang.Exception: Error: The path '/home/andrew/UTBot/UTBotJava/cyber-utbot-api/file:/home/andrew/UTBot/UTBotJava/cyber-utbot-api/build/libs/cyber-utbot-api-2023.05-SNAPSHOT.jar!' is neither file nor directory`
 
 ## Docs
 

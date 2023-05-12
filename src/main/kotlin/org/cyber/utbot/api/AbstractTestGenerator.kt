@@ -1,6 +1,7 @@
 package org.cyber.utbot.api
 
 import org.cyber.utbot.api.abstraction.extraChecks.ExtraVulnerabilityCheck
+import org.cyber.utbot.api.utils.DEFAULT_BUILS_CLASSES_PATH
 import org.cyber.utbot.api.utils.additions.classState.codeGeneration.CodeGen
 import org.cyber.utbot.api.utils.overrides.CyberCodeGenerator
 import org.cyber.utbot.api.utils.overrides.CyberTestCaseGenerator
@@ -37,9 +38,10 @@ abstract class AbstractTestGenerator {
     protected abstract val utbotViewers: Set<UTBotViewers>
     protected abstract val cyberPathSelector: Boolean
     protected abstract val findVulnerabilities: Boolean
-    protected abstract val vulnerabilityCheckDirectories: List<String>
+    protected abstract val vulnerabilityCheckBases: List<String>
     protected abstract val vulnerabilityChecksAnalysisSuffix: String
     protected abstract val vulnerabilityChecksSuffix: String
+    protected abstract val vulnerabilityChecksBuildSuffix: String
     protected abstract val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck>
     protected abstract val onlyVulnerabilities: Boolean
     protected abstract val testsIgnoreEmpty: Boolean
@@ -52,7 +54,7 @@ abstract class AbstractTestGenerator {
     protected val statePublisher: StatePublisher by lazy { StatePublisher(utbotViewers.mapNotNull { it.stateViewer() }.toMutableList()) }
     private val vulnerabilityChecksHolder: VulnerabilityChecksHolder? by lazy {
         if (findVulnerabilities) {
-            VulnerabilityChecksHolder(vulnerabilityCheckDirectories, vulnerabilityChecksAnalysisSuffix, vulnerabilityChecksSuffix)
+            VulnerabilityChecksHolder(vulnerabilityCheckBases, vulnerabilityChecksAnalysisSuffix, vulnerabilityChecksSuffix)
                 .also { it.register(extraVulnerabilityChecks) }
         } else null
     }
@@ -70,6 +72,13 @@ abstract class AbstractTestGenerator {
         }
     }
 
+    protected fun updateClasspath(classpath: String): String {
+        val baseClasspathes = vulnerabilityCheckBases.map {
+            "$it${File.separator}$DEFAULT_BUILS_CLASSES_PATH"
+        }
+        return "$classpath${File.pathSeparator}${baseClasspathes.joinToString(separator = File.pathSeparator)}"
+    }
+
     protected fun getWorkingDirectory(classFqn: String): Path? {
         val classRelativePath = PathUtil.classFqnToPath(classFqn) + ".class"
         val classAbsoluteURL = classLoader.getResource(classRelativePath) ?: return null
@@ -84,8 +93,11 @@ abstract class AbstractTestGenerator {
         // TODO: SAT-1566 Set UtSettings parameters.
         UtSettings.treatOverflowAsError = treatOverflowAsError == TreatOverflowAsError.AS_ERROR
 
+        val dirs = listOf(workingDirectory) + vulnerabilityCheckBases.map {
+            Paths.get("$it${File.separator}$vulnerabilityChecksBuildSuffix")
+        }
         return CyberTestCaseGenerator(
-            listOf(workingDirectory),
+            dirs,
             classPathNormalized,
             System.getProperty("java.class.path"),
             JdkInfoDefaultProvider().info,

@@ -21,7 +21,7 @@ class ReportCreator(settings: GenerateTestsSettings, private val category: Strin
     constructor(classpath: String, basePaths: List<String>, category: String? = null, extraMocks: List<String> = emptyList()) : this(GenerateTestsSettings(classpath, codegenLanguage = CodegenLanguage.JAVA,
         mockAlways = MOCK_ALWAYS_DEFAULT + CYBER_MOCK_ALWAYS_DEFAULT + extraMocks, mockStrategy = MockStrategyApi.NO_MOCKS, withUtSettings = { UtSettings.useFuzzing = false;
             UtSettings.useDebugVisualization = true; UtSettings.testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY },
-        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckDirectories=basePaths), category)
+        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckBases=basePaths), category)
 
     private fun create(test: TestUnit, testSavePath: String?): ReportItem {
         return try {
@@ -56,6 +56,6 @@ fun main() {
 
     val extraMocks=listOf("org.owasp.esapi.ESAPI", "org.owasp.esapi.Encoder")
     val classpath = "/home/andrew/BenchmarkJava/target/classes:/home/andrew/jars/javax.servlet-api-3.1.0.jar:/home/andrew/jars/esapi-2.5.1.0.jar"
-    val reportCreator = ReportCreator(classpath, listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"), category = "pathtraver", extraMocks=extraMocks)
+    val reportCreator = ReportCreator(classpath, listOf("$UTBOT_DIR/cyber-utbot-exploit-base"), category = "pathtraver", extraMocks=extraMocks)
     reportCreator.create(bench, benchmark="OWASP-Benchmark", testsSavePath="/home/andrew/BenchmarkJava/src/test/java/org/owasp/benchmark/testcode")    // testsSavePath should exist
 }

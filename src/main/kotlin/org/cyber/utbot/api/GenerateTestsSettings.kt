@@ -128,17 +128,22 @@ class GenerateTestsSettings(
     /**
      * list of directories with files of the form VulnerabilityStandard for the description of analyzed vulnerabilities
      */
-    val vulnerabilityCheckDirectories: List<String> = listOf("src/base"),
+    val vulnerabilityCheckBases: List<String> = listOf("."),
 
     /**
-     * *$vulnerabilityCheckDirectory/$vulnerabilityCheckFuncsSuffix* - path to functions checks descriptions directory
+     * *vulnerabilityCheckBase/$vulnerabilityCheckFuncsSuffix* - path to functions checks descriptions directory
      */
-    val vulnerabilityChecksAnalysisSuffix: String = "funcs",
+    val vulnerabilityChecksAnalysisSuffix: String = "src/base/funcs",
 
     /**
-     * *$vulnerabilityCheckDirectory/vulnerabilityChecksSuffix* - path to checks, referenced by *vulnerabilityChecksAnalysisSuffix files*. So path - *$vulnerabilityCheckDirectories/$vulnerabilityChecksSuffix/${path declared from function check file}*
+     * *vulnerabilityCheckBase/vulnerabilityChecksSuffix* - path to checks, referenced by *vulnerabilityChecksAnalysisSuffix files*. So path - *$vulnerabilityCheckDirectories/$vulnerabilityChecksSuffix/${path declared from function check file}*
      */
-    val vulnerabilityChecksSuffix: String = "checks",
+    val vulnerabilityChecksSuffix: String = "src/base/checks",
+
+    /**
+     * *vulnerabilityCheckBase/vulnerabilityChecksBuildSuffix* - path to build with base check functions*
+     */
+    val vulnerabilityChecksBuildSuffix: String = "build/classes/java/main/org/cyber",
 
     /**
      * structures similar to those analyzed from the base (vulnerabilityCheckDirectories), set in runtime
