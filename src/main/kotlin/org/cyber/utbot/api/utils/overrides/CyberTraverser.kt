@@ -7,6 +7,7 @@ import org.cyber.utbot.api.utils.additions.MethodSubstitution
 import org.cyber.utbot.api.utils.additions.classState.StateHolder
 import org.cyber.utbot.api.utils.additions.constraints.ConstraintParser
 import org.cyber.utbot.api.utils.additions.fuzzing.ExampleVulnerabilityChecksFuzzer
+import org.cyber.utbot.api.utils.additions.fuzzing.TaintVulnerabilityChecksFuzzer
 import org.cyber.utbot.api.utils.additions.fuzzing.VulnerabilityChecksFuzzer
 import org.cyber.utbot.api.utils.additions.vulnerability.decorateVulnerabilityFunction
 import org.cyber.utbot.api.utils.annotations.CyberModify
@@ -57,12 +58,17 @@ class CyberTraverser(
     private val stmtToParams = mutableMapOf<Stmt, List<SymbolicValue>>()
     val taintEndPoints: MutableMap<BamLocationDependentJvmMemoryLocation<*>, List<JvmTaintSink>> = mutableMapOf()
 
-    private val vulnerabilityChecksFuzzer: VulnerabilityChecksFuzzer = ExampleVulnerabilityChecksFuzzer()
+    private val vulnerabilityChecksFuzzer: VulnerabilityChecksFuzzer = TaintVulnerabilityChecksFuzzer()
 
     @CyberNew("decorate target invoke")
-    private fun decorateTarget(target: InvocationTarget, parameters: List<SymbolicValue>): InvocationTarget {
+    private fun decorateTarget(
+        target: InvocationTarget,
+        parameters: List<SymbolicValue>,
+        taintedArgs: MutableSet<Pair<SymbolicValue, Int>>
+    ): InvocationTarget {
         val targetClassName = target.method.declaringClass.name
         val targetFunctionName = target.method.name
+        println("target: $targetClassName $targetFunctionName")
         return vulnerabilityChecksHolder?.checks( targetClassName to targetFunctionName)?.run {
             val methodName = "$CHECK_METHOD_PREFIX\$$targetClassName.$targetFunctionName"
             if (environment.method.name == methodName && environment.method.declaringClass.name == VULNERABILITY_CHECKS_CLASS_NAME) return target
@@ -86,7 +92,7 @@ class CyberTraverser(
                     descriptions.add(null)
                     null
                 } else {
-                    val argumentChecks = vulnerabilityChecksFuzzer.generate(methodId, parametersInfo, constraints, description)
+                    val argumentChecks = vulnerabilityChecksFuzzer.generate(methodId, parametersInfo, constraints, description, taintedArgs)
                     if (argumentChecks == null) descriptions.add(description)
                     argumentChecks?.run { ArgumentsVulnerabilityChecksCreator.parseVulnerabilityCheck(this) }
                 }
@@ -213,7 +219,7 @@ class CyberTraverser(
 //                    }
                 }
                 val target = InvocationTarget(invocation.instance, invocation.method)
-                val newTarget = decorateTarget(target, invocation.parameters) // here add tainted args
+                val newTarget = decorateTarget(target, invocation.parameters, taintedArgs) // here add tainted args
                 if (target != newTarget) {
                     return invoke(newTarget, invocation.parameters)
                 }
@@ -276,7 +282,7 @@ class CyberTraverser(
         }
         val overrideResults = targets
 //            .map { @CyberNew("decorate target") decorateTarget(it, taintedArgs) }
-            .map { @CyberNew("decorate target") decorateTarget(it, invocation.parameters) }// here add tainted args
+            .map { @CyberNew("decorate target") decorateTarget(it, invocation.parameters, taintedArgs) }// here add tainted args
             .map { it to overrideInvocation(invocation, it) }
 
         if (overrideResults.sumOf { (_, overriddenResult) -> overriddenResult.results.size } > 1) {

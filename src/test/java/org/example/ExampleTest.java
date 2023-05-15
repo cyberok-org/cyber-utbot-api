@@ -1,64 +1,56 @@
-package org.example;
+package org.example.checks;
 
 import org.junit.jupiter.api.Test;
+import javax.servlet.http.HttpServletRequest;
 
-import org.junit.jupiter.api.DisplayName;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public final class ExampleTest {
-    ///region Test suites for executable org.example.Example.fun
+    ///region Test suites for executable org.example.checks.Example.example
     
-    ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method fun(java.lang.String, int)
     
-    /**
-    @utbot.classUnderTest {@link Example}
- * @utbot.methodUnderTest {@link org.example.Example#fun(java.lang.String,int)}
- *  */
     @Test
-    @DisplayName("fun: ")
-    @org.cyber.utils.VulnerabilityInfo("extra vulnerability check")
-    public void testFun() {
+    public void testExample1() {
         Example example = new Example();
-        String string = "100";
         
-        boolean actual = example.fun(string, -255);
-        
-        assertTrue(actual);
+        /* This test fails because method [org.example.checks.Example.example] produces [java.lang.NullPointerException]
+            org.example.checks.Example.example(Example.java:10) */
+        example.example(null);
     }
     
-    /**
-    @utbot.classUnderTest {@link Example}
- * @utbot.methodUnderTest {@link org.example.Example#fun(java.lang.String,int)}
- *  */
     @Test
-    @DisplayName("fun: ")
-    @org.cyber.utils.VulnerabilityInfo("extra vulnerability check")
-    public void testFun_1() {
+    public void testExample2() {
         Example example = new Example();
-        String string = "500";
+        HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
         
-        boolean actual = example.fun(string, -255);
-        
-        assertTrue(actual);
+        /* This test fails because method [org.example.checks.Example.example] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
+            org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
+            org.example.checks.Example.example(Example.java:10) */
+        example.example(httpServletRequestMock);
     }
     
-    /**
-    @utbot.classUnderTest {@link Example}
- * @utbot.methodUnderTest {@link org.example.Example#fun(java.lang.String,int)}
- *  */
     @Test
-    @DisplayName("fun: ")
-    @org.cyber.utils.VulnerabilityInfo("extra vulnerability check")
-    public void testFun_2() {
+    public void testExample3() {
         Example example = new Example();
-        String string = "-999";
+        HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
         
-        boolean actual = example.fun(string, -255);
-        
-        assertTrue(actual);
+        /* This test fails because method [org.example.checks.Example.example] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
+            org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
+            org.example.checks.Example.example(Example.java:10) */
+        example.example(httpServletRequestMock);
     }
-    ///endregion
+    
+    @Test
+    public void testExample4() {
+        Example example = new Example();
+        HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
+        
+        /* This test fails because method [org.example.checks.Example.example] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
+            org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
+            org.example.checks.Example.example(Example.java:10) */
+        example.example(httpServletRequestMock);
+    }
+    
     ///endregion
 }
 

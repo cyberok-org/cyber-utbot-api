@@ -13,40 +13,59 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+
 /**
     @author Benjamin Livshits <livshits@cs.stanford.edu>
     
-    $Id: Basic23.java,v 1.6 2006/04/04 20:00:40 livshits Exp $
+    $Id: Inter8.java,v 1.1 2006/04/21 17:14:26 livshits Exp $
  */
 package org.example.inter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Locale;
+import java.io.PrintWriter;
 
 
-/**
- *  @servlet description="path traversal" 
- *  @servlet vuln_count = "2"
+/** 
+ *  @servlet description="multi-level context sensitivity test" 
+ *  @servlet vuln_count = "1" 
  *  */
-public class PathTraversal {
+public class Inter8  {
     private static final String FIELD_NAME = "name";
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String s = req.getParameter(FIELD_NAME);
-        String name = s.toLowerCase(Locale.UK);
-        RandomAccessFile raf = new RandomAccessFile(name, "rw");
+        String s1 = req.getParameter(FIELD_NAME);
+        
+        String s2 = foo(s1);
+        String s3 = bar("abc");
+        
+        PrintWriter writer = resp.getWriter();  
+        writer.println(s2);                    /* BAD */
+        writer.println(s3);                    /* OK */
     }
     
+    private String foo(String s1) {
+		return id(s1);
+	}
+
+	private String bar(String string) {
+		return id(string);
+	}
+
+	private String id(String string) {
+        return id2(string);
+    }
+    
+    private String id2(String string) {
+        return string;
+    }
+
     public String getDescription() {
-        return "path traversal";
+        return "multi-level context sensitivity test";
     }
     
     public int getVulnerabilityCount() {
-        return 2;
+        return 1;
     }
 }

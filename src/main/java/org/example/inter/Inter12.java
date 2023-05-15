@@ -13,40 +13,59 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+
 /**
     @author Benjamin Livshits <livshits@cs.stanford.edu>
     
-    $Id: Basic23.java,v 1.6 2006/04/04 20:00:40 livshits Exp $
+    $Id: Inter12.java,v 1.1 2006/04/21 17:14:26 livshits Exp $
  */
 package org.example.inter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Locale;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.LinkedList;
 
 
-/**
- *  @servlet description="path traversal" 
- *  @servlet vuln_count = "2"
+
+/** 
+ *  @servlet description="collection as a static field" 
+ *  @servlet vuln_count = "1" 
  *  */
-public class PathTraversal {
+public class Inter12  {
     private static final String FIELD_NAME = "name";
+    static final Collection COLLECTION1 = new LinkedList();
+    static final Collection COLLECTION2 = new LinkedList();
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String s = req.getParameter(FIELD_NAME);
-        String name = s.toLowerCase(Locale.UK);
-        RandomAccessFile raf = new RandomAccessFile(name, "rw");
+        String s1 = req.getParameter(FIELD_NAME);
+        
+        foo("abc");
+        bar(s1);
+        
+        PrintWriter writer = resp.getWriter();
+        String s2 = (String) COLLECTION1.iterator().next();
+        String s3 = (String) COLLECTION2.iterator().next();
+        
+        writer.println(s2);                    /* BAD */
+        writer.println(s3);                    /* OK */
     }
     
+	private void foo(Object s) {
+		COLLECTION2.add(s);
+	}
+	
+	private void bar(Object s) {
+		COLLECTION1.add(s);
+	}
+    
     public String getDescription() {
-        return "path traversal";
+        return "collection as a static field";
     }
     
     public int getVulnerabilityCount() {
-        return 2;
+        return 1;
     }
 }

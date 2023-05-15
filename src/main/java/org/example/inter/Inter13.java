@@ -13,40 +13,51 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+
 /**
     @author Benjamin Livshits <livshits@cs.stanford.edu>
     
-    $Id: Basic23.java,v 1.6 2006/04/04 20:00:40 livshits Exp $
+    $Id: Inter13.java,v 1.1 2006/04/21 17:14:26 livshits Exp $
  */
 package org.example.inter;
 
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Locale;
+import java.io.PrintWriter;
 
 
-/**
- *  @servlet description="path traversal" 
- *  @servlet vuln_count = "2"
+
+/** 
+ *  @servlet description="recursive case" 
+ *  @servlet vuln_count = "1" 
  *  */
-public class PathTraversal {
+public class Inter13  {
     private static final String FIELD_NAME = "name";
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String s = req.getParameter(FIELD_NAME);
-        String name = s.toLowerCase(Locale.UK);
-        RandomAccessFile raf = new RandomAccessFile(name, "rw");
+        String s1 = req.getParameter(FIELD_NAME);
+        
+        f(s1, 1000, resp);
     }
     
+	private void f(String s1, int i, ServletResponse resp) throws IOException {
+		if(i != 0) {
+			f(s1, i-1, resp);
+		} else {
+	        PrintWriter writer = resp.getWriter();
+	        writer.println(s1);                    /* BAD */
+		}
+
+		
+	}
+
     public String getDescription() {
-        return "path traversal";
+        return "recursive case";
     }
     
     public int getVulnerabilityCount() {
-        return 2;
+        return 1;
     }
 }

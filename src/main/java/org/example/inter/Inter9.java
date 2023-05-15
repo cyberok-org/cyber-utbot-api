@@ -13,40 +13,58 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+
 /**
     @author Benjamin Livshits <livshits@cs.stanford.edu>
     
-    $Id: Basic23.java,v 1.6 2006/04/04 20:00:40 livshits Exp $
+    $Id: Inter9.java,v 1.1 2006/04/21 17:14:26 livshits Exp $
  */
 package org.example.inter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.PrintWriter;
 import java.util.Locale;
 
 
-/**
- *  @servlet description="path traversal" 
- *  @servlet vuln_count = "2"
+/** 
+ *  @servlet description="simple object sensitivity" 
+ *  @servlet vuln_count = "2" 
  *  */
-public class PathTraversal {
+public class Inter9  {
     private static final String FIELD_NAME = "name";
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String s = req.getParameter(FIELD_NAME);
-        String name = s.toLowerCase(Locale.UK);
-        RandomAccessFile raf = new RandomAccessFile(name, "rw");
+        String s1 = req.getParameter(FIELD_NAME);
+        
+        String s2 = foo(s1);
+        String s3 = foo("abc");
+        
+        PrintWriter writer = resp.getWriter();  
+        writer.println(s2);                    /* BAD */
+        writer.println(s3);                    /* OK */
+        
+        String s4 = bar(s1);
+        String s5 = bar("abc");
+        
+        writer.println(s4);                    /* BAD */
+        writer.println(s5);                    /* OK */
     }
     
+    private String foo(String s1) {
+		return s1.toLowerCase();
+	}
+
+    private String bar(String s1) {
+		return s1.toLowerCase(Locale.ENGLISH);
+	}
+    
     public String getDescription() {
-        return "path traversal";
+        return "simple object sensitivity";
     }
     
     public int getVulnerabilityCount() {
-        return 2;
+        return 1;
     }
 }

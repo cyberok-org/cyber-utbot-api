@@ -13,37 +13,44 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+
 /**
     @author Benjamin Livshits <livshits@cs.stanford.edu>
     
-    $Id: Basic23.java,v 1.6 2006/04/04 20:00:40 livshits Exp $
+    $Id: Inter4.java,v 1.4 2006/04/04 20:00:40 livshits Exp $
  */
 package org.example.inter;
 
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Locale;
+import java.io.PrintWriter;
 
 
-/**
- *  @servlet description="path traversal" 
- *  @servlet vuln_count = "2"
+/** 
+ *  @servlet description="store stuff in a field" 
+ *  @servlet vuln_count = "1" 
  *  */
-public class PathTraversal {
+public class Inter4  {
     private static final String FIELD_NAME = "name";
+    public String name;
+
+    public void sink(String s) {}
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String s = req.getParameter(FIELD_NAME);
-        String name = s.toLowerCase(Locale.UK);
-        RandomAccessFile raf = new RandomAccessFile(name, "rw");
+        name = req.getParameter(FIELD_NAME);
+        sink(name);
+        f(resp);
     }
     
+    private void f(ServletResponse resp) throws IOException {
+        PrintWriter writer = resp.getWriter();
+        writer.println(this.name);         /* BAD */        
+    }
+
     public String getDescription() {
-        return "path traversal";
+        return "store stuff in a field";
     }
     
     public int getVulnerabilityCount() {
