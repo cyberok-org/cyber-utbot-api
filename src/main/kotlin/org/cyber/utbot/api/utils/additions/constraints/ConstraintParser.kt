@@ -1,11 +1,15 @@
 package org.cyber.utbot.api.utils.additions.constraints
 
-import org.utbot.engine.pc.UtBoolExpression
-
-typealias ConstraintVarName = String
+import org.utbot.engine.pc.*
 
 object ConstraintParser {
-    fun parse(names: Set<ConstraintVarName>, constraints: Set<UtBoolExpression>): Iterable<Constraint> {    // TODO
-        return listOf()
+    fun parse(names: List<UtAddrExpression>, constraints: Set<UtBoolExpression>): Constraints {
+        val parser = Parser()
+        val constraintSet = CyberConstraintSet()
+
+        constraints.map {
+            constraintSet.register(it.accept(parser))
+        }
+        return Constraints(names, constraintSet.result)
     }
 }

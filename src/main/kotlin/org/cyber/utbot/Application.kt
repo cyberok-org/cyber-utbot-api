@@ -29,6 +29,7 @@ fun main() {
     val generator = TestGenerator(settings)
     val (tests, info) = generator.run(mapOf("org.example.checks.Example" to "src/main/java/org/example/checks/Example.java").toTestUnits())
 //    val (tests, info) = generator.run(mapOf("org.example.checks.Demo" to "src/main/java/org/example/checks/Demo.java").toTestUnits())
+//    val (tests, info) = generator.run(mapOf("org.example.checks.Check" to "src/main/java/org/example/checks/Check.java").toTestUnits())
 //    val num = 15
 //    val (tests, info) = generator.run(mapOf("org.micro.basic.Basic$num" to "/home/andrew/securibench-micro-2/build/classes/java/main/org/micro/basic/Basic$num.class").toTestUnits())
     println(tests)
