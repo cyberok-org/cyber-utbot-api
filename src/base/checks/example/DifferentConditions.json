@@ -1,42 +1,42 @@
 [
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun0"
   },
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun1"
   },
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun2"
   },
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun3"
   },
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun4"
   },
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun5"
   },
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun6"
   },
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun7"
   },
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun8"
   },
   {
-    "fullyQualified": "org.cyber.base.DifferentConditions",
+    "fullyQualified": "org.cyber.exampleBase.DifferentConditions",
     "function": "fun9"
   }
 ]

@@ -18,6 +18,7 @@ import org.utbot.framework.plugin.api.MockStrategyApi
 import java.nio.file.Files
 
 fun main() {
+<<<<<<< HEAD
 //    val classpath = "/home/andrew/UTBotJava/cyber-utbot-exploit-base/build/classes/java/main"
 //    val classpath = "C:/Users/lesya/Downloads/javax.servlet-api-3.1.0.jar"
 //    val classpath = "C:/Users/lesya/uni2/UTBotJava/cyber-utbot-api/build/classes/java/main"
@@ -57,13 +58,14 @@ fun main() {
     val otherMocks = emptyList<String>()
 //    val otherMocks = listOf<String>()
     //
-    val settings = GenerateTestsSettings(classpath, generationTimeout=120_000, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + CYBER_MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
+    val settings = GenerateTestsSettings(classpath, generationTimeout=180_000, codegenLanguage = CodegenLanguage.JAVA, mockAlways = MOCK_ALWAYS_DEFAULT + CYBER_MOCK_ALWAYS_DEFAULT + otherMocks, mockStrategy = MockStrategyApi.NO_MOCKS,
         withUtSettings = { useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY; },
-        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckDirectories=listOf("$UTBOT_DIR/cyber-utbot-exploit-base/src/base"))
+        utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckBases=listOf("$UTBOT_DIR/cyber-utbot-exploit-base"))
     val generator = TestGenerator(settings)
 //    val (tests, info) = generator.run(mapOf("org.example.checks.Example" to "src/main/java/org/example/checks/Example.java").toTestUnits())
     val (tests, info) = generator.run(mapOf("org.example.inter.PathTraversal" to "src/main/java/org/example/inter/PathTraversal").toTestUnits())
 //    val (tests, info) = generator.run(mapOf("org.example.checks.Demo" to "src/main/java/org/example/checks/Demo.java").toTestUnits())
+//    val (tests, info) = generator.run(mapOf("org.example.checks.Check" to "src/main/java/org/example/checks/Check.java").toTestUnits())
 //    val num = 15
 //    val (tests, info) = generator.run(mapOf("org.micro.basic.Basic$num" to "/home/andrew/securibench-micro-2/build/classes/java/main/org/micro/basic/Basic$num.class").toTestUnits())
 //    println(tests)

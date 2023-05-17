@@ -1,4 +1,4 @@
-package org.cyber.exploitBase;
+package org.cyber.exampleBase;
 
 import java.io.File;
 import java.io.IOException;

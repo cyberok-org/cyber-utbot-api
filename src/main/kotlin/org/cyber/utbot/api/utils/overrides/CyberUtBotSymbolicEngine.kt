@@ -96,38 +96,6 @@ class CyberUtBotSymbolicEngine(
                 vulnerabilityChecksHolder = vulnerabilityChecksHolder,
                 stateHolder = stateHolder ?: throw CyberException("CyberUtBotSymbolicEngine init fail")
             )
-
-            // for overrides
-            classesToLoad = classesToLoad.plus(arrayOf(
-                // add all overrides here!!!
-                org.cyber.utils.overrides.CyberPath::class,
-            ).map { it.java }.toTypedArray())
-
-//            classToWrapper += (mutableMapOf<TypeToBeWrapped, WrapperType>().apply {
-//                // add all overrides here!!!
-//            }.apply {
-//                val applicationClassLoader = UtContext::class.java.classLoader
-//                values.distinct().forEach {
-//                    val kClass = applicationClassLoader.loadClass(it.className).kotlin
-//                    putSootClass(kClass, it)
-//                }
-//            })
-
-//            wrappers = wrappers + mutableMapOf(
-//                // add all overrides here!!!
-//            ).apply {
-//                arrayOf(
-//                    // add all overrides here!!!
-//                ).let { putAll(it) }
-//            }.also {
-//                val missedWrappers = it.keys.filterNot { key ->
-//                    Scene.v().getSootClass(key.name).type in classToWrapper.keys
-//                }
-//
-//                require(missedWrappers.isEmpty()) {
-//                    "Missed wrappers for classes [${missedWrappers.joinToString(", ")}]"
-//                }
-//            }
         } else {
             if (onlyVulnerabilities) {
                 onlyVulnerabilities = false

@@ -1,4 +1,4 @@
-package org.cyber.exploitBase;
+package org.cyber.exampleBase;
 
 public class Command {
     //TODO: add sophisticated payloads

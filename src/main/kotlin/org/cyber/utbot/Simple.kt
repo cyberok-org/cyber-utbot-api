@@ -10,7 +10,7 @@ import org.utbot.framework.UtSettings.testMinimizationStrategyType
 import org.utbot.framework.UtSettings.useFuzzing
 import java.nio.file.Files
 
-
+// org/cyber/utbot/api/utils/additions/fuzzing/ExampleVulnerabilityChecksFuzzer.kt - parameters for test
 fun main() {
     val classpath = "build/classes/java/main"
 
@@ -18,7 +18,7 @@ fun main() {
         withUtSettings = { useFuzzing = false; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY; },
         utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), onlyVulnerabilities = true)
     val generator = TestGenerator(settings)
-    val (tests, info) = generator.run(mapOf("org.example.Example" to "src/main/java/org/example/Example.java").toTestUnits())
+    val (tests, info) = generator.run(mapOf("org.example.checks.Simple" to "src/main/java/org/example/checks/Simple.java").toTestUnits())
     println(tests)
 //    tests.forEach { nameAndTest ->
 //        Files.write("src/test/java/org/example/${nameAndTest.key.takeLastWhile { it != '.' }}Test.java".toPath(), listOf(nameAndTest.value))

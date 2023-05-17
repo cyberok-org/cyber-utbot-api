@@ -1,6 +1,5 @@
 package org.cyber.utbot.api.utils.overrides
 
-import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.CHECK_METHOD_PREFIX
 import org.cyber.utbot.api.utils.VULNERABILITY_CHECKS_CLASS_NAME
 import org.cyber.utbot.api.utils.additions.MethodSubstitution
@@ -77,15 +76,8 @@ class CyberTraverser(
 
             val parametersInfo = null   // set it later
 
-            val parameterNames = parameters.map {
-                when(it) {
-                    is PrimitiveValue -> (it.expr as? UtBvConst)?.name ?: throw CyberException("unresolved expr name for $it")
-                    is ObjectValue -> (it.addr.internal as? UtBvConst)?.name ?: throw CyberException("unresolved addr name for $it")
-                    is ArrayValue -> (it.addr.internal as? UtBvConst)?.name ?: throw CyberException("unresolved addr name for $it")
-                    else -> throw CyberException("unresolved type for $it")
-                }
-            }.toSet()
-            val constraints = ConstraintParser.parse(parameterNames, environment.state.symbolicState.solver.assertions) //
+            val parameterAddresses = parameters.map { it.addr }
+            val constraints = ConstraintParser.parse(parameterAddresses, environment.state.symbolicState.solver.assertions) //
 
             val argumentChecks = map { it.description }.toSet().mapNotNull { description ->
                 if (description == null) {

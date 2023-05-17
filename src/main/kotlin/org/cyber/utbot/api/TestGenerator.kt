@@ -42,9 +42,10 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val utbotViewers: Set<UTBotViewers> = settings.utbotViewers
     override val cyberPathSelector: Boolean = settings.cyberPathSelector
     override val findVulnerabilities: Boolean = settings.findVulnerabilities
-    override val vulnerabilityCheckDirectories: List<String> = settings.vulnerabilityCheckDirectories
+    override val vulnerabilityCheckBases: List<String> = settings.vulnerabilityCheckBases
     override val vulnerabilityChecksAnalysisSuffix: String = settings.vulnerabilityChecksAnalysisSuffix
     override val vulnerabilityChecksSuffix: String = settings.vulnerabilityChecksSuffix
+    override val vulnerabilityChecksBuildSuffix: String = settings.vulnerabilityChecksBuildSuffix
     override val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck> = settings.extraVulnerabilityChecks
     override val onlyVulnerabilities: Boolean = settings.onlyVulnerabilities
     override val testsIgnoreEmpty: Boolean = settings.testsIgnoreEmpty
@@ -53,6 +54,10 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val codeGen: CodeGen = CodeGen()
 
     private val logger = KotlinLogging.logger {}
+
+    init {
+        updateClassesToLoad()
+    }
 
     /**
      * @param testUnits: collection of [TestUnit]
@@ -64,7 +69,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
             (it.source.endsWith(".java") || it.source.endsWith(".kt")) && Files.exists(Paths.get(it.source))
         }) { "source should have suffix \".java\" or  \".kt\"" }
 
-        (classpath ?: settings.classpath)?.let{ updateClassLoader(it) } ?: throw Exception("classpath should be set")
+        (classpath ?: settings.classpath)?.let{ updateClassLoader(updateClasspath(it)) } ?: throw Exception("classpath should be set")
         val targetToTests = mutableMapOf<TargetQualifiedName, GeneratedTests>()
         testUnits.forEach { testUnit ->
             runInside(testUnit.target, testUnit.source, testUnit.output, genMethods)?.let { tests -> targetToTests[testUnit.target] = tests }
@@ -79,7 +84,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
      * @return mapping from [TargetQualifiedName] to [GeneratedTests]
      */
     fun runBunch(source: SourceCodeFileName, packageFilter: String? = null, classpath: String? = null): Pair<MutableMap<TargetQualifiedName, GeneratedTests>, MutableMap<UTBotViewers, Any>> {
-        (classpath ?: settings.classpath)?.let{ updateClassLoader(it) } ?: throw Exception("classpath should be set")
+        (classpath ?: settings.classpath)?.let{ updateClassLoader(updateClasspath(it)) } ?: throw Exception("classpath should be set")
         val targetToTests = mutableMapOf<TargetQualifiedName, GeneratedTests>()
         val classesFromPath = loadClassesFromPath(classLoader, source)
         classesFromPath.filterNot { it.java.isInterface }.filter { clazz ->

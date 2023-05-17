@@ -1,10 +1,10 @@
 [
   {
-    "fullyQualified": "org.cyber.base.ProcessBuilderChecks",
+    "fullyQualified": "org.cyber.exampleBase.ProcessBuilderChecks",
     "function": "checkSimple"
   },
   {
-    "fullyQualified": "org.cyber.base.ProcessBuilderChecks",
+    "fullyQualified": "org.cyber.exampleBase.ProcessBuilderChecks",
     "function": "checkMany"
   }
 ]

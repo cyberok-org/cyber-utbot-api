@@ -1,0 +1,8 @@
+{
+  "fullyQualified": "org.example.checks.Simple",
+  "function": "internal",
+  "description": "simple",
+  "arguments": [
+    "example/simple.json"
+  ]
+}

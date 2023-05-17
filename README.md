@@ -3,7 +3,7 @@
 
 [UTBot](https://github.com/UnitTestBot/UTBotJava) - UnitTestBot is the tool for automated unit test generation and precise code analysis.
 
-`cyber-utbot-api` - обёртка над `utbot`, позволяющая запускать его из кода.
+*cyber-utbot-api* - обёртка над `utbot`, позволяющая запускать его из кода.
 
 Она работает по аналогии с `utbot-cli`, в ней отдельно вынесены настройки для `cli`, можно задать настройки самого `utbot` внутри.
 
@@ -11,17 +11,20 @@
 
 ## Build
 
+Следующее работало с версией **gradle 7.2**, с более старыми версиями не проверялось, может что-то не собраться.
+
 ```bash
 git clone https://github.com/UnitTestBot/UTBotJava
 cd UTBotJava/
 git checkout fe0b89c789da5559bf8912e0179cdcee026e6137
 git clone https://github.com/cyberok-org/cyber-utbot-api
+cd cyber-utbot-api/
 ```
 
-После стоит открыть `ide` и попытаться собрать. Потом приминить `patch` командной ниже и ещё раз собрать.
+После стоит открыть `ide` (на проекте **cyber-utbot-api**) и попытаться собрать (`gradle build -x test` если не начнётся автоматически). Потом применить `patch` командной ниже и ещё раз собрать.
 
 ```bash
-cd cyber-utbot-api/scripts/
+cd scripts/
 bash patch_apply.sh
 ```
 
@@ -30,6 +33,8 @@ bash patch_apply.sh
 ```gradle
 gradle build -x test
 ```
+
+(Возможно нужно будет предварительно сконфигурировать проект (`load gradle changes`, если будет иконка справа сверху))
 
 ### Knowledge base
 
@@ -93,11 +98,17 @@ gradle build -x test
 
 Подробнее про формат проверок можно почитать [тут](src/docs/cyberok/api/VulnerabilityChecks.md)
 
+## Cli 
+
+Так же можно собрать `cli` и использовать его. Это можно сделать командой `gradle jar`.
+
+Замечание: не стоит запускать на файлах, пути которых полностью совпадают с путями из этого репозитория (баг). Это выдаёт подобную ошибку `java.lang.Exception: Error: The path '/home/andrew/UTBot/UTBotJava/cyber-utbot-api/file:/home/andrew/UTBot/UTBotJava/cyber-utbot-api/build/libs/cyber-utbot-api-2023.05-SNAPSHOT.jar!' is neither file nor directory`
+
 ## Docs
 
 [brief](src/docs/brief.md) - доки по всему. Там есть описания для:
 - `cyberok.api` - доки по настройкам, стандарту базы знаний и механизму проверки.
-- `cyberok.test` - доки по спецификации тестов (формат хранения), концепция приложения для сравнения разных инструментов/версий одного инструмента. 
+- `cyberok.test` - доки по спецификации тестов (формат хранения), концепция приложения для сравнения разных инструментов/версий одного инструмента.
 - `utbot` - внутренние доки по `utbot`, [utbot scheme](src/docs/utbot/Scheme.md) - схема работы `utbot`
 - `abstract` - что-то отдельное, не относящаяся к теме, но полезное при изучении.
 

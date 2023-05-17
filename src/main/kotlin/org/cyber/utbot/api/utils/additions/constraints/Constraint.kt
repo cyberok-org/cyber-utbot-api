@@ -1,4 +1,5 @@
 package org.cyber.utbot.api.utils.additions.constraints
 
-interface Constraint {  // TODO
-}
+import org.utbot.engine.pc.UtAddrExpression
+
+class Constraints(val arguments: List<UtAddrExpression>, val addrToConstraint: MutableMap<Addr, MutableList<CyberConstraint>>)
