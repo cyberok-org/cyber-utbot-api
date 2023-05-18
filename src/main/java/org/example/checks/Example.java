@@ -2,24 +2,33 @@ package org.example.checks;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Enumeration;
+import java.util.Locale;
 
 public class Example {
-    public boolean example(HttpServletRequest request) {
-        String param = "";
-        request.getHeader("benchmarkTEST00133");
-        String s = "BenchmarkTest00133";
-        if (request.getHeader(s) != null) {
-            param = request.getHeader(s);
-        }
-        if (param.equals("test")) {
+//    public boolean example(HttpServletRequest request) {
+//        String param = "";
+//        request.getHeader("benchmarkTEST00133");
+//        String s = "BenchmarkTest00133";
+//        if (request.getHeader(s) != null) {
 //            param = request.getHeader(s);
-//            if (param.equals("test2")) {
-                return true;
-//            }
-        }
-        return false;
-    }
+//        }
+//        if (param.equals("test")) {
+////            param = request.getHeader(s);
+////            if (param.equals("test2")) {
+//                return true;
+////            }
+//        }
+//        return false;
+//    }
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    String s = req.getParameter("name");
+    String name = s.toLowerCase(Locale.UK);
+    RandomAccessFile raf = new RandomAccessFile(name, "rw");
+}
 
 //    private void internal(String s, int x) {
 //    }
