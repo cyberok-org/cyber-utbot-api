@@ -2,88 +2,57 @@ package org.example.checks;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.mockito.Mockito.mock;
 
 public final class ExampleTest {
-    ///region Test suites for executable org.example.checks.Example.example
+    ///region Test suites for executable org.example.checks.Example.doGet
     
-    ///region SYMBOLIC EXECUTION: ERROR SUITE for method example(javax.servlet.http.HttpServletRequest)
+    ///region SYMBOLIC EXECUTION: ERROR SUITE for method doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
     
     /**
     @utbot.classUnderTest {@link Example}
- * @utbot.methodUnderTest {@link org.example.checks.Example#example(javax.servlet.http.HttpServletRequest)}
- * @utbot.throwsException {@link java.lang.NullPointerException} in: request.getHeader("benchmarkTEST00133");
+ * @utbot.methodUnderTest {@link org.example.checks.Example#doGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)}
+ * @utbot.invokes {@link javax.servlet.http.HttpServletRequest#getParameter(java.lang.String)}
+ * @utbot.throwsException {@link java.lang.NullPointerException} in: String s = req.getParameter("name");
  *  */
     @Test
-    @DisplayName("example: request.getHeader(\"benchmarkTEST00133\") : True -> ThrowNullPointerException")
-    public void testExample_ThrowNullPointerException() {
+    @DisplayName("doGet: s = req.getParameter(\"name\") : True -> ThrowNullPointerException")
+    public void testDoGet_HttpServletRequestGetParameter() throws IOException  {
         Example example = new Example();
         
-        /* This test fails because method [org.example.checks.Example.example] produces [java.lang.NullPointerException]
-            org.example.checks.Example.example(Example.java:10) */
-        example.example(null);
+        /* This test fails because method [org.example.checks.Example.doGet] produces [java.lang.NullPointerException]
+            org.example.checks.Example.doGet(Example.java:26) */
+        example.doGet(null, null);
     }
+    ///endregion
     
-    /**
-    @utbot.classUnderTest {@link Example}
- * @utbot.methodUnderTest {@link org.example.checks.Example#example(javax.servlet.http.HttpServletRequest)}
- * @utbot.executesCondition {@code (request.getHeader(s) != null): True}
- * @utbot.executesCondition {@code (param.equals("test")): False}
- * @utbot.returnsFrom {@code return false;}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: return false;
- *  */
+    ///region OTHER: ERROR SUITE for method doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+    
     @Test
-    @DisplayName("example: return false -> ThrowMockitoException")
-    public void testExample_ThrowMockitoException() {
+    public void testDoGet1() throws IOException  {
         Example example = new Example();
         HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
+        (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("");
         
-        /* This test fails because method [org.example.checks.Example.example] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
+        /* This test fails because method [org.example.checks.Example.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
             org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-            org.example.checks.Example.example(Example.java:10) */
-        example.example(httpServletRequestMock);
+            org.example.checks.Example.doGet(Example.java:26) */
+        example.doGet(httpServletRequestMock, null);
     }
     
-    /**
-    @utbot.classUnderTest {@link Example}
- * @utbot.methodUnderTest {@link org.example.checks.Example#example(javax.servlet.http.HttpServletRequest)}
- * @utbot.executesCondition {@code (request.getHeader(s) != null): True}
- * @utbot.executesCondition {@code (param.equals("test")): False}
- * @utbot.returnsFrom {@code return false;}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: return false;
- *  */
     @Test
-    @DisplayName("example: return false -> ThrowMockitoException")
-    public void testExample_ThrowMockitoException_1() {
+    public void testDoGet2() throws IOException  {
         Example example = new Example();
         HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
+        (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("");
         
-        /* This test fails because method [org.example.checks.Example.example] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
+        /* This test fails because method [org.example.checks.Example.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
             org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-            org.example.checks.Example.example(Example.java:10) */
-        example.example(httpServletRequestMock);
-    }
-    
-    /**
-    @utbot.classUnderTest {@link Example}
- * @utbot.methodUnderTest {@link org.example.checks.Example#example(javax.servlet.http.HttpServletRequest)}
- * @utbot.executesCondition {@code (request.getHeader(s) != null): True}
- * @utbot.executesCondition {@code (param.equals("test")): True}
- * @utbot.returnsFrom {@code return true;}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: return true;
- *  */
-    @Test
-    @DisplayName("example: return true -> ThrowMockitoException")
-    public void testExample_ParamEquals() {
-        Example example = new Example();
-        HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-        
-        /* This test fails because method [org.example.checks.Example.example] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-            org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-            org.example.checks.Example.example(Example.java:10) */
-        example.example(httpServletRequestMock);
+            org.example.checks.Example.doGet(Example.java:26) */
+        example.doGet(httpServletRequestMock, null);
     }
     ///endregion
     

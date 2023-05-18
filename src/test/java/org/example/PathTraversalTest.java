@@ -4,10 +4,39 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
-import static org.mockito.Mockito.mock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 public final class PathTraversalTest {
+    ///region Test suites for executable org.example.inter.PathTraversal.getDescription
+    
+    
+    @Test
+    public void testGetDescription1() {
+        PathTraversal pathTraversal = new PathTraversal();
+        
+        String actual = pathTraversal.getDescription();
+        
+        String expected = "path traversal";
+        assertEquals(expected, actual);
+    }
+    
+    ///endregion
+    
+    ///region Test suites for executable org.example.inter.PathTraversal.getVulnerabilityCount
+    
+    
+    @Test
+    public void testGetVulnerabilityCount1() {
+        PathTraversal pathTraversal = new PathTraversal();
+        
+        int actual = pathTraversal.getVulnerabilityCount();
+        
+        assertEquals(2, actual);
+    }
+    
+    ///endregion
+    
     ///region Test suites for executable org.example.inter.PathTraversal.doGet
     
     
@@ -66,35 +95,6 @@ public final class PathTraversalTest {
         pathTraversal.doGet(httpServletRequestMock, null);
     }
     ///endregion
-    
-    ///endregion
-    
-    ///region Test suites for executable org.example.inter.PathTraversal.getDescription
-    
-    
-    @Test
-    public void testGetDescription1() {
-        PathTraversal pathTraversal = new PathTraversal();
-        
-        String actual = pathTraversal.getDescription();
-        
-        String expected = "path traversal";
-        assertEquals(expected, actual);
-    }
-    
-    ///endregion
-    
-    ///region Test suites for executable org.example.inter.PathTraversal.getVulnerabilityCount
-    
-    
-    @Test
-    public void testGetVulnerabilityCount1() {
-        PathTraversal pathTraversal = new PathTraversal();
-        
-        int actual = pathTraversal.getVulnerabilityCount();
-        
-        assertEquals(2, actual);
-    }
     
     ///endregion
 }

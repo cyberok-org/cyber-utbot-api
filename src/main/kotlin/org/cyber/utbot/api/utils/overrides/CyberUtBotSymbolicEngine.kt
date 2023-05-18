@@ -67,14 +67,12 @@ class CyberUtBotSymbolicEngine(
     analysedJar: String,
     cyberDefaultSelector: Boolean,
     private val stateHolder: StateHolder?,
-) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, solverTimeoutInMillis, applicationContext) {
+) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, applicationContext, solverTimeoutInMillis) {
     init {  // set our selector
-        pathSelector = if (cyberPathSelector) {
-            cyberPathSelector(globalGraph, StrategyOption.DISTANCE, analysedJar, cyberDefaultSelector) {
+        if (cyberPathSelector) {
+            pathSelector = cyberPathSelector(globalGraph, StrategyOption.DISTANCE, analysedJar, cyberDefaultSelector) {
                 withStepsLimit(UtSettings.pathSelectorStepsLimit)
             }
-        } else {
-            pathSelector(globalGraph, typeRegistry)
         }
         if (findVulnerabilities) {
             mocker = CyberMocker(
@@ -182,14 +180,23 @@ class CyberUtBotSymbolicEngine(
 
                         try {
                             val concreteExecutionResult =
-                                concreteExecutor.executeConcretely(methodUnderTest, stateBefore, instrumentation, UtSettings.concreteExecutionDefaultTimeoutInInstrumentedProcessMillis)
+                                concreteExecutor.executeConcretely(
+                                    methodUnderTest,
+                                    stateBefore,
+                                    instrumentation,
+                                    UtSettings.concreteExecutionDefaultTimeoutInInstrumentedProcessMillis
+                                )
 
                             if (concreteExecutionResult.violatesUtMockAssumption()) {
                                 logger.debug { "Generated test case violates the UtMock assumption: $concreteExecutionResult" }
                                 return@measureTime
                             }
 
-//                            @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, resolvedParameters, resolver)
+                            @CyberNew("update CodeGen info") updateCodeGenInfo(
+                                stateBefore,
+                                resolvedParameters,
+                                resolver
+                            )
 
                             val concreteUtExecution = UtSymbolicExecution(
                                 stateBefore,
@@ -256,6 +263,7 @@ class CyberUtBotSymbolicEngine(
                                 StateLabel.INTERMEDIATE -> pathSelector.offer(newState)
                                 StateLabel.CONCRETE -> statesForConcreteExecution.add(newState)
                                 StateLabel.TERMINAL -> {
+                                    consumeTerminalState(newState)
                                     @CyberNew("ignore terminal state if the trace was not found yet")
 //                                    if (pathSelector is CyberSelector && !(pathSelector as CyberSelector).defaultSelection) {
 //                                        if (!(pathSelector as CyberSelector).traceFound()) {
@@ -265,7 +273,6 @@ class CyberUtBotSymbolicEngine(
 //
 //                                    }
                                     println("TERMINAL: ${newState.stmt}, from ${state.stmt}, method: ${graph.body}")
-                                    consumeTerminalState(newState)
                                 }
                             }
                         }
@@ -319,7 +326,7 @@ class CyberUtBotSymbolicEngine(
         val stateAfter = modelsAfter.constructStateForMethod(methodUnderTest)
         require(stateBefore.parameters.size == stateAfter.parameters.size)
 
-//        @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, parameters, resolver)
+        @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, parameters, resolver)
 
         val symbolicUtExecution = UtSymbolicExecution(
             stateBefore = stateBefore,
