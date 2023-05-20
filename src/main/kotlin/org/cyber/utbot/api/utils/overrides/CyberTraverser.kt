@@ -66,9 +66,7 @@ class CyberTraverser(
 
             val parametersInfo = null   // set it later
 
-            val parameterAddresses = parameters.map { it.addr }
-            val constraints = ConstraintParser.parse(parameterAddresses, environment.state.symbolicState.solver.assertions) //
-
+            val constraints = ConstraintParser.parse(parameters, environment.state.symbolicState.solver.assertions)
             val argumentChecks = map { it.description }.toSet().mapNotNull { description ->
                 if (description == null) {
                     descriptions.add(null)

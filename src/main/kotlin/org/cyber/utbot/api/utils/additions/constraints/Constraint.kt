@@ -1,5 +1,5 @@
 package org.cyber.utbot.api.utils.additions.constraints
 
-import org.utbot.engine.pc.UtAddrExpression
+import org.utbot.engine.SymbolicValue
 
-class Constraints(val arguments: List<UtAddrExpression>, val addrToConstraint: MutableMap<Addr, MutableList<CyberConstraint>>)
+class Constraints(val arguments: List<SymbolicValue>, val addrToConstraint: MutableMap<Addr, MutableList<CyberConstraint>>)
