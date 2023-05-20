@@ -98,8 +98,6 @@ gradle build -x test
 
 ## Details
 
-Пока что стоит собирать сторонний проект добавив, скопировав туда папку [cyber-utbot-exploit-base/src/main/java/org/cyber](../cyber-utbot-exploit-base/src/main/java/org/cyber). Это временная мера. Копируются туда проверочные функции и часть для корректной работы `cyber-utbot-api`. Если нет доступа к приватной базе можно скопировать [org/cyber](org/cyber) - содержит то же самое, но базовое, для примера.
-
 Подробнее про формат проверок можно почитать [тут](src/docs/cyberok/api/VulnerabilityChecks.md)
 
 ## Cli 
