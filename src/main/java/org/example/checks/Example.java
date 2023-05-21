@@ -2,12 +2,13 @@ package org.example.checks;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Locale;
+import java.util.Random;
 
 public class Example {
-//    public boolean example(HttpServletRequest request) {
+    //    public boolean example(HttpServletRequest request) {
 //        String param = "";
 //        request.getHeader("benchmarkTEST00133");
 //        String s = "BenchmarkTest00133";
@@ -22,11 +23,21 @@ public class Example {
 //        }
 //        return false;
 //    }
-protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    String s = req.getParameter("name");
-    String name = s.toLowerCase(Locale.UK);
-    RandomAccessFile raf = new RandomAccessFile(name, "rw");
-}
+    public Example() {
+        int s = 1;
+        if (new Random().nextBoolean()) {
+            s = 2;
+        } else {
+            s = 4;
+            throw new IllegalArgumentException("ff");
+        }
+    }
+
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String s = req.getParameter("name");
+        FileInputStream fis = new FileInputStream(s);
+//        RandomAccessFile raf = new RandomAccessFile(s, "r");
+    }
 
 //    private void internal(String s, int x) {
 //    }

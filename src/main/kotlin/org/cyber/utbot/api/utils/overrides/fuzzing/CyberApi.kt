@@ -47,7 +47,7 @@ suspend fun <T, R, D : Description<T>, F : Feedback<T, R>> Fuzzing<T, R, D, F>.c
                 if (dynamicallyGenerated.isNotEmpty()) {
                     var fst = dynamicallyGenerated.removeFirst()
                     if (dynamicallyGenerated.isNotEmpty()) fst = dynamicallyGenerated.removeFirst()
-                    println("yield dyn $fst")
+//                    println("yield dyn $fst")
                     yield(fst)
                 } else {
                     val fuzzOne = fuzzOne()
@@ -67,7 +67,7 @@ suspend fun <T, R, D : Description<T>, F : Feedback<T, R>> Fuzzing<T, R, D, F>.c
                         println("mutate")
                         mutate.result.forEach {
                             if (it is Result.Known<*, *, *>) {
-                                println(((it as Result.Known<*, *, *>).value as StringValue).value)
+                                if ((it as Result.Known<*, *, *>).value is StringValue) println(((it as Result.Known<*, *, *>).value as StringValue).value)
                             }
                         }
                         dynamicallyGenerated += mutate
@@ -86,7 +86,7 @@ suspend fun <T, R, D : Description<T>, F : Feedback<T, R>> Fuzzing<T, R, D, F>.c
             val feedback = fuzzing.handle(description, result)
             when (feedback.control) {
                 Control.CONTINUE -> {
-                    println("HERE CONT")
+//                    println("HERE CONT")
                     seeds.put(random, configuration, feedback, values)
                 }
                 Control.RESET_TYPE_CACHE_AND_CONTINUE -> {
@@ -298,13 +298,16 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
     state: State<TYPE, RESULT>,
 ): Node<TYPE, RESULT> {
     if (node.result.isEmpty()) return node
-    val indexOfMutatedResult = Configuration.taintedArgs[Random.nextInt(Configuration.taintedArgs.size)] + 1 // the first param is the method description afaik
+    val indexOfMutatedResult = if (Configuration.taintedArgs.size > 0) {
+            Configuration.taintedArgs[Random.nextInt(Configuration.taintedArgs.size)] + 1 // the first param is the method description afaik
+    } else Random.nextInt(0, node.parameters.size)
     // random.chooseOne(node.result.map(::rate).toDoubleArray())
     println("idx == $indexOfMutatedResult")
     val mutated = when (val resultToMutate = node.result[indexOfMutatedResult]) {
         is Result.Simple<TYPE, RESULT> -> Result.Simple(resultToMutate.mutation(resultToMutate.result, random), resultToMutate.mutation)
         is Result.Known<TYPE, RESULT, out KnownValue> -> {
-            val mutations = CyberStringValue(((resultToMutate.value) as StringValue).value).mutations() // todo(unchecked cast)
+            val mutations = if ((resultToMutate.value) is StringValue) CyberStringValue(((resultToMutate.value) as StringValue).value).mutations() // todo(unchecked cast)
+            else resultToMutate.value.mutations()
             if (mutations.isNotEmpty()) {
                 Result.Known(
                     mutations.random(random).mutate(resultToMutate.value, random, configuration),

@@ -2,10 +2,8 @@ package org.example.checks;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-
-import static org.mockito.Mockito.mock;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 
 public final class ExampleTest {
     ///region Test suites for executable org.example.checks.Example.doGet
@@ -20,42 +18,30 @@ public final class ExampleTest {
  *  */
     @Test
     @DisplayName("doGet: s = req.getParameter(\"name\") : True -> ThrowNullPointerException")
-    public void testDoGet_HttpServletRequestGetParameter() throws IOException  {
-        Example example = new Example();
+    public void testDoGet_HttpServletRequestGetParameter() throws Exception  {
+        Example example = ((Example) createInstance("org.example.checks.Example"));
         
         /* This test fails because method [org.example.checks.Example.doGet] produces [java.lang.NullPointerException]
-            org.example.checks.Example.doGet(Example.java:26) */
+            org.example.checks.Example.doGet(Example.java:37) */
         example.doGet(null, null);
     }
     ///endregion
     
-    ///region OTHER: ERROR SUITE for method doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-    
-    @Test
-    public void testDoGet1() throws IOException  {
-        Example example = new Example();
-        HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-        (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("");
-        
-        /* This test fails because method [org.example.checks.Example.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-            org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-            org.example.checks.Example.doGet(Example.java:26) */
-        example.doGet(httpServletRequestMock, null);
-    }
-    
-    @Test
-    public void testDoGet2() throws IOException  {
-        Example example = new Example();
-        HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-        (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("");
-        
-        /* This test fails because method [org.example.checks.Example.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-            org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-            org.example.checks.Example.doGet(Example.java:26) */
-        example.doGet(httpServletRequestMock, null);
-    }
     ///endregion
     
+    ///region Util methods
+    
+    private static Object createInstance(String className) throws Exception {
+        Class<?> clazz = Class.forName(className);
+        return Class.forName("sun.misc.Unsafe").getDeclaredMethod("allocateInstance", Class.class)
+            .invoke(getUnsafeInstance(), clazz);
+    }
+    
+    private static Object getUnsafeInstance() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        java.lang.reflect.Field f = Class.forName("sun.misc.Unsafe").getDeclaredField("theUnsafe");
+        f.setAccessible(true);
+        return f.get(null);
+    }
     ///endregion
 }
 

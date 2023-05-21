@@ -20,55 +20,93 @@ class CyberStringValue(override val value: String) : StringValue(value) {
         println("mutations")
         return listOf(Mutation { source, random, configuration ->
 //            require(source == this)
-            // we can miss some mutation for a purpose
-            val position = random.nextInt(value.length + 1)
             var result: String = value
-            val payloads = getPayloadsList(configuration)
-            if (random.flipCoin(50)) {
-                result = addSuffix(result, payloads)
-            }
-            if (random.flipCoin(50)) {
-                result = addSuffix(result, payloads)
-                if (random.flipCoin(50)) {
-                    result = addSuffix(result, payloads)
-                }
-            }
+            val payloadsConfig = getPayloadsList(configuration) ?: return@Mutation StringValue(result)
+            val command = getCommand(value, random, payloadsConfig.commands)
+            result = command
+            result = addArguments(result, random, payloadsConfig.args, command)
+            result = addPrefix(result, random, payloadsConfig.prefixes)
+            result = addSuffix(result, random, payloadsConfig.suffixes)
+            result = mutateCommand(result, random, command)
             StringValue(result)
         })
     }
 
-    private fun getPayloadsList(configuration: Configuration): List<String> {
+    private fun getPayloadsList(configuration: Configuration): PayloadsConfig? {
+        fun getPayload(dir: String) = PayloadsConfig(
+            gson.fromJson(
+                File("$dir/commands.json").readText(),
+                PayloadWrapper::class.java
+            ).parameters,
+            gson.fromJson(
+                File("$dir/arguments.json").readText(),
+                PayloadWrapper::class.java
+            ).parameters,
+            gson.fromJson(
+                File("$dir/prefixes.json").readText(),
+                PayloadWrapper::class.java
+            ).parameters,
+            gson.fromJson(
+                File("$dir/suffixes.json").readText(),
+                PayloadWrapper::class.java
+            ).parameters
+        )
         return when (Configuration.vulnerabilityType) {
-            "UNIX OS command injection" -> {
-                gson.fromJson(
-                    File("$fuzzingBaseDir/cmdi/unix/cmdi.json").readText(),
-                    PayloadWrapper::class.java
-                ).parameters
-            }
+            "UNIX OS command injection" -> getPayload("$fuzzingBaseDir/cmdi/unix")
 
-            "Windows OS command injection" -> {
-                gson.fromJson(
-                    File("$fuzzingBaseDir/cmdi/windows/cmdi.json").readText(),
-                    PayloadWrapper::class.java
-                ).parameters
-            }
+            "Windows OS command injection" -> getPayload("$fuzzingBaseDir/cmdi/windows")
 
-            "arbitrary file creation" -> {
-                gson.fromJson(File("$fuzzingBaseDir/afc/afc.json").readText(), PayloadWrapper::class.java).parameters
-            }
+            "arbitrary file creation" -> getPayload("$fuzzingBaseDir/afc")
 
-            "arbitrary file modification" -> {
-                gson.fromJson(File("$fuzzingBaseDir/afm/afm.json").readText(), PayloadWrapper::class.java).parameters
-            }
+            "arbitrary file modification" -> getPayload("$fuzzingBaseDir/afm")
 
-            else -> listOf()
+            "arbitrary file reading" -> getPayload("$fuzzingBaseDir/afm")
+
+            else -> null
         }
     }
 
-    private fun addSuffix(value: String, payloads: List<String>): String {
+    private fun getCommand(value: String, random: Random, commands: List<String>): String {
+        return buildString {
+            append(commands[Random.nextInt(commands.size)])
+            append(value)
+        }
+    }
+
+    private fun addArguments(value: String, random: Random, args: List<String>, command: String): String {
         return buildString {
             append(value)
-            append(payloads[Random.nextInt(payloads.size)])
+            append(args[Random.nextInt(args.size)]) // make command dependent
+        }
+    }
+
+    private fun addPrefix(value: String, random: Random, prefixes: List<String>): String {
+        return buildString {
+            append(value)
+            if (random.flipCoin(50)) {
+                append(prefixes[Random.nextInt(prefixes.size)])
+                if (random.flipCoin(50)) {
+                    append(prefixes[Random.nextInt(prefixes.size)])
+                }
+            }
+        }
+    }
+
+    private fun addSuffix(value: String, random: Random, suffixes: List<String>): String {
+        return buildString {
+            append(value)
+            if (random.flipCoin(50)) {
+                append(suffixes[Random.nextInt(suffixes.size)])
+                if (random.flipCoin(50)) {
+                    append(suffixes[Random.nextInt(suffixes.size)])
+                }
+            }
+        }
+    }
+
+    private fun mutateCommand(value: String, random: Random, command: String): String {
+        return buildString {
+            append(value)
         }
     }
 
@@ -76,6 +114,13 @@ class CyberStringValue(override val value: String) : StringValue(value) {
     inner class PayloadWrapper(
         val description: String,
         val parameters: List<String>,
+    )
+
+    inner class PayloadsConfig(
+        val commands: List<String>,
+        val args: List<String>,
+        val prefixes: List<String>,
+        val suffixes: List<String>,
     )
 
 }

@@ -8,7 +8,9 @@ import org.cyber.utbot.api.utils.additions.constraints.ConstraintParser
 import org.cyber.utbot.api.utils.additions.fuzzing.ExampleVulnerabilityChecksFuzzer
 import org.cyber.utbot.api.utils.additions.fuzzing.TaintVulnerabilityChecksFuzzer
 import org.cyber.utbot.api.utils.additions.fuzzing.VulnerabilityChecksFuzzer
+import org.cyber.utbot.api.utils.additions.vulnerability.assertSootMethod
 import org.cyber.utbot.api.utils.additions.vulnerability.decorateVulnerabilityFunction
+import org.cyber.utbot.api.utils.additions.vulnerability.toStaticInvokeExpr
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.annotations.CyberNote
@@ -35,6 +37,7 @@ import proguard.analysis.cpa.jvm.domain.taint.JvmInvokeTaintSink
 import proguard.analysis.cpa.jvm.domain.taint.JvmTaintSink
 import soot.*
 import soot.jimple.Stmt
+import soot.jimple.StringConstant
 import soot.jimple.internal.JInvokeStmt
 import soot.jimple.internal.JSpecialInvokeExpr
 
@@ -73,7 +76,6 @@ class CyberTraverser(
             if (environment.method.name == methodName && environment.method.declaringClass.name == VULNERABILITY_CHECKS_CLASS_NAME) return target
             val descriptions = mutableSetOf<String?>() // here
             val methodId = methodId(ClassId(targetClassName), targetFunctionName, target.method.returnType.classId, *target.method.parameterTypes.map { it.classId }.toTypedArray())
-
             val parametersInfo = null   // set it later
 
             val parameterAddresses = parameters.map { it.addr }
@@ -84,7 +86,19 @@ class CyberTraverser(
                     descriptions.add(null)
                     null
                 } else {
-                    val argumentChecks = vulnerabilityChecksFuzzer.generate(methodId, parametersInfo, constraints, description, taintedArgs)
+                    val methods = mutableListOf<String>()
+                    val booleanType = BooleanType.v()
+                    val paramTypes = target.method.parameterTypes
+                    this.forEach foreach@{ vulnerabilityCheck ->
+                        vulnerabilityCheck.functionIds.forEach { (checkClassName, checkFunctionName) ->
+                            val checkSootClass = Scene.v().getSootClass(checkClassName)
+                            val checkSootMethod =
+                                checkSootClass.getMethodUnsafe(checkFunctionName, paramTypes, booleanType)
+                                    ?: return@foreach
+                            methods.add(checkSootMethod.name)
+                        }
+                    }
+                    val argumentChecks = vulnerabilityChecksFuzzer.generate(methodId, parametersInfo, constraints, description, methods, taintedArgs)
                     if (argumentChecks == null) descriptions.add(description)
                     argumentChecks?.run { ArgumentsVulnerabilityChecksCreator.parseVulnerabilityCheck(this) }
                 }
@@ -95,7 +109,8 @@ class CyberTraverser(
                     argumentChecks.add(it)
                 }
             }
-            val decorateFunction = decorateVulnerabilityFunction(target, methodName, checks = argumentChecks) // here add taint args
+
+            val (decorateFunction, methods) = decorateVulnerabilityFunction(target, methodName, checks = argumentChecks)
             InvocationTarget(instance = null, method = decorateFunction, target.constraints)
         } ?: target
     }

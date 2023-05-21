@@ -69,6 +69,7 @@ class CyberUtBotSymbolicEngine(
     private val stateHolder: StateHolder?,
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, applicationContext, solverTimeoutInMillis) {
     init {  // set our selector
+        println("THIS init " + this@CyberUtBotSymbolicEngine)
         if (cyberPathSelector) {
             pathSelector = cyberPathSelector(globalGraph, StrategyOption.DISTANCE, analysedJar, cyberDefaultSelector) {
                 withStepsLimit(UtSettings.pathSelectorStepsLimit)
@@ -111,6 +112,7 @@ class CyberUtBotSymbolicEngine(
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "add StateViewer")
     override fun traverseImpl(): Flow<UtResult> = flow {
+        println("THIS! " + this@CyberUtBotSymbolicEngine)
 
         require(trackableResources.isEmpty())
 
@@ -291,6 +293,7 @@ class CyberUtBotSymbolicEngine(
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "filter terminal states")
     override suspend fun FlowCollector<UtResult>.consumeTerminalState(state: ExecutionState) {
+        println("THIS " + this@CyberUtBotSymbolicEngine)
         // some checks to be sure the state is correct
         require(state.label == StateLabel.TERMINAL) { "Can't process non-terminal state!" }
         require(!state.isInNestedMethod()) { "The state has to correspond to the MUT" }
@@ -427,7 +430,8 @@ class CyberUtBotSymbolicEngine(
      */
     @CyberModify("replace original java language fuzzing by cyber fuzzing")
     override fun fuzzing(until: Long, context: UtContext, transform: (JavaValueProvider) -> JavaValueProvider) = withUtContext(context) {
-        flow {
+        println("THISS " + this@CyberUtBotSymbolicEngine)
+        flow<UtResult> {
             val isFuzzable = methodUnderTest.parameters.all { classId ->
                 classId != Method::class.java.id && // causes the instrumented process crash at invocation
                         classId != Class::class.java.id  // causes java.lang.IllegalAccessException: java.lang.Class at sun.misc.Unsafe.allocateInstance(Native Method)
@@ -450,15 +454,15 @@ class CyberUtBotSymbolicEngine(
                 listOf(transform(ValueProvider.of(org.cyber.utbot.api.utils.overrides.fuzzing.defaultValueProviders(defaultIdGenerator))))
                 // todo fst info here
             ) { thisInstance, descr, values ->
-                println("values: ")
-                values.forEach { println(it.summary) }
+//                println("values: ")
+//                values.forEach { println(it.summary) }
                 if (thisInstance?.model is UtNullModel) {
                     // We should not try to run concretely any models with null-this.
                     // But fuzzer does generate such values, because it can fail to generate any "good" values.
                     return@cyberRunJavaFuzzing BaseFeedback(Trie.emptyNode(), Control.PASS)
                 }
 
-                val diff = until - System.currentTimeMillis() + 3000
+                val diff = until - System.currentTimeMillis() + 1000
                 val thresholdMillisForFuzzingOperation = 0 // may be better use 10-20 millis as it might not be possible
                 // to concretely execute that values because request to instrumentation process involves
                 // 1. serializing/deserializing it with kryo
@@ -472,79 +476,74 @@ class CyberUtBotSymbolicEngine(
                     return@cyberRunJavaFuzzing BaseFeedback(result = Trie.emptyNode(), control = Control.STOP)
                 }
 
-                val initialEnvironmentModels = EnvironmentModels(thisInstance?.model, values.map { it.model }, mapOf())
+//                val initialEnvironmentModels = EnvironmentModels(thisInstance?.model, values.map { it.model }, mapOf())
 
-                val concreteExecutionResult: UtConcreteExecutionResult? = try {
-                    val timeoutMillis = min(UtSettings.concreteExecutionDefaultTimeoutInInstrumentedProcessMillis, diff)
-                    concreteExecutor.executeConcretely(
-                        methodUnderTest,
-                        initialEnvironmentModels,
-                        listOf(),
-                        timeoutMillis
-                    )
-                } catch (e: CancellationException) {
-                    logger.debug { "Cancelled by timeout" }; null
-                } catch (e: InstrumentedProcessDeathException) {
-                    emitFailedConcreteExecutionResult(initialEnvironmentModels, e); null
-                } catch (e: Throwable) {
-                    emit(UtError("Default concrete execution failed", e)); null
-                }
+//                val concreteExecutionResult: UtConcreteExecutionResult? = try {
+//                    val timeoutMillis = min(UtSettings.concreteExecutionDefaultTimeoutInInstrumentedProcessMillis, diff)
+//                    concreteExecutor.executeConcretely(
+//                        methodUnderTest,
+//                        initialEnvironmentModels,
+//                        listOf(),
+//                        timeoutMillis
+//                    )
+//                } catch (e: CancellationException) {
+//                    logger.debug { "Cancelled by timeout" }; null
+//                } catch (e: InstrumentedProcessDeathException) {
+//                    emitFailedConcreteExecutionResult(initialEnvironmentModels, e); null
+//                } catch (e: Throwable) {
+//                    emit(UtError("Default concrete execution failed", e)); null
+//                }
 
                 // in case an exception occurred from the concrete execution
-                concreteExecutionResult ?: return@cyberRunJavaFuzzing BaseFeedback(
-                    result = Trie.emptyNode(),
-                    control = Control.PASS
-                )
-                println("concrete result: ${concreteExecutionResult.result}")
+//                concreteExecutionResult ?: return@cyberRunJavaFuzzing BaseFeedback(
+//                    result = Trie.emptyNode(),
+//                    control = Control.PASS
+//                )
+//                println("concrete result: ${concreteExecutionResult.result}")
 
-                if (concreteExecutionResult.violatesUtMockAssumption()) {
-                    logger.debug { "Generated test case by fuzzer violates the UtMock assumption: $concreteExecutionResult" }
-                    return@cyberRunJavaFuzzing BaseFeedback(result = Trie.emptyNode(), control = Control.PASS)
-                }
-                println("here1")
+//                if (concreteExecutionResult.violatesUtMockAssumption()) {
+//                    logger.debug { "Generated test case by fuzzer violates the UtMock assumption: $concreteExecutionResult" }
+//                    return@cyberRunJavaFuzzing BaseFeedback(result = Trie.emptyNode(), control = Control.PASS)
+//                }
+//
+//                val coveredInstructions = concreteExecutionResult.coverage.coveredInstructions
+//                var trieNode: Trie.Node<Instruction>? = null
+//                if (coveredInstructions.isNotEmpty()) {
+//                    trieNode = descr.tracer.add(coveredInstructions)
+//                    if (trieNode.count > 100) {
+//                        if (++attempts >= attemptsLimit) {
+//                            return@cyberRunJavaFuzzing BaseFeedback(result = Trie.emptyNode(), control = Control.STOP)
+//                        }
+//                        return@cyberRunJavaFuzzing BaseFeedback(result = trieNode, control = Control.CONTINUE)
+//                    }
+//                } else {
+//                    logger.error { "Coverage is empty for $methodUnderTest with $values" }
+//                    val result = concreteExecutionResult.result
+//                    if (result is UtSandboxFailure) {
+//                        println("here7")
+//                        val stackTraceElements = result.exception.stackTrace.reversed()
+//                        if (errorStackTraceTracker.add(stackTraceElements).count > 1) {
+//                            return@cyberRunJavaFuzzing BaseFeedback(result = Trie.emptyNode(), control = Control.PASS)
+//                        }
+//                    }
+//                }
 
-                val coveredInstructions = concreteExecutionResult.coverage.coveredInstructions
-                var trieNode: Trie.Node<Instruction>? = null
-                if (coveredInstructions.isNotEmpty()) {
-                    println("here2")
-                    trieNode = descr.tracer.add(coveredInstructions)
-                    if (trieNode.count > 100) {
-                        println("here3")
-                        if (++attempts >= attemptsLimit) {
-                            println("here4")
-                            return@cyberRunJavaFuzzing BaseFeedback(result = Trie.emptyNode(), control = Control.STOP)
-                        }
-                        println("here5")
-                        return@cyberRunJavaFuzzing BaseFeedback(result = trieNode, control = Control.CONTINUE)
-                    }
-                } else {
-                    println("here6")
-                    logger.error { "Coverage is empty for $methodUnderTest with $values" }
-                    val result = concreteExecutionResult.result
-                    if (result is UtSandboxFailure) {
-                        println("here7")
-                        val stackTraceElements = result.exception.stackTrace.reversed()
-                        if (errorStackTraceTracker.add(stackTraceElements).count > 1) {
-                            return@cyberRunJavaFuzzing BaseFeedback(result = Trie.emptyNode(), control = Control.PASS)
-                        }
-                    }
-                }
-
-                println("EMIT ${values[0].summary}, ${values[1].summary}")
-                emit(
-                    UtFuzzedExecution(
-                        stateBefore = initialEnvironmentModels,
-                        stateAfter = concreteExecutionResult.stateAfter,
-                        result = concreteExecutionResult.result,
-                        coverage = concreteExecutionResult.coverage,
-                        fuzzingValues = values,
-                        fuzzedMethodDescription = descr.description
-                    )
-                )
+//                println("EMIT ${values[0].summary}")
+//                emit(
+//                    UtFuzzedExecution(
+//                        stateBefore = initialEnvironmentModels,
+//                        stateAfter = concreteExecutionResult.stateAfter,
+//                        result = concreteExecutionResult.result,
+//                        coverage = concreteExecutionResult.coverage,
+//                        fuzzingValues = values,
+//                        fuzzedMethodDescription = descr.description
+//                    )
+//                )
 
                 testEmittedByFuzzer++
-                BaseFeedback(result = trieNode ?: Trie.emptyNode(), control = Control.CONTINUE)
+                BaseFeedback(result = Trie.emptyNode(), control = Control.CONTINUE)
             }
+            println("AAAAA STOP")
         }
     }
 
