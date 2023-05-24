@@ -1,6 +1,5 @@
 package org.cyber.utbot.api.utils.overrides.fuzzing
 
-import cyberFuzz
 import org.utbot.fuzzing.*
 import kotlin.random.Random
 

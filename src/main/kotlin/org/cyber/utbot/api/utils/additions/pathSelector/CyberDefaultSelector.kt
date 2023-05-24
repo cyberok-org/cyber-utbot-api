@@ -31,7 +31,7 @@ internal class CyberDefaultSelector(private val graph: InterProceduralUnitGraph)
             tmpCurrentIndex = random.nextInt(executionStates.size)
         }
         val state = executionStates[tmpCurrentIndex]
-        executionStates.removeAt(tmpCurrentIndex)
+        executionStates.remove(state)
 //        println("polles state: ${Thread.currentThread()} ${state.stmt} method ${graph.method(state.stmt).jimpleBody().method.name}")
         return state
     }

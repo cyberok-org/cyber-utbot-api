@@ -61,7 +61,7 @@ fun main() {
         withUtSettings = { useFuzzing = false; useDebugVisualization = true; testMinimizationStrategyType = TestSelectionStrategyType.DO_NOT_MINIMIZE_STRATEGY; },
         utbotViewers = setOf(UTBotViewers.TERMINAL_STATISTIC_VIEWER), vulnerabilityCheckBases=listOf("$UTBOT_DIR/cyber-utbot-exploit-base"))
     val generator = TestGenerator(settings)
-    val (tests, info) = generator.run(mapOf("org.example.checks.Example" to "src/main/java/org/example/checks/Example.java").toTestUnits())
+    val (tests, info) = generator.run(mapOf("org.example.inter.PathTraversal" to "src/main/java/org/example/inter/PathTraversal.java").toTestUnits())
 //    val (tests, info) = generator.run(mapOf("org.example.checks.Example" to "src/main/java/org/example/checks/Example.java").toTestUnits())
     println(tests)
     tests.forEach { nameAndTest ->

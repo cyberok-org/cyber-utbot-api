@@ -36,7 +36,7 @@ public class PathTraversal {
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String s = req.getParameter(FIELD_NAME);
-        String name = s.toLowerCase(Locale.UK);
+        String name = s;
         RandomAccessFile raf = new RandomAccessFile(name, "rw");
     }
     

@@ -1,5 +1,6 @@
 package org.cyber.utbot.api.utils.overrides
 
+import VulnerabilityArgumentsCheckWithDescription
 import org.cyber.utbot.api.utils.CHECK_METHOD_PREFIX
 import org.cyber.utbot.api.utils.VULNERABILITY_CHECKS_CLASS_NAME
 import org.cyber.utbot.api.utils.additions.MethodSubstitution
@@ -98,7 +99,8 @@ class CyberTraverser(
                             methods.add(checkSootMethod.name)
                         }
                     }
-                    val argumentChecks = vulnerabilityChecksFuzzer.generate(methodId, parametersInfo, constraints, description, methods, taintedArgs)
+                    val argumentChecks = vulnerabilityChecksFuzzer.
+                    generate(methodId, parametersInfo, constraints, description, methods, taintedArgs)
                     if (argumentChecks == null) descriptions.add(description)
                     argumentChecks?.run { ArgumentsVulnerabilityChecksCreator.parseVulnerabilityCheck(this) }
                 }

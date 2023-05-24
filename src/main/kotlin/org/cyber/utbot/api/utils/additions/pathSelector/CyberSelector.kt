@@ -40,12 +40,13 @@ class CyberSelector(
 
     init {
         classPool.insertClassPath(jarName)
+        classPool.insertClassPath("C:/Users/lesya/uni2/UTBotJava/cyber-utbot-exploit-base/build/classes/java/main")
     }
 
     fun traceFound() = traceFound
 
     override fun offerImpl(state: ExecutionState) {
-//        println("offer!")
+//        println("offer! ${state.stmt}")
         executionStates += state
         currentIndex = -1
     }
@@ -68,7 +69,7 @@ class CyberSelector(
             if (mapState(state)) {
                 peekTraceFound = true
                 currentIndex = i
-//                if (state.stmt.toString().contains("Example")) println("peeked1 ${state.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+//                println("peeked1 ${state.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                 return state
             }
         }
@@ -76,7 +77,7 @@ class CyberSelector(
         // random state peek
         val (state, idx) = defaultSelector.peekImpl(executionStates, currentIndex)
         currentIndex = idx
-//        if (state?.stmt.toString().contains("Example")) println("peeked2 ${state?.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+//        println("peeked2 ${state?.stmt}, }, traceFound = $traceFound, currentIndex = $currentIndex")
         return state
     }
 
@@ -103,13 +104,13 @@ class CyberSelector(
                             it
                         )
                     }
-//                    if (state.stmt.toString().contains("Example"))println("polled1 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+                    println("polled1 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
                 if (mapState(state)) {
                     executionStates.removeAt(i)
                     currentIndex = -1
-//                    if (state.stmt.toString().contains("Example"))println("polled2 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+                    println("polled2 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
             }
@@ -122,7 +123,8 @@ class CyberSelector(
         }
         val state = defaultSelector.pollImpl(executionStates, currentIndex)
         currentIndex = -1
-//        if (state?.stmt.toString().contains("Example")) println("polled3 ${state?.stmt},label = ${state?.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+        println("polled3 ${state?.stmt},label = ${state?.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+        executionStates.remove(state)
         return state
     }
 

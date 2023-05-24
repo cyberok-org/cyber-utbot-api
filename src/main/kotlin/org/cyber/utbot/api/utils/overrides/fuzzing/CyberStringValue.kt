@@ -17,7 +17,6 @@ class CyberStringValue(override val value: String) : StringValue(value) {
     private val gson = Gson()
 
     override fun mutations(): List<Mutation<KnownValue>> {
-        println("mutations")
         return listOf(Mutation { source, random, configuration ->
 //            require(source == this)
             var result: String = value

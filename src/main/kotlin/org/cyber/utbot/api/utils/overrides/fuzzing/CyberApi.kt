@@ -1,5 +1,7 @@
+package org.cyber.utbot.api.utils.overrides.fuzzing
+
 import kotlinx.coroutines.yield
-import org.cyber.utbot.api.utils.overrides.fuzzing.CyberStringValue
+import org.utbot.framework.UtSettings
 import org.utbot.fuzzing.*
 import org.utbot.fuzzing.Result
 import org.utbot.fuzzing.seeds.KnownValue
@@ -8,6 +10,9 @@ import org.utbot.fuzzing.utils.MissedSeed
 import org.utbot.fuzzing.utils.flipCoin
 import org.utbot.fuzzing.utils.transformIfNotEmpty
 import kotlin.random.Random
+
+
+val cyberMutations: MutableList<MutableList<String>> = mutableListOf()
 
 /**
  * Starts fuzzing for this [Fuzzing] object.
@@ -27,6 +32,7 @@ suspend fun <T, R, D : Description<T>, F : Feedback<T, R>> Fuzzing<T, R, D, F>.c
         override val elapsedTime: Long
             get() = System.nanoTime() - startTime
     }
+
     val userStatistic = StatImpl()
     val fuzzing = this
     val typeCache = hashMapOf<T, List<Seed<T, R>>>()
@@ -39,9 +45,12 @@ suspend fun <T, R, D : Description<T>, F : Feedback<T, R>> Fuzzing<T, R, D, F>.c
         builder = PassRoutine("Main Routine"),
         state = State(1, typeCache, userStatistic.missedTypes),
     )
+
     val dynamicallyGenerated = mutableListOf<Node<T, R>>()
     val seeds = Statistics<T, R, F>()
-    run breaking@ {
+    var attempts = 0
+    var attemptsLimit = UtSettings.fuzzingMaxAttempts
+    run breaking@{
         sequence {
             while (description.parameters.isNotEmpty()) {
                 if (dynamicallyGenerated.isNotEmpty()) {
@@ -64,17 +73,24 @@ suspend fun <T, R, D : Description<T>, F : Feedback<T, R>> Fuzzing<T, R, D, F>.c
                             State(1, typeCache, userStatistic.missedTypes)
                             // todo add fun info
                         )
-                        println("mutate")
-                        mutate.result.forEach {
-                            if (it is Result.Known<*, *, *>) {
-                                if ((it as Result.Known<*, *, *>).value is StringValue) println(((it as Result.Known<*, *, *>).value as StringValue).value)
+                        println("mutate1")
+                        mutate.result.forEachIndexed {i, r ->
+                            cyberMutations.getOrNull(i) ?: cyberMutations.add(i, mutableListOf())
+                            if (i == 0) return@forEachIndexed
+                            if (r is Result.Known<*, *, *>) {
+                                if ((r as Result.Known<*, *, *>).value is StringValue) {
+                                    if (!cyberMutations[i].contains(((r as Result.Known<*, *, *>).value as StringValue).value))  {
+                                        cyberMutations[i].add(((r as Result.Known<*, *, *>).value as StringValue).value)
+                                    }
+                                    println(((r as Result.Known<*, *, *>).value as StringValue).value)
+                                }
                             }
                         }
                         dynamicallyGenerated += mutate
                     }
                 }
             }
-        }.forEach execution@ { values ->
+        }.forEach execution@{ values ->
             yield()
             fuzzing.update(description, userStatistic.apply {
                 totalRuns++
@@ -86,17 +102,22 @@ suspend fun <T, R, D : Description<T>, F : Feedback<T, R>> Fuzzing<T, R, D, F>.c
             val feedback = fuzzing.handle(description, result)
             when (feedback.control) {
                 Control.CONTINUE -> {
-//                    println("HERE CONT")
+                    attempts += 1
+                    if (attempts > attemptsLimit) return@breaking
                     seeds.put(random, configuration, feedback, values)
                 }
+
                 Control.RESET_TYPE_CACHE_AND_CONTINUE -> {
                     dynamicallyGenerated.clear()
                     typeCache.clear()
                     seeds.put(random, configuration, feedback, values)
                 }
+
                 Control.STOP -> {
                     println("HERE STOP")
-                    return@breaking }
+                    return@breaking
+                }
+
                 Control.PASS -> {}
             }
         }
@@ -111,7 +132,7 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
     configuration: Configuration,
     builder: Routine<TYPE, RESULT>,
     state: State<TYPE, RESULT>,
-): Node<TYPE, RESULT>  {
+): Node<TYPE, RESULT> {
     val typeCache = mutableMapOf<TYPE, MutableList<Result<TYPE, RESULT>>>()
     val result = parameters.map { type ->
         val results = typeCache.computeIfAbsent(type) { mutableListOf() }
@@ -152,6 +173,7 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
                 configuration,
                 state
             )
+
             is Seed.Collection<TYPE, RESULT> -> reduce(it, fuzzing, description, random, configuration, state)
         }
     }
@@ -165,7 +187,8 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
  *  reduces [Seed.Recursive] type.  When `configuration.recursionTreeDepth` limit is reached it calls
  *  `Seed.Recursive#empty` routine to create an empty object.
  */
-fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RESULT>> reduce( // todo also move
+fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RESULT>> reduce(
+    // todo also move
     task: Seed.Recursive<TYPE, RESULT>,
     fuzzing: Fuzzing<TYPE, RESULT, DESCRIPTION, FEEDBACK>,
     description: DESCRIPTION,
@@ -220,7 +243,8 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
  * reduces [Seed.Collection] type. When `configuration.recursionTreeDepth` limit is reached it creates
  * an empty collection and doesn't do any modification to it.
  */
-fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RESULT>>  reduce( // todo also move
+fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RESULT>> reduce(
+    // todo also move
     task: Seed.Collection<TYPE, RESULT>,
     fuzzing: Fuzzing<TYPE, RESULT, DESCRIPTION, FEEDBACK>,
     description: DESCRIPTION,
@@ -299,15 +323,21 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
 ): Node<TYPE, RESULT> {
     if (node.result.isEmpty()) return node
     val indexOfMutatedResult = if (Configuration.taintedArgs.size > 0) {
-            Configuration.taintedArgs[Random.nextInt(Configuration.taintedArgs.size)] + 1 // the first param is the method description afaik
+        Configuration.taintedArgs[Random.nextInt(Configuration.taintedArgs.size)] + 1 // the first param is the method description afaik
     } else Random.nextInt(0, node.parameters.size)
     // random.chooseOne(node.result.map(::rate).toDoubleArray())
     println("idx == $indexOfMutatedResult")
     val mutated = when (val resultToMutate = node.result[indexOfMutatedResult]) {
-        is Result.Simple<TYPE, RESULT> -> Result.Simple(resultToMutate.mutation(resultToMutate.result, random), resultToMutate.mutation)
+        is Result.Simple<TYPE, RESULT> -> Result.Simple(
+            resultToMutate.mutation(resultToMutate.result, random),
+            resultToMutate.mutation
+        )
+
         is Result.Known<TYPE, RESULT, out KnownValue> -> {
-            val mutations = if ((resultToMutate.value) is StringValue) CyberStringValue(((resultToMutate.value) as StringValue).value).mutations() // todo(unchecked cast)
-            else resultToMutate.value.mutations()
+            val mutations =
+                if ((resultToMutate.value) is StringValue)
+                    CyberStringValue(((resultToMutate.value) as StringValue).value).mutations() // todo(unchecked cast)
+                else resultToMutate.value.mutations()
             if (mutations.isNotEmpty()) {
                 Result.Known(
                     mutations.random(random).mutate(resultToMutate.value, random, configuration),
@@ -317,34 +347,61 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
                 resultToMutate
             }
         }
+
         is Result.Recursive<TYPE, RESULT> -> {
             if (resultToMutate.modify.isEmpty() || random.flipCoin(configuration.probConstructorMutationInsteadModificationMutation)) {
                 Result.Recursive(
-                    construct = cyberMutate(resultToMutate.construct, fuzzing, random, configuration, State(state.recursionTreeDepth + 1, state.cache, state.missedTypes)),
+                    construct = cyberMutate(
+                        resultToMutate.construct,
+                        fuzzing,
+                        random,
+                        configuration,
+                        State(state.recursionTreeDepth + 1, state.cache, state.missedTypes)
+                    ),
                     modify = resultToMutate.modify
                 )
             } else if (random.flipCoin(configuration.probShuffleAndCutRecursiveObjectModificationMutation)) {
                 Result.Recursive(
                     construct = resultToMutate.construct,
-                    modify = resultToMutate.modify.shuffled(random).take(random.nextInt(resultToMutate.modify.size + 1).coerceAtLeast(1))
+                    modify = resultToMutate.modify.shuffled(random)
+                        .take(random.nextInt(resultToMutate.modify.size + 1).coerceAtLeast(1))
                 )
             } else {
                 Result.Recursive(
                     construct = resultToMutate.construct,
                     modify = resultToMutate.modify.toMutableList().apply {
                         val i = random.nextInt(0, resultToMutate.modify.size)
-                        set(i, cyberMutate(resultToMutate.modify[i], fuzzing, random, configuration, State(state.recursionTreeDepth + 1, state.cache, state.missedTypes)))
+                        set(
+                            i,
+                            cyberMutate(
+                                resultToMutate.modify[i],
+                                fuzzing,
+                                random,
+                                configuration,
+                                State(state.recursionTreeDepth + 1, state.cache, state.missedTypes)
+                            )
+                        )
                     }
                 )
             }
         }
+
         is Result.Collection<TYPE, RESULT> -> Result.Collection(
             construct = resultToMutate.construct,
             modify = resultToMutate.modify.toMutableList().apply {
                 if (isNotEmpty()) {
                     if (random.flipCoin(100 - configuration.probCollectionShuffleInsteadResultMutation)) {
                         val i = random.nextInt(0, resultToMutate.modify.size)
-                        set(i, cyberMutate(resultToMutate.modify[i], fuzzing, random, configuration, State(state.recursionTreeDepth + 1, state.cache, state.missedTypes)))
+                        set(
+                            i,
+                            cyberMutate(
+                                resultToMutate.modify[i],
+                                fuzzing,
+                                random,
+                                configuration,
+                                State(state.recursionTreeDepth + 1, state.cache, state.missedTypes)
+                            )
+                        )
                     } else {
                         shuffle(random)
                     }
@@ -352,6 +409,7 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
             },
             iterations = resultToMutate.iterations
         )
+
         is Result.Empty -> resultToMutate
     }
     return Node(node.result.toMutableList().apply {

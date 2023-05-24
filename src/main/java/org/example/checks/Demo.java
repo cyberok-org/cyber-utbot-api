@@ -6,8 +6,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class Demo {
-    public void example(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String path = "safe_path.txt";
+    public void demo(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String path = "safe_path";
         String header = request.getHeader("header");
         if (header.equals("some value")) {
             Cookie[] theCookies = request.getCookies();
@@ -19,10 +19,7 @@ public class Demo {
                 }
             }
         }
-
         java.io.File fileTarget = new java.io.File(path);
-
-//        System.out.println(path);
         response.getWriter().println("file: " + fileTarget);
     }
 }
