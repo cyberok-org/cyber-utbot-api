@@ -5,11 +5,34 @@ import org.junit.jupiter.api.DisplayName;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mock;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public final class PathTraversalTest {
+    ///region Test suites for executable org.example.inter.PathTraversal.getDescription
+    
+    ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method getDescription()
+    
+    /**
+    @utbot.classUnderTest {@link PathTraversal}
+ * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#getDescription()}
+ * @utbot.returnsFrom {@code return "path traversal";}
+ *  */
+    @Test
+    @DisplayName("getDescription: -> return \"path traversal\"")
+    public void testGetDescription_ReturnPathtraversal() {
+        PathTraversal pathTraversal = new PathTraversal();
+        
+        String actual = pathTraversal.getDescription();
+        
+        String expected = "path traversal";
+        assertEquals(expected, actual);
+    }
+    ///endregion
+    
+    ///endregion
+    
     ///region Test suites for executable org.example.inter.PathTraversal.doGet
     
     ///region SYMBOLIC EXECUTION: ERROR SUITE for method doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -70,7 +93,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("et\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -96,7 +119,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -122,7 +145,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -148,7 +171,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("e\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -174,7 +197,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn(".\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -200,7 +223,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("e\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -226,7 +249,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -278,7 +301,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2e\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/pas\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -304,7 +327,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -330,7 +353,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/pa\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -356,7 +379,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("et\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/p\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -382,7 +405,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/p\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/pass\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -408,7 +431,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/pa\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -434,7 +457,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passw\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -460,7 +483,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%3\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -486,7 +509,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2eet\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -512,7 +535,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%6\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -538,7 +561,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/pas\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63e\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -564,7 +587,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2eetc\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -582,23 +605,16 @@ public final class PathTraversalTest {
  *  */
     @Test
     @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
-    @org.cyber.utils.VulnerabilityInfo("arbitrary file creation")
+    @org.cyber.utils.VulnerabilityInfo("arbitrary file modification")
     public void testDoGet_ThrowMockitoException_21() throws IOException  {
-        org.mockito.MockedConstruction mockedConstruction = null;
-        try {
-            mockedConstruction = mockConstruction(java.io.File.class, (java.io.File fileMock, org.mockito.MockedConstruction.Context context) -> {
-            });
-            PathTraversal pathTraversal = new PathTraversal();
-            HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2ee\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
-            
-            /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-                org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-                org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
-            pathTraversal.doGet(httpServletRequestMock, null);
-        } finally {
-            mockedConstruction.close();
-        }
+        PathTraversal pathTraversal = new PathTraversal();
+        HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
+        (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd\\..");
+        
+        /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
+            org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
+            org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
+        pathTraversal.doGet(httpServletRequestMock, null);
     }
     
     /**
@@ -616,7 +632,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -642,7 +658,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2eetc/p\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd\\.\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -668,7 +684,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/pass\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63et\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -694,7 +710,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passw\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd\\\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -720,7 +736,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd%\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63etc/p\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -746,7 +762,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2eetc/pa\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63etc\u0000\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -772,33 +788,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2eetc/pas\u0000\u0000\u0000");
-            
-            /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-                org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-                org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
-            pathTraversal.doGet(httpServletRequestMock, null);
-        } finally {
-            mockedConstruction.close();
-        }
-    }
-    
-    /**
-    @utbot.classUnderTest {@link PathTraversal}
- * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#doGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: RandomAccessFile raf = new RandomAccessFile(name, "rw");
- *  */
-    @Test
-    @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
-    @org.cyber.utils.VulnerabilityInfo("arbitrary file creation")
-    public void testDoGet_ThrowMockitoException_29() throws IOException  {
-        org.mockito.MockedConstruction mockedConstruction = null;
-        try {
-            mockedConstruction = mockConstruction(java.io.File.class, (java.io.File fileMock, org.mockito.MockedConstruction.Context context) -> {
-            });
-            PathTraversal pathTraversal = new PathTraversal();
-            HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2eetc/\u0000\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63etc/\u0000\u0000\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -817,15 +807,41 @@ public final class PathTraversalTest {
     @Test
     @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
     @org.cyber.utils.VulnerabilityInfo("arbitrary file modification")
-    public void testDoGet_ThrowMockitoException_30() throws IOException  {
+    public void testDoGet_ThrowMockitoException_29() throws IOException  {
         PathTraversal pathTraversal = new PathTraversal();
         HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-        (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2eetc/passwd");
+        (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63etc/passwd");
         
         /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
             org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
             org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
         pathTraversal.doGet(httpServletRequestMock, null);
+    }
+    
+    /**
+    @utbot.classUnderTest {@link PathTraversal}
+ * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#doGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)}
+ * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: RandomAccessFile raf = new RandomAccessFile(name, "rw");
+ *  */
+    @Test
+    @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
+    @org.cyber.utils.VulnerabilityInfo("arbitrary file creation")
+    public void testDoGet_ThrowMockitoException_30() throws IOException  {
+        org.mockito.MockedConstruction mockedConstruction = null;
+        try {
+            mockedConstruction = mockConstruction(java.io.File.class, (java.io.File fileMock, org.mockito.MockedConstruction.Context context) -> {
+            });
+            PathTraversal pathTraversal = new PathTraversal();
+            HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63etc/pas\u0000\u0000\u0000");
+            
+            /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
+                org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
+                org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
+            pathTraversal.doGet(httpServletRequestMock, null);
+        } finally {
+            mockedConstruction.close();
+        }
     }
     
     /**
@@ -843,7 +859,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2eetc/pass\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63etc/passw\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -869,7 +885,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd%35\u0000\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63etc/pa\u0000\u0000\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -895,7 +911,7 @@ public final class PathTraversalTest {
             });
             PathTraversal pathTraversal = new PathTraversal();
             HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd%35%\u0000\u0000\u0000\u0000");
+            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("..%35%63etc/pass\u0000\u0000");
             
             /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
                 org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
@@ -904,178 +920,6 @@ public final class PathTraversalTest {
         } finally {
             mockedConstruction.close();
         }
-    }
-    
-    /**
-    @utbot.classUnderTest {@link PathTraversal}
- * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#doGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: RandomAccessFile raf = new RandomAccessFile(name, "rw");
- *  */
-    @Test
-    @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
-    @org.cyber.utils.VulnerabilityInfo("arbitrary file creation")
-    public void testDoGet_ThrowMockitoException_34() throws IOException  {
-        org.mockito.MockedConstruction mockedConstruction = null;
-        try {
-            mockedConstruction = mockConstruction(java.io.File.class, (java.io.File fileMock, org.mockito.MockedConstruction.Context context) -> {
-            });
-            PathTraversal pathTraversal = new PathTraversal();
-            HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd%3\u0000\u0000\u0000\u0000\u0000\u0000");
-            
-            /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-                org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-                org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
-            pathTraversal.doGet(httpServletRequestMock, null);
-        } finally {
-            mockedConstruction.close();
-        }
-    }
-    
-    /**
-    @utbot.classUnderTest {@link PathTraversal}
- * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#doGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: RandomAccessFile raf = new RandomAccessFile(name, "rw");
- *  */
-    @Test
-    @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
-    @org.cyber.utils.VulnerabilityInfo("arbitrary file creation")
-    public void testDoGet_ThrowMockitoException_35() throws IOException  {
-        org.mockito.MockedConstruction mockedConstruction = null;
-        try {
-            mockedConstruction = mockConstruction(java.io.File.class, (java.io.File fileMock, org.mockito.MockedConstruction.Context context) -> {
-            });
-            PathTraversal pathTraversal = new PathTraversal();
-            HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("%5c%2e%2eetc/passw\u0000");
-            
-            /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-                org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-                org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
-            pathTraversal.doGet(httpServletRequestMock, null);
-        } finally {
-            mockedConstruction.close();
-        }
-    }
-    
-    /**
-    @utbot.classUnderTest {@link PathTraversal}
- * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#doGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: RandomAccessFile raf = new RandomAccessFile(name, "rw");
- *  */
-    @Test
-    @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
-    @org.cyber.utils.VulnerabilityInfo("arbitrary file creation")
-    public void testDoGet_ThrowMockitoException_36() throws IOException  {
-        org.mockito.MockedConstruction mockedConstruction = null;
-        try {
-            mockedConstruction = mockConstruction(java.io.File.class, (java.io.File fileMock, org.mockito.MockedConstruction.Context context) -> {
-            });
-            PathTraversal pathTraversal = new PathTraversal();
-            HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd%35%6\u0000\u0000\u0000");
-            
-            /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-                org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-                org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
-            pathTraversal.doGet(httpServletRequestMock, null);
-        } finally {
-            mockedConstruction.close();
-        }
-    }
-    
-    /**
-    @utbot.classUnderTest {@link PathTraversal}
- * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#doGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: RandomAccessFile raf = new RandomAccessFile(name, "rw");
- *  */
-    @Test
-    @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
-    @org.cyber.utils.VulnerabilityInfo("arbitrary file creation")
-    public void testDoGet_ThrowMockitoException_37() throws IOException  {
-        org.mockito.MockedConstruction mockedConstruction = null;
-        try {
-            mockedConstruction = mockConstruction(java.io.File.class, (java.io.File fileMock, org.mockito.MockedConstruction.Context context) -> {
-            });
-            PathTraversal pathTraversal = new PathTraversal();
-            HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd%35%63\u0000\u0000");
-            
-            /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-                org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-                org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
-            pathTraversal.doGet(httpServletRequestMock, null);
-        } finally {
-            mockedConstruction.close();
-        }
-    }
-    
-    /**
-    @utbot.classUnderTest {@link PathTraversal}
- * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#doGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: RandomAccessFile raf = new RandomAccessFile(name, "rw");
- *  */
-    @Test
-    @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
-    @org.cyber.utils.VulnerabilityInfo("arbitrary file modification")
-    public void testDoGet_ThrowMockitoException_38() throws IOException  {
-        PathTraversal pathTraversal = new PathTraversal();
-        HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-        (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd%35%63..");
-        
-        /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-            org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-            org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
-        pathTraversal.doGet(httpServletRequestMock, null);
-    }
-    
-    /**
-    @utbot.classUnderTest {@link PathTraversal}
- * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#doGet(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)}
- * @utbot.throwsException {@link org.mockito.exceptions.base.MockitoException} in: RandomAccessFile raf = new RandomAccessFile(name, "rw");
- *  */
-    @Test
-    @DisplayName("doGet: raf = new RandomAccessFile(name, \"rw\") -> ThrowMockitoException")
-    @org.cyber.utils.VulnerabilityInfo("arbitrary file creation")
-    public void testDoGet_ThrowMockitoException_39() throws IOException  {
-        org.mockito.MockedConstruction mockedConstruction = null;
-        try {
-            mockedConstruction = mockConstruction(java.io.File.class, (java.io.File fileMock, org.mockito.MockedConstruction.Context context) -> {
-            });
-            PathTraversal pathTraversal = new PathTraversal();
-            HttpServletRequest httpServletRequestMock = mock(HttpServletRequest.class);
-            (org.mockito.Mockito.when(httpServletRequestMock.getParameter("name"))).thenReturn("etc/passwd%35%63.\u0000");
-            
-            /* This test fails because method [org.example.inter.PathTraversal.doGet] produces [org.mockito.exceptions.base.MockitoException: \nCannot call abstract real method on java object!\nCalling real methods is only possible when mocking non abstract method.\n  //correct example:\n  when(mockOfConcreteClass.nonAbstractMethod()).thenCallRealMethod();]
-                org.utbot.instrumentation.instrumentation.execution.constructors.MockValueConstructor$generateMockitoAnswer$1.answer(MockValueConstructor.kt:228)
-                org.example.inter.PathTraversal.doGet(PathTraversal.java:38) */
-            pathTraversal.doGet(httpServletRequestMock, null);
-        } finally {
-            mockedConstruction.close();
-        }
-    }
-    ///endregion
-    
-    ///endregion
-    
-    ///region Test suites for executable org.example.inter.PathTraversal.getDescription
-    
-    ///region SYMBOLIC EXECUTION: SUCCESSFUL EXECUTIONS for method getDescription()
-    
-    /**
-    @utbot.classUnderTest {@link PathTraversal}
- * @utbot.methodUnderTest {@link org.example.inter.PathTraversal#getDescription()}
- * @utbot.returnsFrom {@code return "path traversal";}
- *  */
-    @Test
-    @DisplayName("getDescription: -> return \"path traversal\"")
-    public void testGetDescription_ReturnPathtraversal() {
-        PathTraversal pathTraversal = new PathTraversal();
-        
-        String actual = pathTraversal.getDescription();
-        
-        String expected = "path traversal";
-        assertEquals(expected, actual);
     }
     ///endregion
     

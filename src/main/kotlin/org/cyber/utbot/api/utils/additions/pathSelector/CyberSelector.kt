@@ -4,6 +4,7 @@ import javassist.ClassPool
 import org.cyber.utbot.api.taint.ProguardExecutor
 import org.cyber.utbot.api.taint.mapping.StatesContainer
 import org.cyber.utbot.api.taint.mapping.TraceMapper
+import org.cyber.utbot.api.utils.UTBOT_DIR
 import org.utbot.engine.InterProceduralUnitGraph
 import org.utbot.engine.jimpleBody
 import org.utbot.engine.selectors.BasePathSelector
@@ -40,7 +41,7 @@ class CyberSelector(
 
     init {
         classPool.insertClassPath(jarName)
-        classPool.insertClassPath("C:/Users/lesya/uni2/UTBotJava/cyber-utbot-exploit-base/build/classes/java/main")
+        classPool.insertClassPath("$UTBOT_DIR/cyber-utbot-exploit-base/build/classes/java/main")
     }
 
     fun traceFound() = traceFound
@@ -148,6 +149,7 @@ class CyberSelector(
      */
     fun onNextIteration(initState: ExecutionState): JvmTaintMemoryLocationBamCpaRun {
         val jimpleBody = graph.method(initState.stmt).jimpleBody()
+        traversedMethods.add(jimpleBody.toString())
 //         println(jimpleBody)
         println("IN ${jimpleBody.method.name}")
         resetTrace()
@@ -229,5 +231,9 @@ class CyberSelector(
         mutableListOf(
             "internalCheck"
         )
+
+    companion object { // очень костыльно пока
+        var traversedMethods: MutableList<String> = mutableListOf()
+    }
 
 }

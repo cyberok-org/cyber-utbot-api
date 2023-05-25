@@ -1,6 +1,7 @@
 package org.cyber.utbot.api.utils.overrides.fuzzing
 
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.Serializable
 import org.cyber.utbot.api.utils.UTBOT_DIR
 import org.utbot.fuzzing.Configuration
@@ -30,8 +31,6 @@ class CyberStringValue(override val value: String) : StringValue(value) {
                 val payloadsConfig = getPayloadsList(configuration) ?: return@Mutation StringValue(result)
                 val command = getCommand(value, random, payloadsConfig.commands)
                 result = command
-                if (Configuration.vulnerabilityType.contains("injection")) result =
-                    addArguments(result, random, payloadsConfig.args, command)
                 result = addPrefix(result, random, payloadsConfig.prefixes)
                 if (result.length < 18) result = addSuffix(result, random, payloadsConfig.suffixes)
                 result = mutateCommand(result, random, command)
@@ -55,12 +54,8 @@ class CyberStringValue(override val value: String) : StringValue(value) {
         fun getPayload(dir: String) = PayloadsConfig(
             gson.fromJson(
                 File("$dir/commands.json").readText(),
-                PayloadWrapper::class.java
-            ).parameters,
-            gson.fromJson(
-                File("$dir/arguments.json").readText(),
-                PayloadWrapper::class.java
-            ).parameters,
+                CommandWrapper::class.java
+            ),
             gson.fromJson(
                 File("$dir/prefixes.json").readText(),
                 PayloadWrapper::class.java
@@ -79,23 +74,19 @@ class CyberStringValue(override val value: String) : StringValue(value) {
 
             "arbitrary file modification" -> getPayload("$fuzzingBaseDir/afm")
 
-            "arbitrary file reading" -> getPayload("$fuzzingBaseDir/afm")
+            "arbitrary file reading" -> getPayload("$fuzzingBaseDir/afr")
 
             else -> null
         }
     }
 
-    private fun getCommand(value: String, random: Random, commands: List<String>): String {
+    private fun getCommand(value: String, random: Random, commands: CommandWrapper): String {
         return buildString {
-            val command = commands[Random.nextInt(commands.size)]
-            append(if (!value.contains(command)) command else value)
-        }
-    }
-
-    private fun addArguments(value: String, random: Random, args: List<String>, command: String): String {
-        return buildString {
-            append(value)
-            append(args[Random.nextInt(args.size)]) // make command dependent
+            val fullCommand = commands.parameters.random()
+            append(if (!value.contains(fullCommand.command)) fullCommand.command else value)
+            if (fullCommand.arguments.isNotEmpty()) {
+                append(fullCommand.arguments.random())
+            }
         }
     }
 
@@ -131,6 +122,20 @@ class CyberStringValue(override val value: String) : StringValue(value) {
         }
     }
 
+    data class CommandWrapper(
+        @SerializedName("description")
+        val description: String,
+        @SerializedName("parameters")
+        val parameters: List<Command>
+    )
+
+    data class Command(
+        @SerializedName("command")
+        val command: String,
+        @SerializedName("arguments")
+        val arguments: List<String>
+    )
+
     @Serializable // todo fix warning
     inner class PayloadWrapper(
         val description: String,
@@ -138,8 +143,7 @@ class CyberStringValue(override val value: String) : StringValue(value) {
     )
 
     inner class PayloadsConfig(
-        val commands: List<String>,
-        val args: List<String>,
+        val commands: CommandWrapper,
         val prefixes: List<String>,
         val suffixes: List<String>,
     )

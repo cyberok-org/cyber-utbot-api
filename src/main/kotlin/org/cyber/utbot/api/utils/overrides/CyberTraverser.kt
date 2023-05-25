@@ -1,17 +1,13 @@
 package org.cyber.utbot.api.utils.overrides
 
-import VulnerabilityArgumentsCheckWithDescription
 import org.cyber.utbot.api.utils.CHECK_METHOD_PREFIX
 import org.cyber.utbot.api.utils.VULNERABILITY_CHECKS_CLASS_NAME
 import org.cyber.utbot.api.utils.additions.MethodSubstitution
 import org.cyber.utbot.api.utils.additions.classState.StateHolder
 import org.cyber.utbot.api.utils.additions.constraints.ConstraintParser
-import org.cyber.utbot.api.utils.additions.fuzzing.ExampleVulnerabilityChecksFuzzer
 import org.cyber.utbot.api.utils.additions.fuzzing.TaintVulnerabilityChecksFuzzer
 import org.cyber.utbot.api.utils.additions.fuzzing.VulnerabilityChecksFuzzer
-import org.cyber.utbot.api.utils.additions.vulnerability.assertSootMethod
 import org.cyber.utbot.api.utils.additions.vulnerability.decorateVulnerabilityFunction
-import org.cyber.utbot.api.utils.additions.vulnerability.toStaticInvokeExpr
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.annotations.CyberNote
@@ -38,7 +34,6 @@ import proguard.analysis.cpa.jvm.domain.taint.JvmInvokeTaintSink
 import proguard.analysis.cpa.jvm.domain.taint.JvmTaintSink
 import soot.*
 import soot.jimple.Stmt
-import soot.jimple.StringConstant
 import soot.jimple.internal.JInvokeStmt
 import soot.jimple.internal.JSpecialInvokeExpr
 
@@ -100,7 +95,7 @@ class CyberTraverser(
                         }
                     }
                     val argumentChecks = vulnerabilityChecksFuzzer.
-                    generate(methodId, parametersInfo, constraints, description, methods, taintedArgs)
+                    generate(methodId, parametersInfo, constraints, description, methods, taintedArgs, methodUnderTest)
                     if (argumentChecks == null) descriptions.add(description)
                     argumentChecks?.run { ArgumentsVulnerabilityChecksCreator.parseVulnerabilityCheck(this) }
                 }
