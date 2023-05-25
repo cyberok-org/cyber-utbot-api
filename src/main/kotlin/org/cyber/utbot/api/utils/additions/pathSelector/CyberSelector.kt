@@ -60,7 +60,7 @@ class CyberSelector(
         if (defaultSelection || cyberDefaultSelector) {
             val (state, idx) = defaultSelector.peekImpl(executionStates, currentIndex)
             currentIndex = idx
-            return null //state
+            return state
         }
         if (executionStates.size == 0) {
             return null
@@ -88,7 +88,9 @@ class CyberSelector(
      */
     override fun pollImpl(): ExecutionState? {
         if (defaultSelection || cyberDefaultSelector) {
-            return null //defaultSelector.pollImpl(executionStates, currentIndex)
+            val toRet =  defaultSelector.pollImpl(executionStates, currentIndex)
+            currentIndex = -1
+            return toRet
         }
         if (executionStates.size == 0) {
 //            println("polled0, }, traceFound = $traceFound, currentIndex = $currentIndex")
@@ -104,13 +106,13 @@ class CyberSelector(
                             it
                         )
                     }
-                    println("polled1 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+//                    println("polled1 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
                 if (mapState(state)) {
                     executionStates.removeAt(i)
                     currentIndex = -1
-                    println("polled2 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+//                    println("polled2 ${state.stmt},label = ${state.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
                     return state
                 }
             }
@@ -123,7 +125,7 @@ class CyberSelector(
         }
         val state = defaultSelector.pollImpl(executionStates, currentIndex)
         currentIndex = -1
-        println("polled3 ${state?.stmt},label = ${state?.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
+//        println("polled3 ${state?.stmt},label = ${state?.label}, }, traceFound = $traceFound, currentIndex = $currentIndex")
         executionStates.remove(state)
         return state
     }

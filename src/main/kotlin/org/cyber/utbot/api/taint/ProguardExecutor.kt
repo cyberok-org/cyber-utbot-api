@@ -27,7 +27,7 @@ class ProguardExecutor(private val jarName: String) {
 
     fun execute(jimpleBody: JimpleBody) {
         setHeadMethodSignature(jimpleBody.method)
-        val programClassPool: ClassPool = JarUtil.readJar(jarName, "**Demo", false)
+        val programClassPool: ClassPool = JarUtil.readJar(jarName, "**PathTraversal", false)
         val cfa = CfaUtil.createInterproceduralCfa(programClassPool)
         sources.addAll(parseSources("$UTBOT_DIR/cyber-utbot-exploit-base/src/taint/base/sources"))
         sinks.addAll(parseSinks("$UTBOT_DIR/cyber-utbot-exploit-base/src/taint/base/sinks"))

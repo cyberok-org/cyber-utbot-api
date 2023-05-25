@@ -91,10 +91,8 @@ suspend fun cyberRunJavaFuzzing(
     ) { _, t ->
         totalExecutionCalled++
         if (thisInstance == null) {
-            println("exec 1")
             exec(null, descriptionWithOnlyParameters, t)
         } else {
-            println("exec 2")
             exec(t.first(), descriptionWithOnlyParameters, t.drop(1))
         }
     })

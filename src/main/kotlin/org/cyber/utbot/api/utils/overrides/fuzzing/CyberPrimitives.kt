@@ -20,9 +20,8 @@ object CyberStringValueProvider : PrimitiveValueProvider(stringClassId) {
     ) = sequence {
         val constants = description.constants
             .filter { it.classId == stringClassId }
-        val values = //constants
-//            .mapNotNull { it.value as? String } +
-            sequenceOf("some_file", "etc/passwd") // TODO(add constants here)
+        val values = constants.mapNotNull { it.value as? String }
+//            sequenceOf("some_file") // TODO(add constants here)
         values.forEach { yieldKnown(StringValue(it)) { value } }
         constants
             .filter { it.fuzzedContext.isPatterMatchingContext()  }

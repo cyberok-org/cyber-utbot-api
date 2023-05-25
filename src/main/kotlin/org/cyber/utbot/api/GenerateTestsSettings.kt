@@ -118,7 +118,7 @@ class GenerateTestsSettings(
     /**
      * ignore utbot pathSelectors parameters, use our
      */
-    val cyberPathSelector: Boolean = false,
+    val cyberPathSelector: Boolean = true,
 
     /**
      * if false - just run utbot without extra analyze   // TODO(remove later)
@@ -168,9 +168,7 @@ class GenerateTestsSettings(
     /**
      * whether to use default selector instead of cyber selector
      */
-    var cyberDefaultSelector: Boolean = false,
-
-    var vulnerabilityType: String = "",
+    var cyberDefaultSelector: Boolean = true,
 
     /**
      * libraries that utbot will trust

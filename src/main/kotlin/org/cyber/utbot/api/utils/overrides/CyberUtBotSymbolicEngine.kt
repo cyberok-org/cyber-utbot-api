@@ -69,7 +69,6 @@ class CyberUtBotSymbolicEngine(
     private val stateHolder: StateHolder?,
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, applicationContext, solverTimeoutInMillis) {
     init {  // set our selector
-        println("THIS init " + this@CyberUtBotSymbolicEngine)
         if (cyberPathSelector) {
             pathSelector = cyberPathSelector(globalGraph, StrategyOption.DISTANCE, analysedJar, cyberDefaultSelector) {
                 withStepsLimit(UtSettings.pathSelectorStepsLimit)
@@ -112,8 +111,6 @@ class CyberUtBotSymbolicEngine(
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "add StateViewer")
     override fun traverseImpl(): Flow<UtResult> = flow {
-        println("THIS! " + this@CyberUtBotSymbolicEngine)
-
         require(trackableResources.isEmpty())
 
         if (useDebugVisualization) GraphViz(globalGraph, pathSelector)
@@ -293,7 +290,6 @@ class CyberUtBotSymbolicEngine(
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "filter terminal states")
     override suspend fun FlowCollector<UtResult>.consumeTerminalState(state: ExecutionState) {
-        println("THIS " + this@CyberUtBotSymbolicEngine)
         // some checks to be sure the state is correct
         require(state.label == StateLabel.TERMINAL) { "Can't process non-terminal state!" }
         require(!state.isInNestedMethod()) { "The state has to correspond to the MUT" }
@@ -430,7 +426,6 @@ class CyberUtBotSymbolicEngine(
      */
     @CyberModify("replace original java language fuzzing by cyber fuzzing")
     override fun fuzzing(until: Long, context: UtContext, transform: (JavaValueProvider) -> JavaValueProvider) = withUtContext(context) {
-        println("THISS " + this@CyberUtBotSymbolicEngine)
         flow<UtResult> {
             val isFuzzable = methodUnderTest.parameters.all { classId ->
                 classId != Method::class.java.id && // causes the instrumented process crash at invocation

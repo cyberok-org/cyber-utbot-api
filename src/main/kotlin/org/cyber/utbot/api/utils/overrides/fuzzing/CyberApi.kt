@@ -73,16 +73,15 @@ suspend fun <T, R, D : Description<T>, F : Feedback<T, R>> Fuzzing<T, R, D, F>.c
                             State(1, typeCache, userStatistic.missedTypes)
                             // todo add fun info
                         )
-                        println("mutate1")
                         mutate.result.forEachIndexed {i, r ->
                             cyberMutations.getOrNull(i) ?: cyberMutations.add(i, mutableListOf())
                             if (i == 0) return@forEachIndexed
                             if (r is Result.Known<*, *, *>) {
-                                if ((r as Result.Known<*, *, *>).value is StringValue) {
+                                if ((r as Result.Known<*, *, *>).value is StringValue) { // todo работает только для строк сейчас
                                     if (!cyberMutations[i].contains(((r as Result.Known<*, *, *>).value as StringValue).value))  {
                                         cyberMutations[i].add(((r as Result.Known<*, *, *>).value as StringValue).value)
                                     }
-                                    println(((r as Result.Known<*, *, *>).value as StringValue).value)
+//                                    println(((r as Result.Known<*, *, *>).value as StringValue).value)
                                 }
                             }
                         }
@@ -98,7 +97,6 @@ suspend fun <T, R, D : Description<T>, F : Feedback<T, R>> Fuzzing<T, R, D, F>.c
             check(values.parameters.size == values.result.size) { "Cannot create value for ${values.parameters}" }
             val valuesCache = mutableMapOf<Result<T, R>, R>()
             val result = values.result.map { valuesCache.computeIfAbsent(it) { r -> create(r) } }
-            println("here! ${result.get(0).toString()}")
             val feedback = fuzzing.handle(description, result)
             when (feedback.control) {
                 Control.CONTINUE -> {
@@ -326,7 +324,6 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
         Configuration.taintedArgs[Random.nextInt(Configuration.taintedArgs.size)] + 1 // the first param is the method description afaik
     } else Random.nextInt(0, node.parameters.size)
     // random.chooseOne(node.result.map(::rate).toDoubleArray())
-    println("idx == $indexOfMutatedResult")
     val mutated = when (val resultToMutate = node.result[indexOfMutatedResult]) {
         is Result.Simple<TYPE, RESULT> -> Result.Simple(
             resultToMutate.mutation(resultToMutate.result, random),
@@ -336,7 +333,7 @@ fun <TYPE, RESULT, DESCRIPTION : Description<TYPE>, FEEDBACK : Feedback<TYPE, RE
         is Result.Known<TYPE, RESULT, out KnownValue> -> {
             val mutations =
                 if ((resultToMutate.value) is StringValue)
-                    CyberStringValue(((resultToMutate.value) as StringValue).value).mutations() // todo(unchecked cast)
+                    CyberStringValue(((resultToMutate.value) as StringValue).value).mutations(Configuration.taintedArgs.size > 0) // todo(unchecked cast)
                 else resultToMutate.value.mutations()
             if (mutations.isNotEmpty()) {
                 Result.Known(

@@ -71,7 +71,7 @@ class CyberTraverser(
     ): InvocationTarget {
         val targetClassName = target.method.declaringClass.name
         val targetFunctionName = target.method.name
-        println("target: $targetClassName $targetFunctionName")
+//        println("target: $targetClassName $targetFunctionName")
         return vulnerabilityChecksHolder?.checks( targetClassName to targetFunctionName)?.run {
             val methodName = "$CHECK_METHOD_PREFIX\$$targetClassName.$targetFunctionName"
             if (environment.method.name == methodName && environment.method.declaringClass.name == VULNERABILITY_CHECKS_CLASS_NAME) return target
