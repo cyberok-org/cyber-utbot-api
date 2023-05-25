@@ -24,6 +24,8 @@ open class CyberTestCaseGenerator(
     private val onlyVulnerabilities: Boolean,
     private val statePublisher: StatePublisher,
     private val vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
+    private val analysedJar: String,
+    private val cyberDefaultSelector: Boolean,
     private val codeGen: CodeGen?
 ) : TestCaseGenerator(buildDirs, classpath, dependencyPaths, jdkInfo) {
     private val logger: KLogger = KotlinLogging.logger {}
@@ -53,7 +55,10 @@ open class CyberTestCaseGenerator(
             onlyVulnerabilities,
             statePublisher = statePublisher,
             vulnerabilityChecksHolder = vulnerabilityChecksHolder,
-            stateHolder = stateHolder,
+            analysedJar,
+            cyberDefaultSelector,
+//            codeGen = codeGen,
+            stateHolder = stateHolder
         )
     }
 }

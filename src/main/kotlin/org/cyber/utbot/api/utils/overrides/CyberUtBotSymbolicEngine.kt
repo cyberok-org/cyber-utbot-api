@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import org.cyber.utbot.api.utils.additions.pathSelector.CyberSelector
 import mu.KotlinLogging
 import org.cyber.utbot.api.exceptions.CyberException
 import org.cyber.utbot.api.utils.additions.classState.StateHolder
@@ -12,6 +13,7 @@ import org.cyber.utbot.api.utils.additions.pathSelector.cyberPathSelector
 import org.cyber.utbot.api.utils.annotations.CyberModify
 import org.cyber.utbot.api.utils.annotations.CyberNew
 import org.cyber.utbot.api.utils.annotations.CyberNotModify
+import org.cyber.utbot.api.utils.overrides.fuzzing.cyberRunJavaFuzzing
 import org.cyber.utbot.api.utils.viewers.StatePublisher
 import org.cyber.utbot.api.utils.vulnerability.VulnerabilityChecksHolder
 import org.utbot.analytics.Predictors
@@ -33,8 +35,16 @@ import org.utbot.framework.UtSettings
 import org.utbot.framework.UtSettings.processUnknownStatesDuringConcreteExecution
 import org.utbot.framework.UtSettings.useDebugVisualization
 import org.utbot.framework.plugin.api.*
-import org.utbot.framework.plugin.api.util.description
+import org.utbot.framework.plugin.api.util.*
 import org.utbot.framework.util.classesToLoad
+import org.utbot.fuzzer.UtFuzzedExecution
+import org.utbot.fuzzer.collectConstantsForFuzzer
+import org.utbot.fuzzing.*
+import org.utbot.fuzzing.utils.Trie
+import org.utbot.instrumentation.instrumentation.execution.UtConcreteExecutionResult
+import soot.tagkit.ParamNamesTag
+import java.lang.reflect.Method
+import kotlin.math.min
 import kotlin.system.measureTimeMillis
 
 @CyberNotModify("org/utbot/engine/UtBotSymbolicEngine.kt", "shold be private in UtBotSymbolicEngine")
@@ -54,11 +64,13 @@ class CyberUtBotSymbolicEngine(
     private var onlyVulnerabilities: Boolean = true,
     private val statePublisher: StatePublisher = StatePublisher(),
     vulnerabilityChecksHolder: VulnerabilityChecksHolder?,
+    analysedJar: String,
+    cyberDefaultSelector: Boolean,
     private val stateHolder: StateHolder?,
 ) : UtBotSymbolicEngine(controller, methodUnderTest, classpath, dependencyPaths, mockStrategy, chosenClassesToMockAlways, applicationContext, solverTimeoutInMillis) {
     init {  // set our selector
         if (cyberPathSelector) {
-            pathSelector = cyberPathSelector(globalGraph, StrategyOption.DISTANCE) {
+            pathSelector = cyberPathSelector(globalGraph, StrategyOption.DISTANCE, analysedJar, cyberDefaultSelector) {
                 withStepsLimit(UtSettings.pathSelectorStepsLimit)
             }
         }
@@ -95,11 +107,10 @@ class CyberUtBotSymbolicEngine(
         val params = if (stateBefore.parameters.size == parameters.size) parameters else parameters.drop(1)
         require(stateBefore.parameters.size == params.size) { "update CodeGen info fail" }
         stateHolder?.updateCodeGenInfo(stateBefore, params.map { (it as? ReferenceValue)?.addr }) { value -> resolver.resolveModel(value) }
-    }
+    } // here закомменить
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "add StateViewer")
     override fun traverseImpl(): Flow<UtResult> = flow {
-
         require(trackableResources.isEmpty())
 
         if (useDebugVisualization) GraphViz(globalGraph, pathSelector)
@@ -113,8 +124,13 @@ class CyberUtBotSymbolicEngine(
 
         pathSelector.offer(initState)
 
-        pathSelector.use {
+        @CyberNew("inform selector about the start of a new selection iteration & add taint endpoints")
+        if (pathSelector is CyberSelector && traverser is CyberTraverser) {
+            (traverser as CyberTraverser).taintEndPoints.clear()
+            (traverser as CyberTraverser).taintEndPoints.putAll((pathSelector as CyberSelector).onNextIteration(initState).endPointToSinks)
+        }
 
+        pathSelector.use {
             while (currentCoroutineContext().isActive) {
                 if (controller.stop)
                     break
@@ -163,14 +179,23 @@ class CyberUtBotSymbolicEngine(
 
                         try {
                             val concreteExecutionResult =
-                                concreteExecutor.executeConcretely(methodUnderTest, stateBefore, instrumentation, UtSettings.concreteExecutionDefaultTimeoutInInstrumentedProcessMillis)
+                                concreteExecutor.executeConcretely(
+                                    methodUnderTest,
+                                    stateBefore,
+                                    instrumentation,
+                                    UtSettings.concreteExecutionDefaultTimeoutInInstrumentedProcessMillis
+                                )
 
                             if (concreteExecutionResult.violatesUtMockAssumption()) {
                                 logger.debug { "Generated test case violates the UtMock assumption: $concreteExecutionResult" }
                                 return@measureTime
                             }
 
-                            @CyberNew("update CodeGen info") updateCodeGenInfo(stateBefore, resolvedParameters, resolver)
+                            @CyberNew("update CodeGen info") updateCodeGenInfo(
+                                stateBefore,
+                                resolvedParameters,
+                                resolver
+                            )
 
                             val concreteUtExecution = UtSymbolicExecution(
                                 stateBefore,
@@ -223,6 +248,7 @@ class CyberUtBotSymbolicEngine(
 
                     state.executingTime += measureTimeMillis {
                         val newStates = try {
+                            traverser.engine = this@CyberUtBotSymbolicEngine
                             traverser.traverse(state)
                         } catch (ex: Throwable) {
                             @CyberModify("filter emit") if (!onlyVulnerabilities) {
@@ -235,7 +261,18 @@ class CyberUtBotSymbolicEngine(
                             when (newState.label) {
                                 StateLabel.INTERMEDIATE -> pathSelector.offer(newState)
                                 StateLabel.CONCRETE -> statesForConcreteExecution.add(newState)
-                                StateLabel.TERMINAL -> consumeTerminalState(newState)
+                                StateLabel.TERMINAL -> {
+                                    consumeTerminalState(newState)
+                                    @CyberNew("ignore terminal state if the trace was not found yet")
+//                                    if (pathSelector is CyberSelector && !(pathSelector as CyberSelector).defaultSelection) {
+//                                        if (!(pathSelector as CyberSelector).traceFound()) {
+//                                            println("continued(((")
+//                                            continue
+//                                        }
+//
+//                                    }
+                                    println("TERMINAL: ${newState.stmt}, from ${state.stmt}, method: ${graph.body}")
+                                }
                             }
                         }
 
@@ -252,9 +289,7 @@ class CyberUtBotSymbolicEngine(
     }
 
     @CyberModify("org/utbot/engine/UtBotSymbolicEngine.kt", "filter terminal states")
-    override suspend fun FlowCollector<UtResult>.consumeTerminalState(
-        state: ExecutionState,
-    ) {
+    override suspend fun FlowCollector<UtResult>.consumeTerminalState(state: ExecutionState) {
         // some checks to be sure the state is correct
         require(state.label == StateLabel.TERMINAL) { "Can't process non-terminal state!" }
         require(!state.isInNestedMethod()) { "The state has to correspond to the MUT" }

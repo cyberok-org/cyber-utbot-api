@@ -1,0 +1,9 @@
+{
+  "containingClass": "java/nio/file/Files",
+  "methodName": "createFile",
+  "descriptor": "(Ljava/nio/file/Path;[Ljava/nio/file/attribute/FileAttribute;)Ljava/nio/file/Path;",
+  "description": "",
+  "takesInstance": "false",
+  "takesArgs": [1],
+  "takesGlobals": []
+}

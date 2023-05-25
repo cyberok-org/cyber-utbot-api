@@ -1,3 +1,4 @@
+
 package org.cyber.utbot
 
 import org.cyber.utbot.api.CYBER_MOCK_ALWAYS_DEFAULT

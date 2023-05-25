@@ -1,0 +1,9 @@
+{
+  "containingClass": "org/testcases/taint/Example",
+  "methodName": "sink",
+  "descriptor": "(Ljava/lang/String;)V",
+  "description": "tmp",
+  "takesInstance": "false",
+  "takesArgs": [1],
+  "takesGlobals": []
+}

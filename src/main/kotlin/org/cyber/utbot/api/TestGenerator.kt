@@ -49,6 +49,8 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
     override val extraVulnerabilityChecks: List<ExtraVulnerabilityCheck> = settings.extraVulnerabilityChecks
     override val onlyVulnerabilities: Boolean = settings.onlyVulnerabilities
     override val testsIgnoreEmpty: Boolean = settings.testsIgnoreEmpty
+    override val analysedJar: String = settings.analysedJar
+    override val cyberDefaultSelector: Boolean = settings.cyberDefaultSelector
     override val codeGen: CodeGen = CodeGen()
 
     private val logger = KotlinLogging.logger {}
@@ -62,7 +64,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
      * @param classpath: the same parameter as in the [GenerateTestsSettings], if specified overrides the current launch
      * @return mapping from [TargetQualifiedName] to [GeneratedTests]
      */
-    fun run(testUnits: Iterable<TestUnit>, classpath: String? = null): Pair<MutableMap<TargetQualifiedName, GeneratedTests>, MutableMap<UTBotViewers, Any>> {
+    fun run(testUnits: Iterable<TestUnit>, classpath: String? = null, genMethods: List<String> = listOf(), isFuzzing: Boolean = false): Pair<MutableMap<TargetQualifiedName, GeneratedTests>, MutableMap<UTBotViewers, Any>> {
         assert(testUnits.all {
             (it.source.endsWith(".java") || it.source.endsWith(".kt")) && Files.exists(Paths.get(it.source))
         }) { "source should have suffix \".java\" or  \".kt\"" }
@@ -70,7 +72,7 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
         (classpath ?: settings.classpath)?.let{ updateClassLoader(updateClasspath(it)) } ?: throw Exception("classpath should be set")
         val targetToTests = mutableMapOf<TargetQualifiedName, GeneratedTests>()
         testUnits.forEach { testUnit ->
-            runInside(testUnit.target, testUnit.source, testUnit.output)?.let { tests -> targetToTests[testUnit.target] = tests }
+            runInside(testUnit.target, testUnit.source, testUnit.output, genMethods, isFuzzing)?.let { tests -> targetToTests[testUnit.target] = tests }
         }
         return targetToTests to getViewersResult()
     }
@@ -101,7 +103,13 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
         return targetToTests to getViewersResult()
     }
 
-    private fun runInside(targetClassFqn: TargetQualifiedName, sourceCodeFile: SourceCodeFileName? = null, output: OutputFileName? = null): GeneratedTests? {
+    private fun runInside(
+        targetClassFqn: TargetQualifiedName,
+        sourceCodeFile: SourceCodeFileName? = null,
+        output: OutputFileName? = null,
+        genMethods: List<String> = listOf(),
+        isFuzzing: Boolean = false
+    ): GeneratedTests? {
         var testClassBody: GeneratedTests? = null
         val started = now()
         val workingDirectory = getWorkingDirectory(targetClassFqn)
@@ -118,31 +126,36 @@ open class TestGenerator(private val settings: GenerateTestsSettings) : Abstract
                     .filterWhen(UtSettings.skipTestGenerationForSyntheticAndImplicitlyDeclaredMethods) {
                         !it.isSynthetic && !it.isKnownImplicitlyDeclaredMethod
                     }
+                    .filter {
+                        if (genMethods.isEmpty()) true
+                        else genMethods.contains(it.name)
+                    }
                     .filterNot { it.isAbstract }
                 val testCaseGenerator = initializeGenerator(workingDirectory)
 
                 if (targetMethods.isEmpty()) {
                     throw Exception("Nothing to process. No methods were provided")
                 }
-
-                val testClassName = output?.toPath()?.toFile()?.nameWithoutExtension
-                    ?: "${classIdUnderTest.simpleName}Test"
-                var testSets: List<UtMethodTestSet>
-                val time = measureTimeMillis {
-                    testSets = generateTestSets(
-                        testCaseGenerator,
-                        targetMethods,
-                        sourceCodeFile?.let { Paths.get(it) },
-                        searchDirectory = workingDirectory,
-                        chosenClassesToMockAlways = (Mocker.defaultSuperClassesToMockAlwaysNames + settings.mockAlways)
-                            .mapTo(mutableSetOf()) { ClassId(it) }
-                    )
-                }
-                logger.info("generateTestSets time: ${time}ms")
-                if (!(testsIgnoreEmpty && testSets.all { it.executions.isEmpty() })) {
-                    testClassBody = generateTest(classIdUnderTest, testClassName, testSets).also {
-                        if (settings.sarifReport != null && sourceCodeFile != null) {
-                            generateReport(targetClassFqn, testSets, it, sourceCodeFile, output)
+                if (!isFuzzing) {
+                    val testClassName = output?.toPath()?.toFile()?.nameWithoutExtension
+                        ?: "${classIdUnderTest.simpleName}Test"
+                    var testSets: List<UtMethodTestSet>
+                    val time = measureTimeMillis {
+                        testSets = generateTestSets(
+                            testCaseGenerator,
+                            targetMethods,
+                            sourceCodeFile?.let { Paths.get(it) },
+                            searchDirectory = workingDirectory,
+                            chosenClassesToMockAlways = (Mocker.defaultSuperClassesToMockAlwaysNames + settings.mockAlways)
+                                .mapTo(mutableSetOf()) { ClassId(it) }
+                        )
+                    }
+                    logger.info("generateTestSets time: ${time}ms")
+                    if (!(testsIgnoreEmpty && testSets.all { it.executions.isEmpty() })) {
+                        testClassBody = generateTest(classIdUnderTest, testClassName, testSets).also {
+                            if (settings.sarifReport != null && sourceCodeFile != null) {
+                                generateReport(targetClassFqn, testSets, it, sourceCodeFile, output)
+                            }
                         }
                     }
                 }

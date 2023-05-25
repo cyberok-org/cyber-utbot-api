@@ -22,6 +22,8 @@ dependencies {
     implementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     // Without this dependency testng tests do not run.
     implementation group: 'com.beust', name: 'jcommander', version: '1.48'
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    implementation group: 'commons-codec', name: 'commons-codec', version: '1.5'
     implementation group: 'org.testng', name: 'testng', version: testNgVersion
     implementation("org.unittestbot.soot:soot-utbot-fork:${sootVersion}") {
         exclude group:'com.google.guava', module:'guava'
@@ -37,6 +39,10 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4j2Version
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4j2Version
     implementation group: 'org.jacoco', name: 'org.jacoco.report', version: jacocoVersion
+    implementation group: 'com.guardsquare', name: 'proguard-core', version: '9.0.8'
+    implementation group: 'org.javassist', name: 'javassist', version: '3.29.1-GA'
+    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: '2.11.1'
     implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.12.5'
     fetchInstrumentationJar project(path: ':utbot-instrumentation', configuration: 'instrumentationArchive')

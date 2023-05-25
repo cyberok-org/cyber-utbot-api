@@ -1,0 +1,9 @@
+{
+  "fullyQualified": "org.testcases.taint.Example",
+  "function": "sink",
+  "description": "Taint example",
+  "functions": [
+    "taint/temp.json"
+  ]
+}
+

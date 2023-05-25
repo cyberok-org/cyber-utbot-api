@@ -1,0 +1,9 @@
+{
+  "containingClass": "java/io/FileInputStream",
+  "methodName": "<init>",
+  "descriptor": "(Ljava/lang/String;)V",
+  "description": "",
+  "takesInstance": "false",
+  "takesArgs": [1],
+  "takesGlobals": []
+}

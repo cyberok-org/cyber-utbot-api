@@ -15,7 +15,7 @@ private const val LONG_GENERATION_TIMEOUT = 1_200_000L
 val MOCK_ALWAYS_DEFAULT = Mocker.defaultSuperClassesToMockAlwaysNames.toList()
 val CYBER_MOCK_ALWAYS_DEFAULT = listOf(         // TODO(division by packages)
     "java.net.URL",
-    "java.io.FileInputStream",
+    "mockjava.io.FileInputStream",
     "java.net.URI",
     "java.io.FileOutputStream",
     "java.io.File",
@@ -118,7 +118,7 @@ class GenerateTestsSettings(
     /**
      * ignore utbot pathSelectors parameters, use our
      */
-    val cyberPathSelector: Boolean = false,
+    val cyberPathSelector: Boolean = true,
 
     /**
      * if false - just run utbot without extra analyze   // TODO(remove later)
@@ -161,12 +161,26 @@ class GenerateTestsSettings(
     var testsIgnoreEmpty: Boolean = false,
 
     /**
+     * path to the jar of the program being analysed
+     */
+    val analysedJar: String = "C:\\Users\\lesya\\IdeaProjects\\test-utbot\\out\\artifacts\\test_utbot_main_jar\\test-utbot.main.jar", // "C:\\Users\\lesya\\uni2\\UTBotJava\\cyber-utbot-api\\src\\main\\java\\org\\testcases\\taint\\jars\\TaintCheckJar.jar",
+
+    /**
+     * whether to use default selector instead of cyber selector
+     */
+    var cyberDefaultSelector: Boolean = true,
+
+    /**
      * libraries that utbot will trust
      * already trust: java, sun, javax, com.sun, org.omg, org.xml, org.w3c.dom
      */
     trustedLibraries: List<String> = listOf()
 ) {
     init {  // check is settings correct
+//        TrustedLibraries.extraTrustedLibraries = trustedLibraries
+//        mockAlways.forEach { fullyQualifiedName ->
+//            Class.forName(fullyQualifiedName, false, ClassLoader.getSystemClassLoader())
+//        }
         TrustedLibraries.extraTrustedLibraries = trustedLibraries
         assert(generationTimeout > 0) { "GenerateTestsSettings.generationTimeout should be more then 0" }
         UtSettings.checkSolverTimeoutMillis = 0   // disabled z3 timeout

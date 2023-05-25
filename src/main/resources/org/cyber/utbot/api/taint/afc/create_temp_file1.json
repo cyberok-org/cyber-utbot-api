@@ -1,0 +1,9 @@
+{
+  "containingClass": "Ljava/nio/file/Files;",
+  "methodName": "",
+  "descriptor": "createTempFile(Ljava/lang/String;Ljava/lang/String;[Ljava/nio/file/attribute/FileAttribute;)Ljava/nio/file/Path;",
+  "description": "File.createTempFile(...) with unchecked prefix or suffix arguments",
+  "takesInstance": "false",
+  "takesArgs": [1, 2],
+  "takesGlobals": []
+}

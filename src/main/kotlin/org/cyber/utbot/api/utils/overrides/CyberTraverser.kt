@@ -5,7 +5,7 @@ import org.cyber.utbot.api.utils.VULNERABILITY_CHECKS_CLASS_NAME
 import org.cyber.utbot.api.utils.additions.MethodSubstitution
 import org.cyber.utbot.api.utils.additions.classState.StateHolder
 import org.cyber.utbot.api.utils.additions.constraints.ConstraintParser
-import org.cyber.utbot.api.utils.additions.fuzzing.ExampleVulnerabilityChecksFuzzer
+import org.cyber.utbot.api.utils.additions.fuzzing.TaintVulnerabilityChecksFuzzer
 import org.cyber.utbot.api.utils.additions.fuzzing.VulnerabilityChecksFuzzer
 import org.cyber.utbot.api.utils.additions.vulnerability.decorateVulnerabilityFunction
 import org.cyber.utbot.api.utils.annotations.CyberModify
@@ -29,6 +29,9 @@ import org.utbot.framework.plugin.api.ExecutableId
 import org.utbot.framework.plugin.api.classId
 import org.utbot.framework.plugin.api.util.methodId
 import org.utbot.framework.util.executableId
+import proguard.analysis.cpa.jvm.domain.memory.BamLocationDependentJvmMemoryLocation
+import proguard.analysis.cpa.jvm.domain.taint.JvmInvokeTaintSink
+import proguard.analysis.cpa.jvm.domain.taint.JvmTaintSink
 import soot.*
 import soot.jimple.Stmt
 import soot.jimple.internal.JInvokeStmt
@@ -51,19 +54,24 @@ class CyberTraverser(
     private val rememberedParams = mutableSetOf<List<SymbolicValue>>()
     private val objectValueToParams = mutableMapOf<ObjectValue, List<SymbolicValue>>()
     private val stmtToParams = mutableMapOf<Stmt, List<SymbolicValue>>()
-    private val vulnerabilityChecksFuzzer: VulnerabilityChecksFuzzer = ExampleVulnerabilityChecksFuzzer()
+    val taintEndPoints: MutableMap<BamLocationDependentJvmMemoryLocation<*>, List<JvmTaintSink>> = mutableMapOf()
+
+    private val vulnerabilityChecksFuzzer: VulnerabilityChecksFuzzer = TaintVulnerabilityChecksFuzzer()
 
     @CyberNew("decorate target invoke")
-    private fun decorateTarget(target: InvocationTarget, parameters: List<SymbolicValue>): InvocationTarget {
+    private fun decorateTarget(
+        target: InvocationTarget,
+        parameters: List<SymbolicValue>,
+        taintedArgs: MutableSet<Pair<SymbolicValue, Int>>
+    ): InvocationTarget {
         val targetClassName = target.method.declaringClass.name
         val targetFunctionName = target.method.name
+//        println("target: $targetClassName $targetFunctionName")
         return vulnerabilityChecksHolder?.checks( targetClassName to targetFunctionName)?.run {
             val methodName = "$CHECK_METHOD_PREFIX\$$targetClassName.$targetFunctionName"
             if (environment.method.name == methodName && environment.method.declaringClass.name == VULNERABILITY_CHECKS_CLASS_NAME) return target
-
-            val descriptions = mutableSetOf<String?>()
+            val descriptions = mutableSetOf<String?>() // here
             val methodId = methodId(ClassId(targetClassName), targetFunctionName, target.method.returnType.classId, *target.method.parameterTypes.map { it.classId }.toTypedArray())
-
             val parametersInfo = null   // set it later
 
             val constraints = ConstraintParser.parse(parameters, environment.state.symbolicState.solver.assertions)
@@ -72,7 +80,20 @@ class CyberTraverser(
                     descriptions.add(null)
                     null
                 } else {
-                    val argumentChecks = vulnerabilityChecksFuzzer.generate(methodId, parametersInfo, constraints, description)
+                    val methods = mutableListOf<String>()
+                    val booleanType = BooleanType.v()
+                    val paramTypes = target.method.parameterTypes
+                    this.forEach foreach@{ vulnerabilityCheck ->
+                        vulnerabilityCheck.functionIds.forEach { (checkClassName, checkFunctionName) ->
+                            val checkSootClass = Scene.v().getSootClass(checkClassName)
+                            val checkSootMethod =
+                                checkSootClass.getMethodUnsafe(checkFunctionName, paramTypes, booleanType)
+                                    ?: return@foreach
+                            methods.add(checkSootMethod.name)
+                        }
+                    }
+                    val argumentChecks = vulnerabilityChecksFuzzer.
+                    generate(methodId, parametersInfo, constraints, description, methods, taintedArgs, methodUnderTest)
                     if (argumentChecks == null) descriptions.add(description)
                     argumentChecks?.run { ArgumentsVulnerabilityChecksCreator.parseVulnerabilityCheck(this) }
                 }
@@ -83,7 +104,8 @@ class CyberTraverser(
                     argumentChecks.add(it)
                 }
             }
-            val decorateFunction = decorateVulnerabilityFunction(target, methodName, checks = argumentChecks)
+
+            val (decorateFunction, methods) = decorateVulnerabilityFunction(target, methodName, checks = argumentChecks)
             InvocationTarget(instance = null, method = decorateFunction, target.constraints)
         } ?: target
     }
@@ -178,8 +200,28 @@ class CyberTraverser(
         // If so, return the result of the override
         if (artificialMethodOverride.success) {
             @CyberNew("decorate target") run {
+                val taintedArgs = mutableSetOf<Pair<SymbolicValue, Int>>()
+                environment.state.stmt.apply {
+//                    if (this is JInvokeStmt) {
+                        val matchedSinks = mutableListOf<JvmTaintSink?>()
+                        taintEndPoints.values.forEach { v ->
+                            matchedSinks.add(v.find {
+                                it.signature.fqn.contains(
+                                    "${invocation.method.declaringClass.name.replace(".", "/")};${invocation.method.name}"
+                                )
+                            })
+                        }
+                        val params = invocation.parameters
+                        if (matchedSinks.isNotEmpty()) {
+                            matchedSinks.filterIsInstance<JvmInvokeTaintSink>().forEach { sink ->
+                                val takesArgs = sink.takesArgs
+                                takesArgs.forEach { taintedArgs.add(Pair(params[it - 1], it - 1)) }
+                            }
+                        }
+//                    }
+                }
                 val target = InvocationTarget(invocation.instance, invocation.method)
-                val newTarget = decorateTarget(target, invocation.parameters)
+                val newTarget = decorateTarget(target, invocation.parameters, taintedArgs) // here add tainted args
                 if (target != newTarget) {
                     return invoke(newTarget, invocation.parameters)
                 }
@@ -224,8 +266,25 @@ class CyberTraverser(
         // Note that sometimes invocation on the particular targets should be overridden as well.
         // For example, Collection.size will produce two targets (ArrayList and HashSet)
         // that will override the invocation.
+        val matchedSinks = mutableListOf<JvmTaintSink?>()
+        taintEndPoints.values.forEach { v ->
+            matchedSinks.add(v.find {
+                it.signature.fqn.contains(
+                    "${invocation.method.declaringClass.name.replace(".", "/")};${invocation.method.name}"
+                )
+            })
+        }
+        val taintedArgs = mutableSetOf<Pair<SymbolicValue, Int>>()
+        val params = invocation.parameters
+        if (matchedSinks.isNotEmpty()) {
+            matchedSinks.filterIsInstance<JvmInvokeTaintSink>().forEach { sink ->
+                val takesArgs = sink.takesArgs
+                takesArgs.forEach { taintedArgs.add(Pair(params[it - 1], it - 1)) }
+            }
+        }
         val overrideResults = targets
-            .map { @CyberNew("decorate target") decorateTarget(it, invocation.parameters) }
+//            .map { @CyberNew("decorate target") decorateTarget(it, taintedArgs) }
+            .map { @CyberNew("decorate target") decorateTarget(it, invocation.parameters, taintedArgs) }// here add tainted args
             .map { it to overrideInvocation(invocation, it) }
 
         if (overrideResults.sumOf { (_, overriddenResult) -> overriddenResult.results.size } > 1) {

@@ -1,0 +1,8 @@
+{
+  "fullyQualified": "java.io.FileInputStream",
+  "function": "<init>",
+  "description": "fis creation",
+  "functions": [
+    "taint/pathtraver.json"
+  ]
+}

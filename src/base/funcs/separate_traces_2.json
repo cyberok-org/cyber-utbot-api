@@ -1,0 +1,8 @@
+{
+  "fullyQualified": "org.testcases.taint.SeparateTraces",
+  "function": "sink2",
+  "description": "for testing separate traces",
+  "functions": [
+    "taint/upd_separate_traces_2.json"
+  ]
+}

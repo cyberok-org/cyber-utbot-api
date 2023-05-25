@@ -1,0 +1,9 @@
+{
+  "containingClass": "Ljava/nio/file/spi/FileSystemProvider",
+  "methodName": "",
+  "descriptor": "newOutputStream(Ljava/nio/file/Path;[Ljava/nio/file/OpenOption;)Ljava/io/OutputStream;",
+  "description": "FileSystemProvider.newOutputStream(...) with unchecked path argument",
+  "takesInstance": "false",
+  "takesArgs": [1],
+  "takesGlobals": []
+}

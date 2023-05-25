@@ -1,0 +1,10 @@
+{
+  "containingClass": "org/testcases/taint/SeparateTraces",
+  "methodName": "source2",
+  "descriptor": "()Ljava/lang/String;",
+  "description": "tmp",
+  "taintsThis": "false",
+  "taintsReturn": "true",
+  "taintsArgs": [],
+  "taintsGlobals": []
+}

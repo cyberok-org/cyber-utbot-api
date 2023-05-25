@@ -1,0 +1,10 @@
+{
+  "containingClass": "javax/servlet/http/HttpServletRequest",
+  "methodName": "getHeader",
+  "descriptor": "(Ljava/lang/String;)Ljava/lang/String;",
+  "description": "path traversal",
+  "taintsThis": "true",
+  "taintsReturn": "true",
+  "taintsArgs": [],
+  "taintsGlobals": []
+}

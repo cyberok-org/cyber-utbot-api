@@ -71,13 +71,12 @@ class CyberCodeGenerator(
     override fun generateForSimpleClass(testSets: List<CgMethodTestSet>): CodeGeneratorResult {
         val astConstructor = CgSimpleTestClassConstructor(context)
         val testClassModel = SimpleTestClassModelBuilder(context).createTestClassModel(classUnderTest, testSets)
-
         logger.info { "Code generation phase started at ${now()}" }
         val testClassFile = astConstructor.construct(testClassModel).run { @CyberNew("add annotations") addAnnotations(this, testSets) }
         logger.info { "Code generation phase finished at ${now()}" }
 
         @CyberNew("additional generation") codeGen?.run {
-            val variableConstructor = CgComponents.getVariableConstructorBy(context) // FIXME
+            val variableConstructor = CgComponents.getVariableConstructorBy(context) // FIXME here закомментить мб
 
             val stateBeforeToName = mutableMapOf<String, EnvironmentModels>()
 

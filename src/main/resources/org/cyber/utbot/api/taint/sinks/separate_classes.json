@@ -1,0 +1,9 @@
+  {
+    "containingClass": "org/testcases/taint/sepclasses/SinkClass",
+    "methodName": "sink",
+  "descriptor": "(Ljava/lang/String;Ljava/lang/String;)V",
+    "description": "",
+    "takesInstance": "false",
+    "takesArgs": [2],
+    "takesGlobals": []
+  }

@@ -1,0 +1,10 @@
+{
+  "containingClass": "org/testcases/taint/Example",
+  "methodName": "source",
+  "descriptor": "()Ljava/lang/String;",
+  "description": "tmp",
+  "taintsThis": "false",
+  "taintsReturn": "true",
+  "taintsArgs": [],
+  "taintsGlobals": []
+}

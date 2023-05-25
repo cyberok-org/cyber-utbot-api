@@ -1,36 +1,54 @@
 package org.example.checks;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Random;
 
 public class Example {
-    public boolean example(HttpServletRequest request) {
-        String param = "";
-        request.getHeader("benchmarkTEST00133");
-        String s = "BenchmarkTest00133";
-        if (request.getHeader(s) != null) {
-            param = request.getHeader(s);
-        }
-        if (param.equals("test")) {
+    //    public boolean example(HttpServletRequest request) {
+//        String param = "";
+//        request.getHeader("benchmarkTEST00133");
+//        String s = "BenchmarkTest00133";
+//        if (request.getHeader(s) != null) {
 //            param = request.getHeader(s);
-//            if (param.equals("test2")) {
-                return true;
-//            }
-        }
-        return false;
-    }
-
-//    private void internal(String s, int x) {
-//    }
-//
-//    public boolean example(String s, int x) {
-//        if (s.length() > 3 && x > 100) {
-//            internal(s, x);
-//            return true;
+//        }
+//        if (param.equals("test")) {
+////            param = request.getHeader(s);
+////            if (param.equals("test2")) {
+//                return true;
+////            }
 //        }
 //        return false;
 //    }
+    public Example() {
+        int s = 1;
+        if (new Random().nextBoolean()) {
+            s = 2;
+        } else {
+            s = 4;
+            throw new IllegalArgumentException("ff");
+        }
+    }
+
+//    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+//        String s = req.getParameter("name");
+//        FileInputStream fis = new FileInputStream(s);
+////        RandomAccessFile raf = new RandomAccessFile(s, "r");
+//    }
+
+    private void internal(String s, int x) {
+    }
+//
+    public boolean example(String s, int x) {
+        if (s.length() > 3 && x > 100) {
+            internal(s, x);
+            return true;
+        }
+        return false;
+    }
 
 //    public boolean example(String s, int a, int b) {
 //        if ((s + "/").equals("qwerty/")) {
